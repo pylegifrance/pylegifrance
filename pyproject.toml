@@ -64,7 +64,8 @@ include-package-data = true
 dev = [
     "pytest>=8.3.5",
     "pre-commit>=3.4.0",
-    "twine>=4.0.2"
+    "twine>=4.0.2",
+    "pytest-bdd>=8.1.0",
 ]
 
 [tool.datamodel-codegen]
