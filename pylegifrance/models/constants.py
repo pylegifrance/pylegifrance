@@ -94,8 +94,13 @@ class CodeNom(str, Enum):
     CGDLPDPP = "Code général de la propriété des personnes publiques"
     CGDCT = "Code général des collectivités territoriales"  # Alias for CGCT
     CGDI = "Code général des impôts"
+    CGDIA1 = "Code général des impôts, annexe I"
+    CGDIA2 = "Code général des impôts, annexe II"
+    CGDIA3 = "Code général des impôts, annexe III"
+    CGDIA4 = "Code général des impôts, annexe IV"
     CGDAI = "Code général des impôts, annexe IV"
     CM = "Code minier (nouveau)"
+    CM2 = "Code minier"
     CMEF = "Code monétaire et financier"
     CP = "Code pénitentiaire"
     CR = "Code rural (ancien)"
@@ -103,6 +108,14 @@ class CodeNom(str, Enum):
     CÉ = "Code électoral"
     LDPF = "Livre des procédures fiscales"
     CASF = "Code de l'action sociale et des familles"
+    CDLU = "Code de l'urbanisme"
+    CDLAR = "Code de l'artisanat"
+    CDLAC = "Code de l'aviation civile"
+    CDLE = "Code de l'éducation"
+    CDLR = "Code de la recherche"
+    CDTRANS = "Code des transports"
+    CDTOUR = "Code du tourisme"
+
 
 
 # Dictionary mapping code abbreviations to their full names
