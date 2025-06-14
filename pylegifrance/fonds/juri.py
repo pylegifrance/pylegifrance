@@ -23,122 +23,122 @@ logger = logging.getLogger(__name__)
 
 class JuriDecision:
     """
-    High-level domain object representing a judicial decision.
+    Objet de domaine de haut niveau représentant une décision de justice.
 
-    This class wraps the Decision model and provides rich behaviors like
-    .latest(), .citations(), .versions(), and .at(date).
+    Cette classe encapsule le modèle Decision et fournit des comportements riches comme
+    .latest(), .citations(), .versions(), et .at(date).
     """
 
     def __init__(self, decision: Decision, client: LegifranceClient):
         """
-        Initialize a JuriDecision instance.
+        Initialise une instance de JuriDecision.
 
         Parameters
         ----------
         decision : Decision
-            The underlying Decision model.
+            Le modèle Decision sous-jacent.
         client : LegifranceClient
-            The client for interacting with the Legifrance API.
+            Le client pour interagir avec l'API Legifrance.
         """
         self._decision = decision
         self._client = client
 
     @property
     def id(self) -> Optional[str]:
-        """Get the ID of the decision."""
+        """Récupère l'identifiant de la décision."""
         return self._decision.id
 
     @property
     def cid(self) -> Optional[Cid]:
-        """Get the CID of the decision with validation."""
+        """Récupère le CID de la décision avec validation."""
         if not hasattr(self._decision, "cid") or not self._decision.cid:
             return None
         return Cid(self._decision.cid)
 
     @property
     def eli(self) -> Optional[Eli]:
-        """Get the ELI of the decision with validation."""
+        """Récupère l'ELI de la décision avec validation."""
         if not self._decision.id_eli:
             return None
         return Eli(self._decision.id_eli)
 
     @property
     def nor(self) -> Optional[Nor]:
-        """Get the NOR of the decision with validation."""
+        """Récupère le NOR de la décision avec validation."""
         if not self._decision.nor:
             return None
         return Nor(self._decision.nor)
 
     @property
     def ecli(self) -> Optional[str]:
-        """Get the ECLI of the decision."""
+        """Récupère l'ECLI de la décision."""
         return getattr(self._decision, "ecli", None)
 
     @property
     def date(self) -> Optional[datetime]:
-        """Get the date of the decision."""
+        """Récupère la date de la décision."""
         if not self._decision.date_texte:
             return None
 
         try:
-            # Handle both string and datetime types
+            # Gère à la fois les types chaîne et datetime
             if isinstance(self._decision.date_texte, str):
                 return datetime.fromisoformat(self._decision.date_texte)
             elif isinstance(self._decision.date_texte, datetime):
                 return self._decision.date_texte
         except (ValueError, TypeError):
-            # Handle case where dateTexte is not a valid ISO format
+            # Gère le cas où dateTexte n'est pas un format ISO valide
             return None
         return None
 
     @property
     def title(self) -> Optional[str]:
-        """Get the title of the decision."""
+        """Récupère le titre de la décision."""
         return self._decision.titre
 
     @property
     def long_title(self) -> Optional[str]:
-        """Get the long title of the decision."""
+        """Récupère le titre long de la décision."""
         return self._decision.titre_long
 
     @property
     def text(self) -> Optional[str]:
-        """Get the text of the decision."""
+        """Récupère le texte de la décision."""
         return self._decision.texte
 
     @property
     def text_html(self) -> Optional[str]:
-        """Get the HTML text of the decision."""
+        """Récupère le texte HTML de la décision."""
         return self._decision.texte_html
 
     @property
     def formation(self) -> Optional[str]:
-        """Get the formation of the decision."""
+        """Récupère la formation de la décision."""
         return self._decision.formation
 
     @property
     def numero(self) -> Optional[str]:
-        """Get the number of the decision."""
+        """Récupère le numéro de la décision."""
         return getattr(self._decision, "num", None)
 
     @property
     def jurisdiction(self) -> Optional[str]:
-        """Get the jurisdiction of the decision."""
+        """Récupère la juridiction de la décision."""
         return getattr(self._decision, "juridiction", None)
 
     @property
     def solution(self) -> Optional[str]:
-        """Get the solution of the decision."""
+        """Récupère la solution de la décision."""
         return getattr(self._decision, "solution", None)
 
     def citations(self) -> List["JuriDecision"]:
         """
-        Get the citations of the decision.
+        Récupère les citations de la décision.
 
         Returns
         -------
         List[JuriDecision]
-            A list of JuriDecision objects representing the citations.
+            Une liste d'objets JuriDecision représentant les citations.
         """
         citations = []
         for lien in self._decision.liens:
@@ -160,23 +160,23 @@ class JuriDecision:
 
     def at(self, date: Union[datetime, str]) -> Optional["JuriDecision"]:
         """
-        Get the version of the decision at the specified date.
+        Récupère la version de la décision à la date spécifiée.
 
         Parameters
         ----------
         date : Union[datetime, str]
-            The date to get the version at.
+            La date à laquelle récupérer la version.
 
         Returns
         -------
         Optional[JuriDecision]
-            The version of the decision at the specified date, or None if not found.
+            La version de la décision à la date spécifiée, ou None si non trouvée.
         """
         if isinstance(date, str):
             try:
                 date = datetime.fromisoformat(date)
             except ValueError:
-                raise ValueError(f"Invalid date format: {date}")
+                raise ValueError(f"Format de date invalide: {date}")
 
         # Convert date to ISO format string for the API
         date_str = date.isoformat()
@@ -191,12 +191,12 @@ class JuriDecision:
 
     def latest(self) -> Optional["JuriDecision"]:
         """
-        Get the latest version of the decision.
+        Récupère la dernière version de la décision.
 
         Returns
         -------
         Optional[JuriDecision]
-            The latest version of the decision, or None if not found.
+            La dernière version de la décision, ou None si non trouvée.
         """
         if self.id is None:
             return None
@@ -208,12 +208,12 @@ class JuriDecision:
 
     def versions(self) -> List["JuriDecision"]:
         """
-        Get all versions of the decision.
+        Récupère toutes les versions de la décision.
 
         Returns
         -------
         List[JuriDecision]
-            A list of JuriDecision objects representing all versions.
+            Une liste d'objets JuriDecision représentant toutes les versions.
         """
         if self.id is None:
             return []
@@ -225,33 +225,33 @@ class JuriDecision:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert the decision to a dictionary.
+        Convertit la décision en dictionnaire.
 
         Returns
         -------
         Dict[str, Any]
-            A dictionary representation of the decision.
+            Une représentation sous forme de dictionnaire de la décision.
         """
         return self._decision.model_dump()
 
     def __repr__(self) -> str:
-        """Get a string representation of the decision."""
+        """Récupère une représentation sous forme de chaîne de la décision."""
         return f"JuriDecision(id={self.id}, date={self.date}, title={self.title})"
 
 
 class JuriAPI:
     """
-    High-level API for interacting with JURI data from the Legifrance API.
+    API de haut niveau pour interagir avec les données JURI de l'API Legifrance.
     """
 
     def __init__(self, client: LegifranceClient):
         """
-        Initialize a JuriAPI instance.
+        Initialise une instance de JuriAPI.
 
         Parameters
         ----------
         client : LegifranceClient
-            The client for interacting with the Legifrance API.
+            Le client pour interagir avec l'API Legifrance.
         """
         self._client = client
 
@@ -259,17 +259,17 @@ class JuriAPI:
         self, response_data: ConsultResponse
     ) -> Optional[Decision]:
         """
-        Process a consult response and extract the Decision.
+        Traite une réponse de consultation et extrait la Décision.
 
         Parameters
         ----------
         response_data : dict
-            The JSON response data from the API.
+            Les données de réponse JSON de l'API.
 
         Returns
         -------
         Optional[Decision]
-            The Decision object, or None if not found.
+            L'objet Decision, ou None si non trouvé.
         """
         consult_response = ConsultResponse.from_api_model(response_data)
 
@@ -286,27 +286,27 @@ class JuriAPI:
 
     def fetch(self, text_id: str) -> Optional[JuriDecision]:
         """
-        Fetch a decision by its ID.
+        Récupère une décision par son identifiant.
 
         Parameters
         ----------
         text_id : str
-            The ID of the decision to fetch.
+            L'identifiant de la décision à récupérer.
 
         Returns
         -------
         Optional[JuriDecision]
-            The decision, or None if not found.
+            La décision, ou None si non trouvée.
 
         Raises
         ------
         ValueError
-            If the text_id is invalid.
+            Si l'identifiant du texte est invalide.
         Exception
-            If the API call fails.
+            Si l'appel à l'API échoue.
         """
         if not text_id:
-            raise ValueError("text_id cannot be empty")
+            raise ValueError("L'identifiant du texte ne peut pas être vide")
 
         request = ConsultRequest(textId=text_id, searchedString="")
 
@@ -327,20 +327,20 @@ class JuriAPI:
 
     def fetch_with_ancien_id(self, ancien_id: str) -> Optional[JuriDecision]:
         """
-        Fetch a decision by its ancien ID.
+        Récupère une décision par son ancien identifiant.
 
         Parameters
         ----------
         ancien_id : str
-            The ancien ID of the decision to fetch.
+            L'ancien identifiant de la décision à récupérer.
 
         Returns
         -------
         Optional[JuriDecision]
-            The decision, or None if not found.
+            La décision, ou None si non trouvée.
         """
         if not ancien_id:
-            raise ValueError("ancien_id cannot be empty")
+            raise ValueError("L'ancien identifiant ne peut pas être vide")
 
         request = ConsultByAncienIdRequest(ancienId=ancien_id)
 
@@ -362,27 +362,27 @@ class JuriAPI:
 
     def fetch_version_at(self, text_id: str, date: str) -> Optional[JuriDecision]:
         """
-        Fetch the version of a decision at a specific date.
+        Récupère la version d'une décision à une date spécifique.
 
         Parameters
         ----------
         text_id : str
-            The ID of the decision to fetch.
+            L'identifiant de la décision à récupérer.
         date : str
-            The date to get the version at, in ISO format.
+            La date à laquelle récupérer la version, au format ISO.
 
         Returns
         -------
         Optional[JuriDecision]
-            The version of the decision at the specified date, or None if not found.
+            La version de la décision à la date spécifiée, ou None si non trouvée.
         """
         if not text_id:
-            raise ValueError("text_id cannot be empty")
+            raise ValueError("L'identifiant du texte ne peut pas être vide")
 
         try:
             datetime.fromisoformat(date)
         except ValueError:
-            raise ValueError(f"Invalid date format: {date}")
+            raise ValueError(f"Format de date invalide: {date}")
 
         request = {"textId": text_id, "date": date}
         response = self._client.call_api("consult/juri/version", request)
@@ -400,20 +400,20 @@ class JuriAPI:
 
     def fetch_versions(self, text_id: str) -> List[JuriDecision]:
         """
-        Fetch all versions of a decision.
+        Récupère toutes les versions d'une décision.
 
         Parameters
         ----------
         text_id : str
-            The ID of the decision to fetch versions for.
+            L'identifiant de la décision dont on veut récupérer les versions.
 
         Returns
         -------
         List[JuriDecision]
-            A list of JuriDecision objects representing all versions.
+            Une liste d'objets JuriDecision représentant toutes les versions.
         """
         if not text_id:
-            raise ValueError("text_id cannot be empty")
+            raise ValueError("L'identifiant du texte ne peut pas être vide")
 
         request = {"textId": text_id}
         response = self._client.call_api("consult/juri/versions", request)
@@ -436,17 +436,17 @@ class JuriAPI:
 
     def search(self, query: Union[str, SearchRequest]) -> List[JuriDecision]:
         """
-        Search for decisions matching the query.
+        Recherche des décisions correspondant à la requête.
 
         Parameters
         ----------
         query : Union[str, SearchRequest]
-            The search query, either as a string or a SearchRequest object.
+            La requête de recherche, soit sous forme de chaîne, soit sous forme d'objet SearchRequest.
 
         Returns
         -------
         List[JuriDecision]
-            A list of JuriDecision objects matching the query.
+            Une liste d'objets JuriDecision correspondant à la requête.
         """
         if isinstance(query, str):
             search_query = SearchRequest(search=query)
@@ -490,12 +490,14 @@ class JuriAPI:
                 decision = self.fetch(text_id)
                 if decision:
                     results.append(decision)
-                    logger.debug(f"Successfully fetched and added decision {text_id}")
+                    logger.debug(f"Décision {text_id} récupérée et ajoutée avec succès")
                 else:
                     logger.warning(
-                        f"Failed to fetch decision {text_id} (returned None)"
+                        f"Échec de récupération de la décision {text_id} (a retourné None)"
                     )
             except Exception as e:
-                logger.error(f"Exception while fetching decision {text_id}: {e}")
+                logger.error(
+                    f"Exception lors de la récupération de la décision {text_id}: {e}"
+                )
 
         return results
