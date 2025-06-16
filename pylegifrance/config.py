@@ -2,6 +2,10 @@ from dataclasses import dataclass
 import os
 import logging
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @dataclass
 class ApiConfig:
@@ -35,6 +39,7 @@ class ApiConfig:
         Raises:
             ValueError: If required environment variables are not set.
         """
+
         client_id = os.getenv("LEGIFRANCE_CLIENT_ID")
         client_secret = os.getenv("LEGIFRANCE_CLIENT_SECRET")
 
