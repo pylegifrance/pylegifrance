@@ -112,7 +112,7 @@ class CodeNom(str, Enum):
     CDLAR = "Code de l'artisanat"
     CDLAC = "Code de l'aviation civile"
     CDLE = "Code de l'éducation"
-    CDLR = "Code de la recherche"
+    CDLRE = "Code de la recherche"
     CDTRANS = "Code des transports"
     CDTOUR = "Code du tourisme"
 
