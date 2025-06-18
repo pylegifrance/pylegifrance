@@ -1,42 +1,20 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 16 10:07:49 2023
-Modèles génériques de l'API legifrance
-
-@author: raphael
-"""
-
 from enum import Enum
 
 
-class TypeFacettes(str, Enum):
-    NOM_CODE = "NOM_CODE"
-    DATE_SIGNATURE = "DATE_SIGNATURE"
-    DATE_VERSION = "DATE_VERSION"
-    TEXT_LEGAL_STATUS = "TEXT_LEGAL_STATUS"
-    ARTICLE_LEGAL_STATUS = "ARTICLE_LEGAL_STATUS"
-    NATURE = "NATURE"
-    NOR = "NOR"
+class NomCode(str, Enum):
+    """Énumération des noms officiels des codes juridiques français."""
 
-
-class Nature(str, Enum):
-    LOI = "LOI"
-    ORDONNANCE = "ORDONNANCE"
-    DECRET = "DECRET"
-    ARRETE = "ARRETE"
-
-
-class CodeNom(str, Enum):
     CC = "Code civil"
     CCOM = "Code de commerce"
+    CPD = "Code pénal"
     CDC = "Code des communes"
+    CDU = "Code de l'urbanisme"
     CDDDA = "Code de déontologie des architectes"
     CDJA = "Code de justice administrative"
     CDJM = "Code de justice militaire (nouveau)"
     CDSEDF = "Code de l'action sociale et des familles"
     CD = "Code de l'énergie"
-    CDEDSDÉEDD = "Code de l'entrée et du séjour des étrangers et du droit d'asile"
+    CDEDSDEEDD = "Code de l'entrée et du séjour des étrangers et du droit d'asile"
     CDPCP = "Code de l'expropriation pour cause d'utilité publique"
     CDJ = "Code de l'organisation judiciaire"
     CDLCP = "Code de la commande publique"
@@ -66,13 +44,13 @@ class CodeNom(str, Enum):
     CDPDRDMFDDPODP = "Code des pensions de retraite des marins français du commerce, de pêche ou de plaisance"
     CDPMEDVDG = "Code des pensions militaires d'invalidité et des victimes de guerre"
     CDPM = "Code des ports maritimes"
-    CDPEDCÉ = "Code des postes et des communications électroniques"
+    CDPEDCE = "Code des postes et des communications électroniques"
     CDRELPE = "Code des relations entre le public et l'administration"
     CDT = "Code du travail"
     CDEPDLMM = "Code disciplinaire et pénal de la marine marchande"
     CDCEDA = "Code du cinéma et de l'image animée"
     CDDD = "Code du domaine de l'Etat"
-    CDDDEDCPAÀLCTDM = "Code du domaine de l'Etat et des collectivités publiques applicable à la collectivité territoriale de Mayotte"
+    CDDDEDCPAALCTDM = "Code du domaine de l'Etat et des collectivités publiques applicable à la collectivité territoriale de Mayotte"
     CDDPFEDLNI = "Code du domaine public fluvial et de la navigation intérieure"
     CDP = "Code du patrimoine"
     CDSN = "Code du service national"
@@ -89,25 +67,57 @@ class CodeNom(str, Enum):
     CP = "Code pénitentiaire"
     CR = "Code rural (ancien)"
     CREDLPM = "Code rural et de la pêche maritime"
-    CÉ = "Code électoral"
+    CE = "Code électoral"
     LDPF = "Livre des procédures fiscales"
+
+
+class TypeChampCode(str, Enum):
+    """Types de champs de recherche disponibles pour le fond CODE.
+
+    Définit les différents types de champs sur lesquels effectuer une recherche
+    textuelle dans les codes juridiques. Chaque type cible une partie spécifique
+    du document juridique.
+
+    Args:
+        Les valeurs correspondent aux identifiants techniques des types de champs
+        reconnus par l'API de recherche dans le fond CODE.
+
+    Examples:
+        Recherche dans tous les champs:
+            >>> type_champ = TypeChampCode.ALL
+            >>> # Usage: {"typeChamp": "ALL", "criteres": [...]}
+
+        Recherche par numéro d'article:
+            >>> type_champ = TypeChampCode.NUM_ARTICLE
+            >>> # Usage: {"typeChamp": "NUM_ARTICLE", "criteres": [{"valeur": "L36-11"}]}
+
+        Recherche dans le titre:
+            >>> type_champ = TypeChampCode.TITLE
+            >>> # Usage: {"typeChamp": "TITLE", "criteres": [{"valeur": "droit pénal"}]}
+
+    Note:
+        Spécifique au fond CODE. D'autres fonds (LODA) peuvent avoir des types
+        de champs différents. Le type ALL permet une recherche transversale
+        sur l'ensemble des champs disponibles.
+
+    Attributes:
+        ALL: Recherche dans tous les champs disponibles (recherche globale)
+        TITLE: Recherche dans le titre des textes et articles
+        TABLE: Recherche dans les tables des matières et index
+        NUM_ARTICLE: Recherche par numéro d'article spécifique (ex: "L36-11", "R123-4")
+        ARTICLE: Recherche dans le contenu textuel des articles
     """
-    CASF = "Code de l'action sociale et des familles"
-    CCIV = "Code civil"
-    CPRCIV = "Code de procédure civile"
-    CCOM = "Code de commerce"
-    CTRAV = "Code du travail"
-    CPI = "Code de la propriété intellectuelle"
-    CPEN = "Code pénal"
-    CPP = "Code de procédure pénale"
-    CASSUR = "Code des assurances"
-    CCONSO = "Code de la consommation"
-    CSI = "Code de la sécurité intérieure"
-    CSP = "Code de la santé publique"
-    CSS = "Code de la sécurité sociale"
-    CESEDA = "Code de l'entrée et du séjour des étrangers et du droit d'asile"
-    CGCT = "Code général des collectivités territoriales"
-    CPCE = "Code des postes et des communications électroniques"
-    CENV = "Code de l'environnement"
-    CJA = "Code de justice administrative"
-    """
+
+    ALL = "ALL"
+    TITLE = "TITLE"
+    TABLE = "TABLE"
+    NUM_ARTICLE = "NUM_ARTICLE"
+    ARTICLE = "ARTICLE"
+
+
+class SortCode(str, Enum):
+    """Options de tri pour les recherches dans le fond CODE."""
+
+    PERTINENCE = "PERTINENCE"
+    DATE_DESC = "DATE_DESC"
+    DATE_ASC = "DATE_ASC"

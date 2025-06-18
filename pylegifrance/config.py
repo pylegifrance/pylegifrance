@@ -4,8 +4,6 @@ import logging
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 
 @dataclass
 class ApiConfig:
@@ -39,6 +37,7 @@ class ApiConfig:
         Raises:
             ValueError: If required environment variables are not set.
         """
+        load_dotenv()
 
         client_id = os.getenv("LEGIFRANCE_CLIENT_ID")
         client_secret = os.getenv("LEGIFRANCE_CLIENT_SECRET")
