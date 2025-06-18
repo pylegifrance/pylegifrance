@@ -2,82 +2,70 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/analysis_architecture_diataxis/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/diataxis_reclassification_summary/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/explication/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/explication/architecture/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/demarrage/api-configuration/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/demarrage/installation/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/demarrage/piste-account/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/recherche/code/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/recherche/jurisprudence/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/guides-pratiques/recherche/loda/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/reference/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
+    </url>
+    <url>
+         <loc>https://pylegifrance.github.io/pylegifrance/reference/Fonds/code/</loc>
+         <lastmod>2025-06-18</lastmod>
+    </url>
+    <url>
+         <loc>https://pylegifrance.github.io/pylegifrance/reference/Fonds/juri/</loc>
+         <lastmod>2025-06-18</lastmod>
+    </url>
+    <url>
+         <loc>https://pylegifrance.github.io/pylegifrance/reference/Fonds/loda/</loc>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/reference/classes/api_config/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/reference/classes/juri_api/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/reference/classes/juri_decision/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/reference/classes/legifrance_client/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/reference/fonctions/recherche_code/</loc>
-         <lastmod>2025-06-05</lastmod>
-    </url>
-    <url>
-         <loc>https://pylegifrance.github.io/pylegifrance/reference/fonctions/recherche_loda/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
     <url>
          <loc>https://pylegifrance.github.io/pylegifrance/tutoriels/</loc>
-         <lastmod>2025-06-05</lastmod>
+         <lastmod>2025-06-18</lastmod>
     </url>
 </urlset>
