@@ -15,7 +15,7 @@ Ces fonctions permettent d'effectuer des recherches dans les différentes bases 
 
 ### Codes
 
-- [recherche_code](fonctions/recherche_code.md) - Recherche dans les codes français (Code civil, Code pénal, etc.)
+- [Code](Fond/recherche_code.md) - Recherche dans les codes français (Code civil, Code pénal, etc.) avec une API fluide
 
 ### Lois, Ordonnances, Décrets et Arrêtés (LODA)
 
