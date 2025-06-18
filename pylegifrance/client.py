@@ -1,12 +1,6 @@
-"""Client for interacting with the Legifrance API.
-
-This module provides a client for making requests to the Legifrance API.
-The client handles request formatting, sending, and response processing.
-Authentication is handled by a separate AuthenticationManager.
-"""
-
 import logging
 import requests
+import json
 from typing import Optional, Any, Self
 from contextlib import contextmanager
 
@@ -133,7 +127,9 @@ class LegifranceClient:
         }
 
         url = f"{self.api_url}{route}"
-        logger.info(f"POST request to URL: {url}")
+        logger.debug(
+            f"Payload for request {url}: {json.dumps(data, indent=2, ensure_ascii=False)}"
+        )
         response = self.session.post(url, headers=headers, json=data)
 
         if 400 <= response.status_code < 600:
@@ -210,7 +206,7 @@ class LegifranceClient:
             response = self.session.get(url, headers=headers)
 
             if response.status_code == 200:
-                logger.info(
+                logger.debug(
                     "Ping successful: connection to Legifrance API established."
                 )
                 return True

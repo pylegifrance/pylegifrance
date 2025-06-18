@@ -5,132 +5,14 @@ This module centralizes all shared constants and enumerations to avoid duplicati
 and ensure consistency across the codebase.
 """
 
-from pylegifrance.models.generated.model import TypeRecherche as _TypeRecherche
-from pylegifrance.models.generated.model import Operateur as _Operateur
+from pylegifrance.models.generated.model import TypeRecherche as _GeneratedTypeRecherche
+from pylegifrance.models.generated.model import Operateur as _GeneratedOperateur
+from pylegifrance.models.generated.model import LegalStatu as _GeneratedLegalStatu
 from pylegifrance.models.generated.model import TypeChamp as _TypeChamp
-from pylegifrance.models.generated.model import Fond as _Fond
+from pylegifrance.models.generated.model import Fond as _GeneratedFond
 from pylegifrance.models.generated.model import Nature2 as _Nature2
 from enum import Enum
 from typing import Dict, List, Tuple
-
-
-class CodeNom(str, Enum):
-    """
-    Enumeration of code names and their full titles.
-    Used for code identification across the application.
-    """
-
-    # Common codes
-    CCIV = "Code civil"
-    CPRCIV = "Code de procédure civile"
-    CCOM = "Code de commerce"
-    CTRAV = "Code du travail"
-    CPI = "Code de la propriété intellectuelle"
-    CPEN = "Code pénal"
-    CPP = "Code de procédure pénale"
-    CASSUR = "Code des assurances"
-    CCONSO = "Code de la consommation"
-    CSI = "Code de la sécurité intérieure"
-    CSP = "Code de la santé publique"
-    CSS = "Code de la sécurité sociale"
-    CESEDA = "Code de l'entrée et du séjour des étrangers et du droit d'asile"
-    CGCT = "Code général des collectivités territoriales"
-    CPCE = "Code des postes et des communications électroniques"
-    CENV = "Code de l'environnement"
-    CJA = "Code de justice administrative"
-
-    # Additional codes
-    CC = "Code civil"  # Alias for CCIV
-    CDC = "Code des communes"
-    CDDDA = "Code de déontologie des architectes"
-    CDJA = "Code de justice administrative"  # Alias for CJA
-    CDJM = "Code de justice militaire (nouveau)"
-    CDSEDF = "Code de l'action sociale et des familles"
-    CD = "Code de l'énergie"
-    CDEDSDÉEDD = "Code de l'entrée et du séjour des étrangers et du droit d'asile"  # Alias for CESEDA
-    CDPCP = "Code de l'expropriation pour cause d'utilité publique"
-    CDJ = "Code de l'organisation judiciaire"
-    CDLCP = "Code de la commande publique"
-    CDLC = "Code de la consommation"  # Alias for CCONSO
-    CDLCED = "Code de la construction et de l'habitation"
-    CDLD = "Code de la défense"
-    CDLFEDS = "Code de la famille et de l'aide sociale"
-    CDLJPDM = "Code de la justice pénale des mineurs"
-    CDLLDLMMEDNDM = "Code de la Légion d'honneur, de la Médaille militaire et de l'ordre national du Mérite"
-    CDLM = "Code de la mutualité"
-    CDLPI = "Code de la propriété intellectuelle"  # Alias for CPI
-    CDLR = "Code de la route"
-    CDLSP = "Code de la santé publique"  # Alias for CSP
-    CDLSI = "Code de la sécurité intérieure"  # Alias for CSI
-    CDLSS = "Code de la sécurité sociale"  # Alias for CSS
-    CDLVR = "Code de la voirie routière"
-    CDPC = "Code des procédures civiles d'exécution"
-    CDPP = "Code de procédure pénale"  # Alias for CPP
-    CDA = "Code des assurances"  # Alias for CASSUR
-    CDCDL = "Code des communes de la Nouvelle-Calédonie"
-    CDD = "Code des douanes"
-    CDDDM = "Code des douanes de Mayotte"
-    CDISLBES = "Code des impositions sur les biens et services"
-    CDIMEDM = "Code des instruments monétaires et des médailles"
-    CDJF = "Code des juridictions financières"
-    CDPCEMDR = "Code des pensions civiles et militaires de retraite"
-    CDPDRDMFDDPODP = "Code des pensions de retraite des marins français du commerce, de pêche ou de plaisance"
-    CDPMEDVDG = "Code des pensions militaires d'invalidité et des victimes de guerre"
-    CDPM = "Code des ports maritimes"
-    CDPEDCÉ = "Code des postes et des communications électroniques"  # Alias for CPCE
-    CDRELPE = "Code des relations entre le public et l'administration"
-    CDT = "Code du travail"  # Alias for CTRAV
-    CDEPDLMM = "Code disciplinaire et pénal de la marine marchande"
-    CDCEDA = "Code du cinéma et de l'image animée"
-    CDDD = "Code du domaine de l'Etat"
-    CDDDEDCPAÀLCTDM = "Code du domaine de l'Etat et des collectivités publiques applicable à la collectivité territoriale de Mayotte"
-    CDDPFEDLNI = "Code du domaine public fluvial et de la navigation intérieure"
-    CDP = "Code du patrimoine"
-    CDSN = "Code du service national"
-    CDS = "Code du sport"
-    CDTM = "Code du travail maritime"
-    CF = "Code forestier (nouveau)"
-    CGDLFP = "Code général de la fonction publique"
-    CGDLPDPP = "Code général de la propriété des personnes publiques"
-    CGDCT = "Code général des collectivités territoriales"  # Alias for CGCT
-    CGDI = "Code général des impôts"
-    CGDAI = "Code général des impôts, annexe IV"
-    CM = "Code minier (nouveau)"
-    CMEF = "Code monétaire et financier"
-    CP = "Code pénitentiaire"
-    CR = "Code rural (ancien)"
-    CREDLPM = "Code rural et de la pêche maritime"
-    CÉ = "Code électoral"
-    LDPF = "Livre des procédures fiscales"
-    CASF = "Code de l'action sociale et des familles"
-
-
-# Dictionary mapping code abbreviations to their full names
-# This is kept for backward compatibility
-CODE_LIST: Dict[str, str] = {
-    code.name: code.value
-    for code in CodeNom
-    if code.name
-    in [
-        "CCIV",
-        "CPRCIV",
-        "CCOM",
-        "CTRAV",
-        "CPI",
-        "CPEN",
-        "CPP",
-        "CASSUR",
-        "CCONSO",
-        "CSI",
-        "CSP",
-        "CSS",
-        "CESEDA",
-        "CGCT",
-        "CPCE",
-        "CENV",
-        "CJA",
-    ]
-}
 
 
 class SupplyEnum(str, Enum):
@@ -216,20 +98,27 @@ class Fond(str, Enum):
     l'information légale et administrative) via l'API Légifrance.
     """
 
-    JORF = _Fond.jorf.value
-    CNIL = _Fond.cnil.value
-    CETAT = _Fond.cetat.value
-    JURI = _Fond.juri.value
-    JUFI = _Fond.jufi.value
-    CONSTIT = _Fond.constit.value
-    KALI = _Fond.kali.value
-    CODE_DATE = _Fond.code_date.value
-    CODE_ETAT = _Fond.code_etat.value
-    LODA_DATE = _Fond.loda_date.value
-    LODA_ETAT = _Fond.loda_etat.value
-    ALL = _Fond.all.value
-    CIRC = _Fond.circ.value
-    ACCO = _Fond.acco.value
+    JORF = "JORF"
+    CNIL = "CNIL"
+    CETAT = "CETAT"
+    JURI = "JURI"
+    JUFI = "JUFI"
+    CONSTIT = "CONSTIT"
+    KALI = "KALI"
+    CODE_DATE = "CODE_DATE"
+    CODE_ETAT = "CODE_ETAT"
+    LODA_DATE = "LODA_DATE"
+    LODA_ETAT = "LODA_ETAT"
+    ALL = "ALL"
+    CIRC = "CIRC"
+    ACCO = "ACCO"
+
+    def to_generated(self) -> _GeneratedFond:
+        return _GeneratedFond(self.value)
+
+    @classmethod
+    def from_generated(cls, generated: _GeneratedFond) -> "Fond":
+        return cls(generated.value)
 
 
 class Nature(str, Enum):
@@ -249,9 +138,50 @@ class Nature(str, Enum):
     ACCORD_FONCTION_PUBLIQUE = _Nature2.accord_fonction_publique.value
 
 
-class TypeFacettes(str, Enum):
-    """
-    Enumeration of facet types for filtering.
+class Facette(str, Enum):
+    """Facettes de filtrage pour les recherches dans l'API juridique Légifrance.
+
+    Définit les critères de filtrage utilisables pour affiner les recherches
+    dans les différents fonds juridiques (CODE_DATE, LODA_DATE, LODA_ETAT).
+    Permet de combiner plusieurs filtres pour des recherches précises et ciblées.
+
+    Args:
+        Les valeurs correspondent aux identifiants techniques des facettes
+        reconnues par l'API de recherche Légifrance.
+
+    Examples:
+        Filtrage par code juridique:
+            >>> facette = Facette.NOM_CODE
+            >>> # Usage: {"facette": "NOM_CODE", "valeurs": ["Code civil"]}
+
+        Filtrage par date de version:
+            >>> facette = Facette.DATE_VERSION
+            >>> # Usage: {"facette": "DATE_VERSION", "singleDate": 1514802418000}
+
+        Filtrage par statut juridique:
+            >>> facette = Facette.TEXT_LEGAL_STATUS
+            >>> # Usage: {"facette": "TEXT_LEGAL_STATUS", "valeur": "VIGUEUR"}
+
+        Combinaison de filtres:
+            >>> filtres = [
+            ...     {"facette": Facette.NOM_CODE, "valeurs": ["Code civil"]},
+            ...     {"facette": Facette.DATE_VERSION, "singleDate": 1514802418000}
+            ... ]
+
+    Note:
+        - Certaines facettes acceptent des valeurs multiples (valeurs: [])
+        - D'autres acceptent une valeur unique (valeur: "")
+        - Les facettes temporelles supportent les dates simples ou les plages
+        - Compatible avec tous les fonds juridiques selon le contexte
+
+    Attributes:
+        NOM_CODE: Nom du code juridique (ex: "Code civil", "Code pénal")
+        DATE_SIGNATURE: Date de signature du texte (plage ou date unique)
+        DATE_VERSION: Date de version/vigueur du texte (timestamp Unix)
+        TEXT_LEGAL_STATUS: Statut juridique du texte (ex: "VIGUEUR", "ABROGE")
+        ARTICLE_LEGAL_STATUS: Statut juridique de l'article (ex: "VIGUEUR", "ABROGE")
+        NATURE: Nature juridique du document (ex: "LOI", "DECRET", "ORDONNANCE")
+        NOR: Numéro d'ordre réglementaire (identifiant administratif unique)
     """
 
     NOM_CODE = "NOM_CODE"
@@ -263,31 +193,27 @@ class TypeFacettes(str, Enum):
     NOR = "NOR"
 
 
-class TypeRecherche(Enum):
+class TypeRecherche(str, Enum):
     """
     Enumeration of search types.
     """
 
-    EXACTE = "EXACTE"
-    APPROXIMATIVE = "APPROXIMATIVE"
-    TOUS_LES_MOTS = "TOUS_LES_MOTS"
     UN_DES_MOTS = "UN_DES_MOTS"
-    AUCUN_MOT = "AUCUN_MOT"
-    EXPRESSION = "EXPRESSION"
-    CHAMP_VIDE = "CHAMP_VIDE"
+    EXACTE = "EXACTE"
     TOUS_LES_MOTS_DANS_UN_CHAMP = "TOUS_LES_MOTS_DANS_UN_CHAMP"
     AUCUN_DES_MOTS = "AUCUN_DES_MOTS"
     AUCUNE_CORRESPONDANCE_A_CETTE_EXPRESSION = (
         "AUCUNE_CORRESPONDANCE_A_CETTE_EXPRESSION"
     )
+    CONTIENT = "CONTIENT"  # Added for compatibility with existing code
+    EGAL = "EXACTE"  # Alias for EXACTE
+
+    def to_generated(self) -> _GeneratedTypeRecherche:
+        return _GeneratedTypeRecherche(self.value)
 
     @classmethod
-    def _missing_(cls, value):
-        """Handle missing values by trying to match them to existing enum members."""
-        if isinstance(value, _TypeRecherche):
-            # If we get a generated enum instance, convert it to its string value
-            return cls(value.value)
-        return None
+    def from_generated(cls, generated: _GeneratedTypeRecherche) -> "TypeRecherche":
+        return cls(generated.value)
 
 
 class Operateur(str, Enum):
@@ -297,15 +223,15 @@ class Operateur(str, Enum):
     Using str as a base class ensures type compatibility with string literals.
     """
 
-    ET = _Operateur.et.value
-    OU = _Operateur.ou.value
+    ET = "ET"
+    OU = "OU"
+
+    def to_generated(self) -> _GeneratedOperateur:
+        return _GeneratedOperateur(self.value)
 
     @classmethod
-    def _missing_(cls, value) -> str | None:
-        """Handle missing values by trying to match them to existing enum members."""
-        if isinstance(value, _Operateur):
-            return cls(value.value)
-        return None
+    def from_generated(cls, generated: _GeneratedOperateur) -> "Operateur":
+        return cls(generated.value)
 
 
 class TypeChamp(str, Enum):
@@ -355,6 +281,130 @@ class TypeChamp(str, Enum):
             # If we get a generated enum instance, convert it to its string value
             return cls(value.value)
         return None
+
+
+class EtatJuridique(Enum):
+    """Statuts juridiques des textes législatifs et réglementaires français.
+
+    Cette énumération définit les différents états juridiques possibles pour un texte
+    de loi, un article de code ou un décret dans le système juridique français,
+    tels qu'utilisés par l'API Légifrance.
+
+    Attributes:
+        VIGUEUR: Texte actuellement en vigueur et applicable.
+        ABROGE_DIFF: Texte abrogé avec effet différé.
+        VIGUEUR_DIFF: Texte en vigueur avec effet différé.
+        VIGUEUR_ETEN: Texte en vigueur étendue.
+        VIGUEUR_NON_ETEN: Texte en vigueur non étendue.
+        ABROGE: Texte abrogé définitivement et n'ayant plus d'effet juridique.
+        PERIME: Texte périmé.
+        ANNULE: Texte annulé.
+        MODIFIE: Texte qui a été modifié par un texte ultérieur.
+        DISJOINT: Texte disjoint.
+        SUBSTITUE: Texte qui a été substitué par un autre.
+        TRANSFERE: Texte transféré dans un autre code ou compilation.
+        INITIALE: Version initiale d'un texte.
+        MODIFIE_MORT_NE: Texte modifié mais qui n'est jamais entré en vigueur.
+        SANS_ETAT: Texte sans état juridique défini.
+        DENONCE: Texte dénoncé.
+        REMPLACE: Texte qui a été remplacé par un autre.
+
+    Examples:
+        >>> status = EtatJuridique.VIGUEUR
+        >>> generated = status.to_generated()
+        >>> print(generated.value)
+        'VIGUEUR'
+
+        >>> from_api = _GeneratedLegalStatu(value='ABROGE')
+        >>> status = EtatJuridique.from_generated(from_api)
+        >>> print(status)
+        <LegalStatus.ABROGE: 'ABROGE'>
+    """
+
+    VIGUEUR = "VIGUEUR"
+    ABROGE_DIFF = "ABROGE_DIFF"
+    VIGUEUR_DIFF = "VIGUEUR_DIFF"
+    VIGUEUR_ETEN = "VIGUEUR_ETEN"
+    VIGUEUR_NON_ETEN = "VIGUEUR_NON_ETEN"
+    ABROGE = "ABROGE"
+    PERIME = "PERIME"
+    ANNULE = "ANNULE"
+    MODIFIE = "MODIFIE"
+    DISJOINT = "DISJOINT"
+    SUBSTITUE = "SUBSTITUE"
+    TRANSFERE = "TRANSFERE"
+    INITIALE = "INITIALE"
+    MODIFIE_MORT_NE = "MODIFIE_MORT_NE"
+    SANS_ETAT = "SANS_ETAT"
+    DENONCE = "DENONCE"
+    REMPLACE = "REMPLACE"
+
+    def to_generated(self) -> _GeneratedLegalStatu:
+        """Convertit vers le type généré pour l'API.
+
+        Returns:
+            _GeneratedLegalStatu: Instance du type généré avec la valeur
+                correspondante pour l'API Légifrance.
+        """
+        return _GeneratedLegalStatu(self.value)
+
+    @classmethod
+    def from_generated(cls, generated: _GeneratedLegalStatu) -> "EtatJuridique":
+        """Crée une instance depuis le type généré de l'API.
+
+        Args:
+            generated: Instance du type généré provenant de l'API Légifrance.
+
+        Returns:
+            LegalStatus: Énumération correspondant au statut juridique.
+
+        Raises:
+            ValueError: Si la valeur du statut n'est pas reconnue.
+        """
+        return cls(generated.value)
+
+
+class TypeFacette(str, Enum):
+    """Types de facettes disponibles pour filtrer les recherches dans l'API Légifrance.
+
+    Les facettes permettent de restreindre les résultats de recherche selon
+    différents critères. Chaque facette correspond à un aspect spécifique
+    des textes juridiques permettant un filtrage précis.
+
+    Attributes:
+        NOM_CODE: Nom du code juridique (ex: Code civil, Code pénal).
+        DATE_SIGNATURE: Date de signature du texte juridique.
+        DATE_VERSION: Date de version du texte (pour recherche historique).
+        TEXT_LEGAL_STATUS: Statut juridique du texte (VIGUEUR, ABROGE, etc.).
+        ARTICLE_LEGAL_STATUS: Statut juridique au niveau de l'article.
+        NATURE: Nature du texte (LOI, DECRET, ARRETE, etc.).
+        NOR: Numéro NOR (Numéro d'Ordre au Registre) du texte.
+
+    Examples:
+        >>> facette = TypeFacette.NOM_CODE
+        >>> print(facette.value)
+        'NOM_CODE'
+
+        >>> # Utilisation dans un filtre
+        >>> filtre = {
+        ...     "facette": TypeFacette.DATE_VERSION.value,
+        ...     "singleDate": 1514802418000
+        ... }
+
+    Note:
+        Ces facettes sont utilisées dans les requêtes de recherche pour
+        créer des filtres permettant de cibler précisément les textes
+        juridiques souhaités. Certaines facettes sont spécifiques à
+        certains fonds documentaires (CODE, LODA, JORF).
+    """
+
+    NOM_CODE = "NOM_CODE"
+    DATE_SIGNATURE = "DATE_SIGNATURE"
+    DATE_VERSION = "DATE_VERSION"
+    TEXT_LEGAL_STATUS = "TEXT_LEGAL_STATUS"
+    ARTICLE_LEGAL_STATUS = "ARTICLE_LEGAL_STATUS"
+    NATURE = "NATURE"
+    NOR = "NOR"
 
 
 # List of deprecated routes and their replacements

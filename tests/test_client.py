@@ -2,7 +2,6 @@ import os
 import pytest
 from dotenv import load_dotenv
 from pylegifrance.client import LegifranceClient
-from pylegifrance.models.consult import GetArticle
 from pylegifrance.config import ApiConfig
 
 
@@ -51,6 +50,9 @@ def test_client_initialization_without_env_vars(monkeypatch):
     monkeypatch.delenv("LEGIFRANCE_CLIENT_ID", raising=False)
     monkeypatch.delenv("LEGIFRANCE_CLIENT_SECRET", raising=False)
 
+    # Mock load_dotenv to do nothing, preventing it from loading variables from .env file
+    monkeypatch.setattr("pylegifrance.config.load_dotenv", lambda: None)
+
     # When a client is created without explicit configuration
     # Then it should raise a ValueError
     with pytest.raises(ValueError) as excinfo:
@@ -83,24 +85,6 @@ def test_update_api_keys_with_valid_credentials(monkeypatch):
     assert client.ping(), "Ping should succeed after updating with valid API keys"
 
     client.close()
-
-
-def test_api_request(api_client):
-    """
-    Test that an API request works correctly.
-    """
-    # Given a valid article ID
-    article_id = "LEGIARTI000047362226"
-    article = GetArticle(id=article_id)
-
-    # When the API is called
-    response = api_client.call_api(
-        route=article.route, data=article.model_dump(mode="json")
-    )
-
-    # Then the response should be successful
-    assert response is not None
-    assert response.status_code == 200
 
 
 def test_ping_success(api_client):

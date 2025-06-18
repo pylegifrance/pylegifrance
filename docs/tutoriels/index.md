@@ -8,10 +8,19 @@ title: Tutoriels
 ### Exemple de base
 
 ```python
-from pylegifrance import recherche_code
+from pylegifrance import LegifranceClient
+from pylegifrance.fonds.code import Code
+from pylegifrance.models.code.enum import NomCode
+
+# Initialisation
+client = LegifranceClient(client_id="...", client_secret="...")
+code = Code(client)
 
 # Rechercher l'article 1382 du Code civil
-resultat = recherche_code(code_name="Code civil", search="1382")
+resultat = (code.search()
+              .in_code(NomCode.CC)  # Code civil
+              .article_number("1382")
+              .execute())
 print(resultat)
 ```
 
@@ -52,5 +61,9 @@ resultats = loda_api.search(SearchRequest(
 
 ```python
 # Avec formatage
-resultat_formate = recherche_CODE(code_name="Code civil", search="16", formatter=True)
+resultat_formate = (code.search()
+                      .in_code(NomCode.CC)  # Code civil
+                      .article_number("16")
+                      .with_formatter()
+                      .execute())
 ```

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pylegifrance"
-version = "0.2.0b1"
+version = "1.0.0b1"
 description = "Librairie qui fournit des fonctions simples pour rechercher dans legifrance"
 requires-python = ">=3.12"
 readme = "README.md"
@@ -64,7 +64,8 @@ include-package-data = true
 dev = [
     "pytest>=8.3.5",
     "pre-commit>=3.4.0",
-    "twine>=4.0.2"
+    "twine>=4.0.2",
+    "pytest-bdd>=8.1.0",
 ]
 
 [tool.datamodel-codegen]
