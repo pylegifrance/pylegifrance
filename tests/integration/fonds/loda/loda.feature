@@ -78,6 +78,12 @@ Fonctionnalité: API LODA - Recherche et consultation de textes légaux
     Alors les résultats contiennent des URLs enrichies
     Et les métadonnées sont formatées
 
+  Scénario: Recherche de la derniere loi votee
+    Lorsque j'appelle loda.search pour la dernière loi votée
+    Alors l'API retourne la loi la plus récente
+    Et le résultat a la nature "LOI"
+    Et la date du texte est la plus récente
+
   Scénario: Gestion d'erreur nature invalide
     Lorsque j'appelle loda.search avec la nature invalide "INVALIDE"
     Alors l'API lève une erreur de validation

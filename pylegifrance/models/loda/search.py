@@ -238,7 +238,7 @@ class SearchRequest(BaseModel):
             filtres=filters,
             pageNumber=self.page_number,
             pageSize=self.page_size,
-            sort=Sort.publication_date_asc.value,
+            sort=Sort.publication_date_desc.value,
             operateur=Operateur.et,
             typePagination=TypePagination.defaut,
             fromAdvancedRecherche=None,

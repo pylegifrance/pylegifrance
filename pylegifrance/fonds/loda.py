@@ -742,7 +742,9 @@ class Loda:
             )
 
             # Debug log the request
-            logger.debug(f"Search request: {json.dumps(serialized_request, indent=2)}")
+            logger.debug(
+                f"Payload de requête de recherche: {json.dumps(serialized_request, indent=2)}"
+            )
 
             # Appeler l'API
             response = self._client.call_api("search", serialized_request)
@@ -754,7 +756,16 @@ class Loda:
                 return []
 
             response_data = response.json()
-            return self._process_search_results(response_data)
+            logger.debug(
+                f"Données de réponse de recherche: {json.dumps(response_data, indent=2, default=str)}"
+            )
+
+            results = self._process_search_results(response_data)
+            logger.debug(
+                f"Résultats de recherche traités: {len(results)} objets TexteLoda trouvés"
+            )
+
+            return results
         except Exception as e:
             # Convert Pydantic validation errors to ValueError for better error handling
             if "not a valid" in str(e):

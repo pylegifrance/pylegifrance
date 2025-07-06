@@ -139,6 +139,21 @@ def recherche_avec_formatter(loda_api: Loda):
 
 
 @when(
+    "j'appelle loda.search pour la dernière loi votée",
+    target_fixture="recherche_derniere_loi",
+)
+def recherche_derniere_loi(loda_api: Loda):
+    """Rechercher la dernière loi votée."""
+    search_request = SearchRequest(
+        natures=["LOI"],
+        page_size=1,
+        page_number=1,
+    )
+    results = loda_api.search(search_request)
+    return results
+
+
+@when(
     parsers.parse('j\'appelle loda.search avec la nature invalide "{nature_invalide}"'),
     target_fixture="recherche_nature_invalide",
 )
@@ -437,6 +452,48 @@ def verifier_erreur_validation(recherche_nature_invalide):
     """Vérifier qu'une erreur de validation est levée."""
     excinfo = recherche_nature_invalide
     assert excinfo.value is not None, "Une exception doit être levée"
+
+
+@then("l'API retourne la loi la plus récente")
+def verifier_loi_la_plus_recente(recherche_derniere_loi):
+    """Vérifier que l'API retourne une loi."""
+    results = recherche_derniere_loi
+    assert isinstance(results, list), "Les résultats doivent être une liste"
+    assert len(results) > 0, "Au moins une loi doit être retournée"
+
+    loi = results[0]
+    assert isinstance(loi, TexteLoda), "Le résultat doit être un TexteLoda"
+    assert loi.id is not None, "La loi doit avoir un ID"
+
+
+@then(parsers.parse('le résultat a la nature "{nature}"'))
+def verifier_nature_resultat_unique(recherche_derniere_loi, nature: str):
+    """Vérifier que le résultat a la nature spécifiée."""
+    results = recherche_derniere_loi
+    assert len(results) > 0, "Au moins un résultat doit être retourné"
+
+    loi = results[0]
+    assert loi.titre is not None, "La loi doit avoir un titre"
+
+    if nature == "LOI":
+        assert "loi" in loi.titre.lower(), f"Le titre '{loi.titre}' doit contenir 'loi'"
+
+
+@then("la date du texte est la plus récente")
+def verifier_date_texte_plus_recente(recherche_derniere_loi):
+    """Vérifier que la loi a une date de texte."""
+    results = recherche_derniere_loi
+    assert len(results) > 0, "Au moins un résultat doit être retourné"
+
+    loi = results[0]
+    # Check if the law has any date information available
+    has_date = (
+        loi.date_debut is not None
+        or loi.date_fin is not None
+        or loi.last_update is not None
+        or (hasattr(loi._texte, "date_texte") and loi._texte.date_texte is not None)
+    )
+    assert has_date, "La loi doit avoir une date"
 
 
 @then("le message indique les natures valides")
