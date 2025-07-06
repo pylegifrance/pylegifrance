@@ -154,6 +154,23 @@ def recherche_derniere_loi(loda_api: Loda):
 
 
 @when(
+    "j'appelle loda.fetch avec l'ID de la dernière loi",
+    target_fixture="consultation_derniere_loi",
+)
+def consultation_derniere_loi(loda_api: Loda, recherche_derniere_loi):
+    """Consulter la dernière loi par son ID."""
+    results = recherche_derniere_loi
+    assert len(results) > 0, "Au moins une loi doit être trouvée"
+
+    loi_id = results[0].id
+    assert loi_id is not None, "L'ID de la loi ne peut pas être None"
+
+    # Fetch the complete content using the ID
+    texte_complet = loda_api.fetch(loi_id)
+    return {"recherche": results, "texte_complet": texte_complet}
+
+
+@when(
     parsers.parse('j\'appelle loda.search avec la nature invalide "{nature_invalide}"'),
     target_fixture="recherche_nature_invalide",
 )
@@ -510,4 +527,47 @@ def verifier_message_natures_valides(recherche_nature_invalide):
     # Vérifier que le message mentionne que la valeur n'est pas valide
     assert "not a valid" in error_message, (
         "Le message d'erreur doit indiquer que la valeur n'est pas valide"
+    )
+
+
+@then("l'API retourne le contenu complet de la loi")
+def verifier_contenu_complet_loi(consultation_derniere_loi):
+    """Vérifier que l'API retourne le contenu complet de la loi."""
+    data = consultation_derniere_loi
+    texte_complet = data["texte_complet"]
+
+    assert texte_complet is not None, "Le texte complet ne peut pas être None"
+    assert isinstance(texte_complet, TexteLoda), (
+        "Le texte complet doit être un TexteLoda"
+    )
+    assert texte_complet.id is not None, "Le texte complet doit avoir un ID"
+
+
+@then("le contenu HTML est présent")
+def verifier_contenu_html_present(consultation_derniere_loi):
+    """Vérifier que le contenu HTML est présent."""
+    data = consultation_derniere_loi
+    texte_complet = data["texte_complet"]
+
+    assert texte_complet.texte_html is not None, "Le contenu HTML ne peut pas être None"
+    assert len(texte_complet.texte_html.strip()) > 0, (
+        "Le contenu HTML ne peut pas être vide"
+    )
+
+
+@then("le contenu HTML est présent et nettoyé des balises html")
+def verifier_contenu_html_present_et_nettoye(consultation_derniere_loi):
+    """Vérifier que le contenu HTML est présent et nettoyé."""
+    data = consultation_derniere_loi
+    texte_complet = data["texte_complet"]
+
+    assert texte_complet.texte_html is not None, "Le contenu HTML ne peut pas être None"
+    assert len(texte_complet.texte_html.strip()) > 0, (
+        "Le contenu HTML ne peut pas être vide"
+    )
+
+    # Utiliser la nouvelle propriété texte_brut (2025 best practices)
+    assert texte_complet.texte_brut is not None, "Le contenu brut ne peut pas être None"
+    assert len(texte_complet.texte_brut.strip()) > 0, (
+        "Le contenu brut ne peut pas être vide"
     )

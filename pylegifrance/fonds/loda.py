@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import datetime
 from typing import List, Optional, Union, Dict, Any, Tuple
 
@@ -139,6 +140,70 @@ class TexteLoda:
             return " ".join(content_parts)
 
         return None
+
+    @property
+    def texte_brut(self) -> Optional[str]:
+        """
+        Récupère le contenu du texte nettoyé des balises HTML avec formatage préservé.
+
+        Utilise BeautifulSoup (recommandé 2025) avec fallback regex.
+
+        Returns
+        -------
+        Optional[str]
+            Le contenu du texte sans balises HTML mais avec formatage lisible.
+        """
+        html_content = self.texte_html
+        if not html_content:
+            return None
+
+        try:
+            # Méthode recommandée 2025: BeautifulSoup (optional dependency)
+            from bs4 import BeautifulSoup
+
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            # Ajouter des retours à la ligne avant les balises de structure
+            for br in soup.find_all("br"):
+                br.replace_with(soup.new_string("\n"))
+            for p in soup.find_all(["p", "div"]):
+                p.insert_before(soup.new_string("\n"))
+                p.insert_after(soup.new_string("\n"))
+            for blockquote in soup.find_all("blockquote"):
+                blockquote.insert_before(soup.new_string("\n"))
+                blockquote.insert_after(soup.new_string("\n"))
+            for h in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+                h.insert_before(soup.new_string("\n"))
+                h.insert_after(soup.new_string("\n"))
+
+            text = soup.get_text()
+
+            # Nettoyer les espaces multiples et retours à la ligne excessifs
+            text = re.sub(r"\n\s*\n", "\n\n", text)
+            text = re.sub(r" +", " ", text)
+
+            return text.strip() or None
+
+        except ImportError:
+            # Fallback: regex (built-in) avec amélioration du formatage
+
+            # Remplacer certaines balises par des retours à la ligne
+            text = re.sub(r"<br/?>", "\n", html_content)
+            text = re.sub(r"<p[^>]*>", "\n", text)
+            text = re.sub(r"</p>", "\n", text)
+            text = re.sub(r"<BLOCKQUOTE[^>]*>", "\n", text)
+            text = re.sub(r"</BLOCKQUOTE>", "\n", text)
+            text = re.sub(r"<h[1-6][^>]*>", "\n", text)
+            text = re.sub(r"</h[1-6]>", "\n", text)
+
+            # Supprimer toutes les autres balises HTML
+            text = re.sub(r"<[^>]+>", "", text)
+
+            # Nettoyer les espaces multiples et retours à la ligne excessifs
+            text = re.sub(r"\n\s*\n", "\n\n", text)
+            text = re.sub(r" +", " ", text)
+
+            return text.strip() or None
 
     @property
     def sections(self) -> Optional[List[ConsultSection]]:
@@ -407,18 +472,34 @@ class Loda:
             raise ValueError("text_id ne peut pas être vide")
 
         base_id, date = self._extract_date_from_id(text_id)
+        logger.debug(
+            f"Récupération du texte avec ID: {text_id}, ID de base: {base_id}, date: {date}"
+        )
 
         request = ConsultRequest(textId=base_id, date=date)
         api_model = request.to_api_model().model_dump(by_alias=True)
 
+        # Debug log the consult request
+        logger.debug(
+            f"Payload de requête de consultation: {json.dumps(api_model, indent=2)}"
+        )
+
         response = self._client.call_api("consult/lawDecree", api_model)
 
         response_data = response.json()
+        logger.debug(
+            f"Données de réponse de consultation: {json.dumps(response_data, indent=2, default=str)}"
+        )
+
         texte_model = self._process_consult_response(response_data)
 
         if not texte_model:
+            logger.warning(f"Impossible de traiter la réponse pour le texte {text_id}")
             return None
 
+        logger.debug(
+            f"Texte {text_id} récupéré avec succès, titre: {texte_model.titre}"
+        )
         return TexteLoda(texte_model, self._client)
 
     def fetch_version_at(self, text_id: str, date: str) -> Optional[TexteLoda]:
