@@ -33,6 +33,7 @@ class SearchRequest(BaseModel):
     fond: Fond = Fond.loda_date
     natures: List[Nature] | List[str] = []
     date_signature: DatePeriod | str | None = None
+    date_publication: DatePeriod | str | None = None
     page_number: int = 1
     page_size: int = 10
 
@@ -226,6 +227,24 @@ class SearchRequest(BaseModel):
                 FiltreDTO(
                     facette="DATE_SIGNATURE",
                     dates=date_sig_period,
+                    valeurs=None,
+                    singleDate=None,
+                    multiValeurs=None,
+                )
+            )
+
+        # Add date publication filter if specified
+        if self.date_publication:
+            date_pub_period = self.date_publication
+            if isinstance(date_pub_period, str):
+                date_pub_period = DatePeriod(
+                    start=datetime.fromisoformat(date_pub_period),
+                    end=datetime.fromisoformat(date_pub_period),
+                )
+            filters.append(
+                FiltreDTO(
+                    facette="DATE_PUBLICATION",
+                    dates=date_pub_period,
                     valeurs=None,
                     singleDate=None,
                     multiValeurs=None,

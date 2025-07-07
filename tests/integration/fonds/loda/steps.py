@@ -98,9 +98,12 @@ def recherche_avec_date_debut(loda_api: Loda):
 )
 def recherche_avec_date_fin(loda_api: Loda):
     """Effectuer une recherche avec date de fin."""
+    date_debut = datetime(year=2023, month=10, day=1)
     date_fin = datetime(year=2023, month=12, day=31)
     search_request = SearchRequest(
-        search="loi", date_signature=DatePeriod(start=None, end=date_fin), page_size=5
+        search="loi",
+        date_publication=DatePeriod(start=date_debut, end=date_fin),
+        page_size=5,
     )
     results = loda_api.search(search_request)
     return {"results": results, "date_fin": date_fin}
@@ -371,11 +374,22 @@ def verifier_date_fin(recherche_avec_date_fin, date_str: str):
                 "Chaque résultat doit être un TexteLoda"
             )
 
-            # Si la date de début est disponible, vérifier qu'elle est <= date_fin
-            if texte.date_debut:
-                assert texte.date_debut <= date_fin_dt, (
-                    f"La date de début {texte.date_debut} doit être <= {date_fin_dt}"
-                )
+            # Vérifier que la date de publication est <= date_fin
+            if texte.date_publication:
+                # Handle timezone-aware comparison
+                date_publication = texte.date_publication
+                if date_publication.tzinfo is not None and date_fin_dt.tzinfo is None:
+                    # Make date_fin_dt timezone-aware (UTC)
+                    from datetime import timezone
+
+                    date_fin_dt_aware = date_fin_dt.replace(tzinfo=timezone.utc)
+                    assert date_publication <= date_fin_dt_aware, (
+                        f"La date de publication {date_publication} doit être <= {date_fin_dt_aware}"
+                    )
+                else:
+                    assert date_publication <= date_fin_dt, (
+                        f"La date de publication {date_publication} doit être <= {date_fin_dt}"
+                    )
 
 
 @then("aucun résultat postérieur n'est retourné")

@@ -50,6 +50,7 @@ class TexteLoda:
         """
         self._texte = texte
         self._client = client
+        self._code_client = None
 
     @property
     def id(self) -> Optional[str]:
@@ -101,6 +102,15 @@ class TexteLoda:
     def last_update(self) -> Optional[datetime]:
         """Récupère la date de dernière mise à jour du texte."""
         return self._texte.last_update_dt
+
+    @property
+    def date_publication(self) -> Optional[datetime]:
+        """Récupère la date de publication du texte."""
+        return (
+            self._texte.consult_response.date_parution
+            if self._texte.consult_response
+            else None
+        )
 
     @property
     def texte_html(self) -> Optional[str]:
