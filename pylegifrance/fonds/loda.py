@@ -7,7 +7,6 @@ from typing import List, Optional, Union, Dict, Any, Tuple
 from pylegifrance.client import LegifranceClient
 from pylegifrance.models.identifier import Cid, Nor
 from pylegifrance.utils import EnumEncoder
-
 from pylegifrance.models.loda.models import TexteLoda as TexteLodaModel
 from pylegifrance.models.generated.model import ConsultSection, ConsultArticle
 from pylegifrance.models.loda.search import SearchRequest
@@ -16,6 +15,7 @@ from pylegifrance.models.loda.api_wrappers import (
     ConsultVersionRequest,
     ListVersionsRequest,
 )
+from pylegifrance.models.code.models import Article
 
 # Constantes
 HTTP_OK = 200
@@ -290,6 +290,281 @@ class TexteLoda:
         if self.id is None:
             return []
         return loda.fetch_versions(self.id)
+
+    def get_modified_articles(self) -> List[Article]:
+        """
+        Récupère les articles qui sont modifiés par cette loi.
+
+        Returns
+        -------
+        List[Article]
+            Une liste des articles modifiés par cette loi.
+        """
+        from pylegifrance.fonds.code import Code
+
+        logger.debug(f"Recherche des articles modifiés par la loi {self.id}")
+        modified_articles = []
+
+        if not self.articles:
+            return modified_articles
+
+        for article in self.articles:
+            logger.debug(
+                f"Analyse de l'article {article.id} pour les liens de modification"
+            )
+
+            if not (
+                hasattr(article, "lst_lien_modification")
+                and article.lst_lien_modification
+            ):
+                logger.debug(
+                    f"Aucun lien de modification trouvé pour l'article {article.id}"
+                )
+                continue
+
+            logger.debug(
+                f"Trouvé {len(article.lst_lien_modification)} liens de modification pour l'article {article.id}"
+            )
+
+            for lien in article.lst_lien_modification:
+                logger.debug(
+                    f"Lien de modification: type={lien.link_type}, article_id={lien.article_id}, date_debut_cible={lien.date_debut_cible}"
+                )
+
+                if not self._is_outgoing_modification_link(lien):
+                    continue
+
+                try:
+                    modified_article = self._fetch_modified_article(
+                        lien, Code(self._client)
+                    )
+                    modified_articles.append(modified_article)
+                    logger.debug(
+                        f"Article modifié {lien.article_id} récupéré avec succès"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Impossible de récupérer l'article {lien.article_id}: {e}"
+                    )
+                    continue
+
+        logger.debug(f"Total des articles modifiés récupérés: {len(modified_articles)}")
+        return modified_articles
+
+    def _is_outgoing_modification_link(self, lien: Any) -> bool:
+        """
+        Vérifie si le lien représente une modification sortante (cette loi modifie d'autres textes).
+
+        Parameters
+        ----------
+        lien : Any
+            Le lien de modification à vérifier.
+
+        Returns
+        -------
+        bool
+            True si c'est une modification sortante valide.
+        """
+        return lien.link_type == "MODIFIE" and lien.article_id and lien.date_debut_cible
+
+    def _fetch_modified_article(self, lien: Any, code_api: Any) -> Article:
+        """
+        Récupère un article modifié à partir d'un lien de modification.
+
+        Parameters
+        ----------
+        lien : Any
+            Le lien de modification contenant l'ID et la date.
+        code_api : Any
+            L'instance de l'API Code pour récupérer l'article.
+
+        Returns
+        -------
+        Article
+            L'article modifié.
+
+        Raises
+        ------
+        Exception
+            Si la récupération échoue.
+        """
+        logger.debug(
+            f"Récupération de l'article modifié {lien.article_id} à la date {lien.date_debut_cible}"
+        )
+        return code_api.fetch_article(lien.article_id).at(lien.date_debut_cible)
+
+    def format_modifications_report(self) -> str:
+        """
+        Formate un rapport des modifications avec citations, contenu et URLs.
+
+        Returns
+        -------
+        str
+            Un rapport markdown des modifications apportées par cette loi.
+        """
+        if not self.articles:
+            return "Aucune modification disponible."
+
+        # En-tête du rapport
+        rapport = "# Modifications apportées par cette loi\n\n"
+        rapport += f"**Titre**: {self.titre or 'Non spécifié'}\n"
+        rapport += f"**Statut**: {self.etat or 'Non spécifié'}\n"
+        rapport += f"**Date d'entrée en vigueur**: {self.date_debut.strftime('%d/%m/%Y') if self.date_debut else 'Non spécifiée'}\n\n"
+        rapport += "---\n\n"
+
+        modifications_found = False
+
+        for article in self.articles:
+            if (
+                hasattr(article, "lst_lien_modification")
+                and article.lst_lien_modification
+            ):
+                modifications_found = True
+                rapport += f"## Article {article.num}\n\n"
+
+                for i, lien in enumerate(article.lst_lien_modification, 1):
+                    if lien.link_type == "MODIFIE" and lien.article_id:
+                        try:
+                            logger.debug(
+                                f"Formatage du rapport - récupération de l'article {lien.article_id}"
+                            )
+                            # Récupérer l'article modifié
+                            from pylegifrance.fonds.code import Code
+
+                            code_api = Code(self._client)
+                            article_modifie = (
+                                code_api.fetch_article(lien.article_id).at(
+                                    lien.date_debut_cible
+                                )
+                                if lien.date_debut_cible
+                                else None
+                            )
+
+                            rapport += f"### Modification {i}: {lien.text_title}\n\n"
+
+                            # Citation juridique
+                            citation = (
+                                article_modifie.format_citation()
+                                if article_modifie
+                                else f"Article {lien.article_num}"
+                            )
+                            rapport += f"**Citation**: {citation}\n\n"
+
+                            # URL de consultation - utiliser directement l'articleId du lien
+                            article_url = f"https://www.legifrance.gouv.fr/codes/article_lc/{lien.article_id}"
+                            rapport += f"**Consulter**: [{lien.article_num}]({article_url})\n\n"
+
+                            # Contenu de l'article modifié
+                            if article_modifie and article_modifie.content:
+                                # Nettoyer le contenu HTML pour l'affichage markdown
+                                contenu_nettoye = self._clean_html_for_markdown(
+                                    article_modifie.content
+                                )
+                                rapport += f"**Nouveau contenu**:\n\n```\n{contenu_nettoye}\n```\n\n"
+                            else:
+                                rapport += (
+                                    "**Nouveau contenu**: Contenu non disponible\n\n"
+                                )
+
+                            # Métadonnées
+                            rapport += f"**Date d'entrée en vigueur**: {lien.date_debut_cible}\n"
+                            rapport += f"**Code source**: {lien.text_cid}\n\n"
+
+                        except Exception as e:
+                            logger.warning(
+                                f"Erreur lors du formatage de l'article {lien.article_id}: {e}"
+                            )
+                            rapport += f"### Modification {i}: {lien.text_title}\n\n"
+                            rapport += f"**Article**: {lien.article_num}\n"
+                            rapport += (
+                                "**Erreur**: Impossible de récupérer le contenu\n\n"
+                            )
+
+                        rapport += "---\n\n"
+
+        if not modifications_found:
+            rapport += "Aucune modification d'articles trouvée dans cette loi.\n"
+
+        return rapport
+
+    def _clean_html_for_markdown(self, html_content: str) -> str:
+        """
+        Nettoie le contenu HTML pour un affichage propre en markdown.
+
+        Parameters
+        ----------
+        html_content : str
+            Le contenu HTML à nettoyer.
+
+        Returns
+        -------
+        str
+            Le contenu nettoyé pour markdown.
+        """
+        if not html_content:
+            return ""
+
+        try:
+            # Méthode recommandée 2025: BeautifulSoup (optional dependency)
+            from bs4 import BeautifulSoup
+
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            # Remplacer les éléments HTML par leur équivalent markdown
+            for br in soup.find_all("br"):
+                br.replace_with(soup.new_string("\n"))
+
+            for p in soup.find_all("p"):
+                p.insert_after(soup.new_string("\n\n"))
+
+            for blockquote in soup.find_all("blockquote"):
+                blockquote.insert_before(soup.new_string("> "))
+                blockquote.insert_after(soup.new_string("\n\n"))
+
+            # Gérer les liens
+            from bs4 import Tag
+
+            for a in soup.find_all("a"):
+                if isinstance(a, Tag) and a.get("href"):
+                    link_text = a.get_text()
+                    href = a.get("href")
+                    # Convertir en lien markdown
+                    a.replace_with(soup.new_string(f"[{link_text}]({href})"))
+
+            text = soup.get_text()
+
+            # Nettoyer les espaces multiples et retours à la ligne excessifs
+            import re
+
+            text = re.sub(
+                r"\n\s*\n\s*\n", "\n\n", text
+            )  # Max 2 retours à la ligne consécutifs
+            text = re.sub(r" +", " ", text)  # Espaces multiples -> espace simple
+
+            return text.strip()
+
+        except ImportError:
+            # Fallback: regex simple
+            import re
+
+            # Remplacer les balises par des équivalents markdown
+            text = re.sub(r"<br\s*/?>\s*", "\n", html_content)
+            text = re.sub(r"<p[^>]*>\s*", "\n", text)
+            text = re.sub(r"</p>\s*", "\n\n", text)
+            text = re.sub(r"<blockquote[^>]*>\s*", "\n> ", text)
+            text = re.sub(r"</blockquote>\s*", "\n\n", text)
+
+            # Extraire les liens
+            text = re.sub(r'<a[^>]*href="([^"]*)"[^>]*>([^<]*)</a>', r"[\2](\1)", text)
+
+            # Supprimer les autres balises HTML
+            text = re.sub(r"<[^>]+>", "", text)
+
+            # Nettoyer
+            text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
+            text = re.sub(r" +", " ", text)
+
+            return text.strip()
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -824,8 +1099,8 @@ class Loda:
                 if hasattr(generated_model, "model_dump"):
                     serialized_request = generated_model.model_dump(by_alias=True)
                 else:
-                    # Fallback to dict() for older Pydantic versions
-                    serialized_request = generated_model.dict(by_alias=True)
+                    # Fallback for objects without model_dump
+                    serialized_request = dict(generated_model)
 
             # Ensure proper JSON serialization
             serialized_request = json.loads(

@@ -174,6 +174,23 @@ def consultation_derniere_loi(loda_api: Loda, recherche_derniere_loi):
 
 
 @when(
+    parsers.parse('le statut juridique est "{statut}"'),
+    target_fixture="verification_statut_juridique",
+)
+def verification_statut_juridique(consultation_par_id, statut: str):
+    """Vérifier que le statut juridique du texte correspond à celui attendu."""
+    texte = consultation_par_id
+    assert texte.etat is not None, "Le texte doit avoir un statut juridique"
+    # Normaliser les statuts - l'API peut retourner "Vigueur" au lieu de "VIGUEUR"
+    statut_normalise = texte.etat.upper() if texte.etat else ""
+    statut_attendu = statut.upper()
+    assert statut_normalise == statut_attendu, (
+        f"Le statut attendu est '{statut}', mais obtenu '{texte.etat}'"
+    )
+    return texte
+
+
+@when(
     parsers.parse('j\'appelle loda.search avec la nature invalide "{nature_invalide}"'),
     target_fixture="recherche_nature_invalide",
 )
@@ -584,4 +601,91 @@ def verifier_contenu_html_present_et_nettoye(consultation_derniere_loi):
     assert texte_complet.texte_brut is not None, "Le contenu brut ne peut pas être None"
     assert len(texte_complet.texte_brut.strip()) > 0, (
         "Le contenu brut ne peut pas être vide"
+    )
+
+
+@then(parsers.parse('le statut juridique est "{statut}"'))
+def verifier_statut_juridique(consultation_par_id, statut: str):
+    """Vérifier que le statut juridique du texte correspond à celui attendu."""
+    texte = consultation_par_id
+    assert texte.etat is not None, "Le texte doit avoir un statut juridique"
+    assert texte.etat == statut, (
+        f"Le statut attendu est '{statut}', mais obtenu '{texte.etat}'"
+    )
+
+
+@then("je peux voir les versions disponibles")
+def verifier_versions_disponibles(verification_statut_juridique):
+    """Vérifier que je peux accéder aux versions du texte."""
+    texte = verification_statut_juridique
+    versions = texte.versions()
+    assert isinstance(versions, list), "Les versions doivent être une liste"
+    assert len(versions) > 0, "Au moins une version doit être disponible"
+
+    # Vérifier que chaque version est valide
+    for version in versions:
+        assert isinstance(version, TexteLoda), "Chaque version doit être un TexteLoda"
+        assert version.id is not None, "Chaque version doit avoir un ID"
+
+
+@then("je peux accéder au contenu de chaque version")
+def verifier_acces_contenu_versions(verification_statut_juridique):
+    """Vérifier que je peux accéder au contenu de chaque version."""
+    texte = verification_statut_juridique
+    versions = texte.versions()
+
+    assert len(versions) > 0, "Au moins une version doit être disponible"
+
+    for version in versions:
+        # Vérifier qu'on peut accéder aux métadonnées de base
+        assert version.titre is not None, "Chaque version doit avoir un titre"
+        assert version.etat is not None, "Chaque version doit avoir un statut juridique"
+
+        # Vérifier qu'on peut accéder au contenu (HTML ou sections/articles)
+        has_content = (
+            version.texte_html is not None
+            or (version.sections and len(version.sections) > 0)
+            or (version.articles and len(version.articles) > 0)
+        )
+        assert has_content, f"La version {version.id} doit avoir du contenu accessible"
+
+
+@then("je peux voir les modifications apportées par cette loi")
+def verifier_modifications_apportees(verification_statut_juridique):
+    """Vérifier que je peux voir les modifications apportées par cette loi."""
+    texte = verification_statut_juridique
+
+    # Vérifier qu'on peut accéder aux articles qui contiennent les modifications
+    assert texte.articles is not None, "Le texte doit avoir des articles"
+    assert len(texte.articles) > 0, "Le texte doit contenir au moins un article"
+
+    # Vérifier que le premier article contient du contenu
+    premier_article = texte.articles[0]
+    assert premier_article.content is not None, (
+        "Le premier article doit avoir du contenu"
+    )
+    assert len(premier_article.content.strip()) > 0, (
+        "Le premier article ne peut pas être vide"
+    )
+
+
+@then("je peux consulter le contenu d'un article modifié par cette loi")
+def verifier_consultation_article_modifie(verification_statut_juridique):
+    """Vérifier que je peux consulter le contenu d'un article modifié par cette loi."""
+    texte = verification_statut_juridique
+
+    # Utiliser la nouvelle méthode pour récupérer les articles modifiés
+    articles_modifies = texte.get_modified_articles()
+
+    print(texte.format_modifications_report())
+
+    # Vérifications simples sans conditionnelles
+    assert len(articles_modifies) > 0, (
+        "Au moins un article modifié doit être accessible"
+    )
+    assert articles_modifies[0].content is not None, (
+        "L'article modifié doit avoir du contenu"
+    )
+    assert len(articles_modifies[0].content.strip()) > 0, (
+        "L'article modifié ne peut pas être vide"
     )
