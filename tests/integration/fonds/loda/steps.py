@@ -689,3 +689,37 @@ def verifier_consultation_article_modifie(verification_statut_juridique):
     assert len(articles_modifies[0].content.strip()) > 0, (
         "L'article modifié ne peut pas être vide"
     )
+
+
+@then("je peux voir les articles créés par cette loi")
+def verifier_articles_crees(verification_statut_juridique):
+    """Vérifier que je peux voir les articles créés par cette loi."""
+    texte = verification_statut_juridique
+
+    # Utiliser la nouvelle méthode pour récupérer les articles créés
+    articles_crees = texte.get_created_articles()
+
+    # Vérifications simples sans conditionnelles
+    assert len(articles_crees) > 0, "Au moins un article créé doit être accessible"
+    assert articles_crees[0].content is not None, "L'article créé doit avoir du contenu"
+    assert len(articles_crees[0].content.strip()) > 0, (
+        "L'article créé ne peut pas être vide"
+    )
+
+
+@then("je peux consulter le contenu d'un article créé par cette loi")
+def verifier_consultation_article_cree(verification_statut_juridique):
+    """Vérifier que je peux consulter le contenu d'un article créé par cette loi."""
+    texte = verification_statut_juridique
+
+    # Utiliser la nouvelle méthode pour récupérer les articles créés
+    articles_crees = texte.get_created_articles()
+
+    print(texte.format_modifications_report())
+
+    # Vérifications simples sans conditionnelles
+    assert len(articles_crees) > 0, "Au moins un article créé doit être accessible"
+    assert articles_crees[0].content is not None, "L'article créé doit avoir du contenu"
+    assert len(articles_crees[0].content.strip()) > 0, (
+        "L'article créé ne peut pas être vide"
+    )

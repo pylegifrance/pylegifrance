@@ -96,6 +96,13 @@ Fonctionnalité: API LODA - Recherche et consultation de textes légaux
     Alors je peux voir les modifications apportées par cette loi
     Et je peux consulter le contenu d'un article modifié par cette loi
 
+  Scénario: Consultation d'une loi créatrice et modificatrice en vigueur
+    Lorsque j'appelle loda.fetch avec l'ID "LEGITEXT000051827266_02-07-2025"
+    Et le statut juridique est "VIGUEUR"
+    Alors je peux voir les articles créés par cette loi
+    Et je peux voir les modifications apportées par cette loi
+    Et je peux consulter le contenu d'un article créé par cette loi
+
   Scénario: Gestion d'erreur nature invalide
     Lorsque j'appelle loda.search avec la nature invalide "INVALIDE"
     Alors l'API lève une erreur de validation

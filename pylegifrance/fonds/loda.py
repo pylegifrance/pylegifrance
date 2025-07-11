@@ -30,6 +30,15 @@ FRENCH_DATE_DAY_POSITION = 0
 FRENCH_DATE_MONTH_POSITION = 1
 FRENCH_DATE_YEAR_POSITION = 2
 
+# Constantes pour les types de liens de modification
+MODIFICATION_LINK_TYPE = "MODIFIE"
+CREATION_LINK_TYPES = ["CREE", "CREATION", "CRÉÉ", "CRÉATION"]
+ABROGATION_LINK_TYPES = ["ABROGE", "ABROGATION"]
+
+# Constantes pour le nettoyage HTML
+INTERNAL_URL_PATTERNS = ["affichCodeArticle.do", "affichTexte.do", "legifrance.gouv.fr"]
+URL_PARAMS_TO_REMOVE = ["cidTexte", "idArticle", "dateTexte", "categorieLien"]
+
 logger = logging.getLogger(__name__)
 
 
@@ -355,6 +364,64 @@ class TexteLoda:
         logger.debug(f"Total des articles modifiés récupérés: {len(modified_articles)}")
         return modified_articles
 
+    def get_created_articles(self) -> List[Article]:
+        """
+        Récupère les articles qui sont créés par cette loi.
+
+        Returns
+        -------
+        List[Article]
+            Une liste des articles créés par cette loi.
+        """
+        from pylegifrance.fonds.code import Code
+
+        logger.debug(f"Recherche des articles créés par la loi {self.id}")
+        created_articles = []
+
+        if not self.articles:
+            return created_articles
+
+        for article in self.articles:
+            logger.debug(
+                f"Analyse de l'article {article.id} pour les liens de création"
+            )
+
+            if not (
+                hasattr(article, "lst_lien_modification")
+                and article.lst_lien_modification
+            ):
+                logger.debug(
+                    f"Aucun lien de modification trouvé pour l'article {article.id}"
+                )
+                continue
+
+            logger.debug(
+                f"Trouvé {len(article.lst_lien_modification)} liens de modification pour l'article {article.id}"
+            )
+
+            for lien in article.lst_lien_modification:
+                logger.debug(
+                    f"Lien de modification: type={lien.link_type}, article_id={lien.article_id}, date_debut_cible={lien.date_debut_cible}"
+                )
+
+                if not self._is_outgoing_creation_link(lien):
+                    continue
+
+                try:
+                    created_article = self._fetch_created_article(
+                        lien, Code(self._client)
+                    )
+                    created_articles.append(created_article)
+                    logger.debug(f"Article créé {lien.article_id} récupéré avec succès")
+                except Exception as e:
+                    logger.warning(
+                        f"Impossible de récupérer l'article créé {lien.article_id}: {e}"
+                    )
+                    continue
+
+        logger.debug(f"Total des articles créés récupérés: {len(created_articles)}")
+        return created_articles
+
     def _is_outgoing_modification_link(self, lien: Any) -> bool:
         """
         Vérifie si le lien représente une modification sortante (cette loi modifie d'autres textes).
@@ -369,7 +436,27 @@ class TexteLoda:
         bool
             True si c'est une modification sortante valide.
         """
-        return lien.link_type == "MODIFIE" and lien.article_id and lien.date_debut_cible
+        return (
+            lien.link_type == MODIFICATION_LINK_TYPE
+            and lien.article_id
+            and lien.date_debut_cible
+        )
+
+    def _is_outgoing_creation_link(self, lien: Any) -> bool:
+        """
+        Vérifie si le lien représente une création sortante (cette loi crée de nouveaux articles).
+
+        Parameters
+        ----------
+        lien : Any
+            Le lien de modification à vérifier.
+
+        Returns
+        -------
+        bool
+            True si c'est une création sortante valide.
+        """
+        return lien.link_type in CREATION_LINK_TYPES and lien.article_id
 
     def _fetch_modified_article(self, lien: Any, code_api: Any) -> Article:
         """
@@ -395,101 +482,240 @@ class TexteLoda:
         logger.debug(
             f"Récupération de l'article modifié {lien.article_id} à la date {lien.date_debut_cible}"
         )
-        return code_api.fetch_article(lien.article_id).at(lien.date_debut_cible)
+        return self._fetch_article_with_date(lien, code_api, lien.date_debut_cible)
+
+    def _fetch_created_article(self, lien: Any, code_api: Any) -> Article:
+        """
+        Récupère un article créé à partir d'un lien de création.
+
+        Parameters
+        ----------
+        lien : Any
+            Le lien de création contenant l'ID.
+        code_api : Any
+            L'instance de l'API Code pour récupérer l'article.
+
+        Returns
+        -------
+        Article
+            L'article créé.
+
+        Raises
+        ------
+        Exception
+            Si la récupération échoue.
+        """
+        logger.debug(f"Récupération de l'article créé {lien.article_id}")
+        # Pour les articles créés, récupérer la version courante ou à la date de création
+        target_date = (
+            lien.date_debut_cible
+            if hasattr(lien, "date_debut_cible") and lien.date_debut_cible
+            else None
+        )
+        return self._fetch_article_with_date(lien, code_api, target_date)
+
+    def _fetch_article_with_date(
+        self, lien: Any, code_api: Any, target_date: Any
+    ) -> Article:
+        """
+        Récupère un article avec une date spécifiée ou la version courante.
+
+        Parameters
+        ----------
+        lien : Any
+            Le lien contenant l'ID de l'article.
+        code_api : Any
+            L'instance de l'API Code pour récupérer l'article.
+        target_date : Any
+            La date cible pour la récupération, ou None pour la version courante.
+
+        Returns
+        -------
+        Article
+            L'article récupéré.
+        """
+        if target_date:
+            return code_api.fetch_article(lien.article_id).at(target_date)
+        else:
+            return code_api.fetch_article(lien.article_id)
 
     def format_modifications_report(self) -> str:
         """
-        Formate un rapport des modifications avec citations, contenu et URLs.
+        Formate un rapport complet de l'impact de cette loi (modifications, créations, abrogations).
 
         Returns
         -------
         str
-            Un rapport markdown des modifications apportées par cette loi.
+            Un rapport markdown de tous les impacts apportés par cette loi.
         """
+        # Guard clause: early return for empty articles
         if not self.articles:
-            return "Aucune modification disponible."
+            return "Aucun impact disponible."
 
-        # En-tête du rapport
-        rapport = "# Modifications apportées par cette loi\n\n"
-        rapport += f"**Titre**: {self.titre or 'Non spécifié'}\n"
-        rapport += f"**Statut**: {self.etat or 'Non spécifié'}\n"
-        rapport += f"**Date d'entrée en vigueur**: {self.date_debut.strftime('%d/%m/%Y') if self.date_debut else 'Non spécifiée'}\n\n"
-        rapport += "---\n\n"
-
-        modifications_found = False
+        rapport = self._build_report_header()
+        impact_counters = {"modifications": 0, "creations": 0, "abrogations": 0}
+        impacts_found = False
 
         for article in self.articles:
-            if (
-                hasattr(article, "lst_lien_modification")
-                and article.lst_lien_modification
-            ):
-                modifications_found = True
-                rapport += f"## Article {article.num}\n\n"
+            if self._article_has_modification_links(article):
+                impacts_found = True
+                rapport += self._format_article_section(article, impact_counters)
 
-                for i, lien in enumerate(article.lst_lien_modification, 1):
-                    if lien.link_type == "MODIFIE" and lien.article_id:
-                        try:
-                            logger.debug(
-                                f"Formatage du rapport - récupération de l'article {lien.article_id}"
-                            )
-                            # Récupérer l'article modifié
-                            from pylegifrance.fonds.code import Code
-
-                            code_api = Code(self._client)
-                            article_modifie = (
-                                code_api.fetch_article(lien.article_id).at(
-                                    lien.date_debut_cible
-                                )
-                                if lien.date_debut_cible
-                                else None
-                            )
-
-                            rapport += f"### Modification {i}: {lien.text_title}\n\n"
-
-                            # Citation juridique
-                            citation = (
-                                article_modifie.format_citation()
-                                if article_modifie
-                                else f"Article {lien.article_num}"
-                            )
-                            rapport += f"**Citation**: {citation}\n\n"
-
-                            # URL de consultation - utiliser directement l'articleId du lien
-                            article_url = f"https://www.legifrance.gouv.fr/codes/article_lc/{lien.article_id}"
-                            rapport += f"**Consulter**: [{lien.article_num}]({article_url})\n\n"
-
-                            # Contenu de l'article modifié
-                            if article_modifie and article_modifie.content:
-                                # Nettoyer le contenu HTML pour l'affichage markdown
-                                contenu_nettoye = self._clean_html_for_markdown(
-                                    article_modifie.content
-                                )
-                                rapport += f"**Nouveau contenu**:\n\n```\n{contenu_nettoye}\n```\n\n"
-                            else:
-                                rapport += (
-                                    "**Nouveau contenu**: Contenu non disponible\n\n"
-                                )
-
-                            # Métadonnées
-                            rapport += f"**Date d'entrée en vigueur**: {lien.date_debut_cible}\n"
-                            rapport += f"**Code source**: {lien.text_cid}\n\n"
-
-                        except Exception as e:
-                            logger.warning(
-                                f"Erreur lors du formatage de l'article {lien.article_id}: {e}"
-                            )
-                            rapport += f"### Modification {i}: {lien.text_title}\n\n"
-                            rapport += f"**Article**: {lien.article_num}\n"
-                            rapport += (
-                                "**Erreur**: Impossible de récupérer le contenu\n\n"
-                            )
-
-                        rapport += "---\n\n"
-
-        if not modifications_found:
-            rapport += "Aucune modification d'articles trouvée dans cette loi.\n"
-
+        rapport += self._build_report_summary(impact_counters, impacts_found)
         return rapport
+
+    def _build_report_header(self) -> str:
+        """Construit l'en-tête du rapport."""
+        date_vigueur = (
+            self.date_debut.strftime("%d/%m/%Y") if self.date_debut else "Non spécifiée"
+        )
+
+        return (
+            "# Impact de cette loi\n\n"
+            f"**Titre**: {self.titre or 'Non spécifié'}\n"
+            f"**Statut**: {self.etat or 'Non spécifié'}\n"
+            f"**Date d'entrée en vigueur**: {date_vigueur}\n\n"
+            "---\n\n"
+        )
+
+    def _article_has_modification_links(self, article) -> bool:
+        """Vérifie si l'article a des liens de modification."""
+        return (
+            hasattr(article, "lst_lien_modification") and article.lst_lien_modification
+        )
+
+    def _format_article_section(self, article, impact_counters: dict) -> str:
+        """Formate la section d'un article avec ses impacts."""
+        section = f"## Article {article.num}\n\n"
+
+        # Ajouter le contenu de l'article de loi lui-même
+        if article.content:
+            section += self._format_article_content(article.content)
+
+        section += self._format_modification_links(article, impact_counters)
+        return section
+
+    def _format_article_content(self, content: str) -> str:
+        """Formate le contenu d'un article de loi."""
+        contenu_nettoye = self._clean_html_for_markdown(content)
+        return (
+            f"**Contenu de l'article de loi**:\n\n```\n{contenu_nettoye}\n```\n\n"
+            "---\n\n"
+        )
+
+    def _format_modification_links(self, article, impact_counters: dict) -> str:
+        """Formate les liens de modification d'un article."""
+        section = ""
+
+        for i, lien in enumerate(article.lst_lien_modification, 1):
+            link_type = lien.link_type
+
+            if link_type == MODIFICATION_LINK_TYPE and lien.article_id:
+                impact_counters["modifications"] += 1
+                section += self._format_modification_section(lien, i)
+            elif link_type in CREATION_LINK_TYPES and lien.article_id:
+                impact_counters["creations"] += 1
+                section += self._format_creation_section(lien, i)
+            elif link_type in ABROGATION_LINK_TYPES:
+                impact_counters["abrogations"] += 1
+                section += self._format_abrogation_section(lien, i)
+            else:
+                section += self._format_other_impact_section(lien, i, link_type)
+
+            section += "---\n\n"
+
+        return section
+
+    def _format_other_impact_section(self, lien, index: int, link_type: str) -> str:
+        """Formate une section pour d'autres types d'impact."""
+        return (
+            f"### {link_type.title()} {index}: {lien.text_title}\n\n"
+            f"**Article**: {lien.article_num}\n"
+            f"**Type d'action**: {link_type}\n\n"
+        )
+
+    def _build_report_summary(self, impact_counters: dict, impacts_found: bool) -> str:
+        """Construit le résumé du rapport."""
+        if not impacts_found:
+            return "Aucun impact trouvé dans cette loi.\n"
+
+        total_impact = sum(impact_counters.values())
+
+        return (
+            "## Résumé de l'impact\n\n"
+            f"- **Modifications**: {impact_counters['modifications']} article(s)\n"
+            f"- **Créations**: {impact_counters['creations']} article(s)\n"
+            f"- **Abrogations**: {impact_counters['abrogations']} article(s)\n"
+            f"- **Impact total**: {total_impact} article(s)\n\n"
+        )
+
+    def _format_modification_section(self, lien: Any, index: int) -> str:
+        """Formate une section pour une modification d'article."""
+        return self._format_article_impact_section(
+            lien, index, "Modification", "Nouveau contenu"
+        )
+
+    def _format_creation_section(self, lien: Any, index: int) -> str:
+        """Formate une section pour une création d'article."""
+        return self._format_article_impact_section(
+            lien, index, "Création", "Contenu créé"
+        )
+
+    def _format_abrogation_section(self, lien: Any, index: int) -> str:
+        """Formate une section pour une abrogation d'article."""
+        return (
+            f"### Abrogation {index}: {lien.text_title}\n\n"
+            f"**Article abrogé**: {lien.article_num}\n"
+            f"**Date d'abrogation**: {lien.date_debut_cible}\n"
+            f"**Code source**: {lien.text_cid}\n\n"
+        )
+
+    def _format_article_impact_section(
+        self, lien: Any, index: int, action_type: str, content_label: str
+    ) -> str:
+        """Formate une section générique pour un impact d'article (modification/création)."""
+        section = f"### {action_type} {index}: {lien.text_title}\n\n"
+
+        try:
+            article = self._fetch_article_from_link(lien)
+            citation = self._format_article_citation(article, lien)
+
+            section += f"**Citation**: {citation}\n\n"
+            section += self._format_consultation_link(lien)
+            section += self._format_article_content_section(article, content_label)
+
+        except Exception as e:
+            section += f"**Erreur**: Impossible de récupérer le contenu ({e})\n\n"
+
+        return section
+
+    def _fetch_article_from_link(self, lien: Any):
+        """Récupère un article à partir d'un lien de modification/création."""
+        from pylegifrance.fonds.code import Code
+
+        code_api = Code(self._client)
+
+        # Pour les modifications, utiliser la date cible si disponible
+        if hasattr(lien, "date_debut_cible") and lien.date_debut_cible:
+            return code_api.fetch_article(lien.article_id).at(lien.date_debut_cible)
+        else:
+            return code_api.fetch_article(lien.article_id)
+
+    def _format_article_citation(self, article, lien: Any) -> str:
+        """Formate la citation d'un article."""
+        return article.format_citation() if article else f"Article {lien.article_num}"
+
+    def _format_consultation_link(self, lien: Any) -> str:
+        """Formate le lien de consultation d'un article."""
+        return f"**Consulter**: [{lien.article_num}](https://www.legifrance.gouv.fr/codes/article_lc/{lien.article_id})\n\n"
+
+    def _format_article_content_section(self, article, content_label: str) -> str:
+        """Formate la section de contenu d'un article."""
+        if not (article and article.content):
+            return ""
+
+        contenu_nettoye = self._clean_html_for_markdown(article.content)
+        return f"**{content_label}**:\n\n```\n{contenu_nettoye}\n```\n\n"
 
     def _clean_html_for_markdown(self, html_content: str) -> str:
         """
@@ -508,11 +734,28 @@ class TexteLoda:
         if not html_content:
             return ""
 
+        import re
+        import urllib.parse
+
+        # Prétraitement pour décoder les entités URL
+        try:
+            # Décoder les caractères URL-encodés
+            text = urllib.parse.unquote(html_content)
+        except Exception:
+            text = html_content
+
         try:
             # Méthode recommandée 2025: BeautifulSoup (optional dependency)
             from bs4 import BeautifulSoup
 
-            soup = BeautifulSoup(html_content, "html.parser")
+            soup = BeautifulSoup(text, "html.parser")
+
+            # Supprimer les liens vers affichCodeArticle.do et autres URLs internes
+            for a in soup.find_all("a"):
+                href = a.get("href", "")
+                if any(pattern in href for pattern in INTERNAL_URL_PATTERNS):
+                    # Remplacer le lien par juste son texte
+                    a.replace_with(soup.new_string(a.get_text()))
 
             # Remplacer les éléments HTML par leur équivalent markdown
             for br in soup.find_all("br"):
@@ -525,50 +768,67 @@ class TexteLoda:
                 blockquote.insert_before(soup.new_string("> "))
                 blockquote.insert_after(soup.new_string("\n\n"))
 
-            # Gérer les liens
+            # Traiter les liens restants (externes)
             from bs4 import Tag
 
             for a in soup.find_all("a"):
                 if isinstance(a, Tag) and a.get("href"):
                     link_text = a.get_text()
                     href = a.get("href")
-                    # Convertir en lien markdown
-                    a.replace_with(soup.new_string(f"[{link_text}]({href})"))
+                    # Convertir en lien markdown seulement si c'est un lien externe utile
+                    if (
+                        isinstance(href, str)
+                        and href.startswith("http")
+                        and "legifrance.gouv.fr" not in href
+                    ):
+                        a.replace_with(soup.new_string(f"[{link_text}]({href})"))
+                    else:
+                        a.replace_with(soup.new_string(link_text))
 
             text = soup.get_text()
 
-            # Nettoyer les espaces multiples et retours à la ligne excessifs
-            import re
-
-            text = re.sub(
-                r"\n\s*\n\s*\n", "\n\n", text
-            )  # Max 2 retours à la ligne consécutifs
-            text = re.sub(r" +", " ", text)  # Espaces multiples -> espace simple
-
-            return text.strip()
-
         except ImportError:
             # Fallback: regex simple
-            import re
+            # Supprimer les URLs de Légifrance
+            text = re.sub(r'/affichCodeArticle\.do\?[^"]*', "", text)
+            text = re.sub(r'/affichTexte\.do\?[^"]*', "", text)
 
             # Remplacer les balises par des équivalents markdown
-            text = re.sub(r"<br\s*/?>\s*", "\n", html_content)
+            text = re.sub(r"<br\s*/?>\s*", "\n", text)
             text = re.sub(r"<p[^>]*>\s*", "\n", text)
             text = re.sub(r"</p>\s*", "\n\n", text)
             text = re.sub(r"<blockquote[^>]*>\s*", "\n> ", text)
             text = re.sub(r"</blockquote>\s*", "\n\n", text)
 
-            # Extraire les liens
-            text = re.sub(r'<a[^>]*href="([^"]*)"[^>]*>([^<]*)</a>', r"[\2](\1)", text)
+            # Supprimer les liens internes de Légifrance mais garder le texte
+            text = re.sub(
+                r'<a[^>]*href="[^"]*(?:affichCodeArticle|affichTexte|legifrance\.gouv\.fr)[^"]*"[^>]*>([^<]*)</a>',
+                r"\1",
+                text,
+            )
+
+            # Traiter les autres liens
+            text = re.sub(
+                r'<a[^>]*href="(http[^"]*)"[^>]*>([^<]*)</a>', r"[\2](\1)", text
+            )
 
             # Supprimer les autres balises HTML
             text = re.sub(r"<[^>]+>", "", text)
 
-            # Nettoyer
-            text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
-            text = re.sub(r" +", " ", text)
+        # Nettoyage final
+        # Supprimer les paramètres d'URL restants
+        url_params_pattern = r"[?&](?:" + "|".join(URL_PARAMS_TO_REMOVE) + r")=[^&\s]*"
+        text = re.sub(url_params_pattern, "", text)
 
-            return text.strip()
+        # Nettoyer les espaces multiples et retours à la ligne excessifs
+        text = re.sub(
+            r"\n\s*\n\s*\n+", "\n\n", text
+        )  # Max 2 retours à la ligne consécutifs
+        text = re.sub(r" +", " ", text)  # Espaces multiples -> espace simple
+        text = re.sub(r"[ \t]+\n", "\n", text)  # Espaces en fin de ligne
+        text = re.sub(r"\n[ \t]+", "\n", text)  # Espaces en début de ligne
+
+        return text.strip()
 
     def to_dict(self) -> Dict[str, Any]:
         """
