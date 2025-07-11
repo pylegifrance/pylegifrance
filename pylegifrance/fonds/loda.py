@@ -8,7 +8,11 @@ from pylegifrance.client import LegifranceClient
 from pylegifrance.models.identifier import Cid, Nor
 from pylegifrance.utils import EnumEncoder
 from pylegifrance.models.loda.models import TexteLoda as TexteLodaModel
-from pylegifrance.models.generated.model import ConsultSection, ConsultArticle
+from pylegifrance.models.generated.model import (
+    ConsultSection,
+    ConsultArticle,
+    ConsultTextResponse,
+)
 from pylegifrance.models.loda.search import SearchRequest
 from pylegifrance.models.loda.api_wrappers import (
     ConsultRequest,
@@ -904,9 +908,7 @@ class Loda:
             for result in results_list
             if (title_info := self._extract_title_info(result)) is not None
             if (
-                texte := self._fetch_and_enrich_text(
-                    title_info[0], title_info[1], result
-                )
+                texte := self._create_minimal_text(title_info[0], title_info[1], result)
             )
             is not None
         ]
@@ -986,49 +988,158 @@ class Loda:
         except StopIteration:
             return None
 
-    def _fetch_and_enrich_text(
-        self, text_id: str, title_text: str, result: Dict[str, Any]
-    ) -> Optional[TexteLoda]:
+    def _extract_date_from_text_id(
+        self, text_id: str, consult_response_data: Dict[str, Any]
+    ) -> None:
         """
-        Récupère un texte par son ID et l'enrichit avec des informations supplémentaires.
+        Extrait la date à partir de l'ID du texte et l'ajoute aux données de réponse.
 
         Parameters
         ----------
         text_id : str
-            L'ID du texte à récupérer.
-        title_text : str
-            Le titre du texte extrait des résultats de recherche.
+            L'ID du texte.
+        consult_response_data : Dict[str, Any]
+            Dictionnaire des données de réponse à enrichir.
+        """
+        base_id, date_str = self._extract_date_from_id(text_id)
+        if not date_str:
+            return
+
+        try:
+            date_obj = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+            consult_response_data["dateTexte"] = date_obj
+        except ValueError:
+            # Si la conversion de date échoue, on continue sans date
+            pass
+
+    def _extract_metadata_from_result(
+        self, result: Dict[str, Any], consult_response_data: Dict[str, Any]
+    ) -> None:
+        """
+        Extrait les métadonnées du résultat de recherche et les ajoute aux données de réponse.
+
+        Parameters
+        ----------
         result : Dict[str, Any]
-            Le résultat de recherche complet contenant des informations supplémentaires.
+            Le résultat de recherche.
+        consult_response_data : Dict[str, Any]
+            Dictionnaire des données de réponse à enrichir.
+        """
+        # Mapping des champs du résultat vers les champs de la réponse
+        field_mapping = {
+            "etat": "etat",
+            "juris_state": "juris_state",
+            "nature": "nature",
+            "datePublication": "date_parution",
+            "cid": "cid",
+            "nor": "nor",
+        }
+
+        # Copie des champs présents dans le résultat
+        for source_field, target_field in field_mapping.items():
+            if source_field in result:
+                consult_response_data[target_field] = result[source_field]
+
+    def _extract_data_from_titles(
+        self, result: Dict[str, Any], consult_response_data: Dict[str, Any]
+    ) -> None:
+        """
+        Extrait les données des titres pour les recherches LODA_ETAT.
+
+        Parameters
+        ----------
+        result : Dict[str, Any]
+            Le résultat de recherche.
+        consult_response_data : Dict[str, Any]
+            Dictionnaire des données de réponse à enrichir.
+        """
+        if not result.get("titles"):
+            return
+
+        for title in result["titles"]:
+            # Mapping des champs du titre vers les champs de la réponse
+            title_mapping = {
+                "legalStatus": "etat",
+                "startDate": "date_debut_version",
+                "endDate": "date_fin_version",
+            }
+
+            for source_field, target_field in title_mapping.items():
+                if source_field in title and title[source_field]:
+                    consult_response_data[target_field] = title[source_field]
+
+    def _create_minimal_text(
+        self, text_id: str, title_text: str, result: Dict[str, Any]
+    ) -> Optional[TexteLoda]:
+        """
+        Crée un TexteLoda minimal à partir des métadonnées de recherche uniquement.
+
+        Parameters
+        ----------
+        text_id : str
+            L'ID du texte.
+        title_text : str
+            Le titre du texte.
+        result : Dict[str, Any]
+            Le résultat de recherche.
 
         Returns
         -------
         Optional[TexteLoda]
-            Le texte enrichi, ou None en cas d'erreur.
+            Le texte minimal, ou None en cas d'erreur.
         """
         try:
-            texte = self.fetch(text_id)
+            # Création des données de base pour la réponse
+            consult_response_data = {"id": text_id, "title": title_text}
 
-            # Guard clause: retourner None si le texte n'a pas pu être récupéré
-            if not texte:
-                logger.warning(
-                    f"Échec de récupération du texte {text_id} (a retourné None)"
-                )
-                return None
+            # Extraction des métadonnées
+            self._extract_date_from_text_id(text_id, consult_response_data)
+            self._extract_metadata_from_result(result, consult_response_data)
+            self._extract_data_from_titles(result, consult_response_data)
 
-            # Enrichir le texte avec le titre si nécessaire
-            if texte.titre is None and title_text:
-                if texte._texte.consult_response:
-                    texte._texte.consult_response.title = title_text
+            # Filtrer les champs pour s'assurer qu'ils correspondent aux types attendus
+            filtered_data = {}
+            # Copier uniquement les champs de base qui sont des chaînes
+            string_fields = [
+                "id",
+                "title",
+                "etat",
+                "juris_state",
+                "nature",
+                "cid",
+                "nor",
+                "date_debut_version",
+                "date_fin_version",
+            ]
+            for field in string_fields:
+                if field in consult_response_data:
+                    filtered_data[field] = consult_response_data[field]
 
-            # Enrichir le texte avec le contenu HTML si nécessaire
-            self._enrich_text_with_html_content(texte, result)
+            # Gérer les champs de date spéciaux
+            if "dateTexte" in consult_response_data and isinstance(
+                consult_response_data["dateTexte"], datetime
+            ):
+                filtered_data["dateTexte"] = consult_response_data["dateTexte"]
 
-            logger.debug(f"Texte {text_id} récupéré et enrichi avec succès")
-            return texte
+            if "date_parution" in consult_response_data and isinstance(
+                consult_response_data["date_parution"], datetime
+            ):
+                filtered_data["date_parution"] = consult_response_data["date_parution"]
+
+            # Création du modèle et retour
+            consult_response = ConsultTextResponse(**filtered_data)
+            texte_model = TexteLodaModel(
+                consult_response=consult_response,
+                titre_long=None,
+                last_update=None,
+                texte_html=None,
+            )
+            return TexteLoda(texte_model, self._client)
 
         except Exception as e:
-            logger.error(f"Exception lors de la récupération du texte {text_id}: {e}")
+            logger.error(
+                f"Exception lors de la création du texte minimal {text_id}: {e}"
+            )
             return None
 
     def _enrich_text_with_html_content(
