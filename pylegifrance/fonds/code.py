@@ -280,9 +280,11 @@ class CodeSearchBuilder:
             raise ValueError(f"Type de fond non supporté: {self.fond}")
 
         # Exécuter la requête
-        response = self.api.call_api(
-            "search", request.model_dump(by_alias=True, mode="json")
-        )
+        request_dict = request.model_dump(by_alias=True, mode="json")
+        if hasattr(request.recherche, 'to_generated'):
+            request_dict["recherche"] = request.recherche.to_generated(self.fond).model_dump(by_alias=True, mode="json")
+
+        response = self.api.call_api("search", request_dict)
 
         results = []
         if response:
