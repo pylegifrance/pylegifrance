@@ -118,15 +118,21 @@ class NomCodeFiltre(BaseModel):
         min_length=1,
     )
 
-    def to_generated(self) -> FiltreDTO:
+    def to_generated(self, fond: str = "CODE_DATE") -> FiltreDTO:
         """Convertit le filtre vers un objet DTO pour l'API.
 
         Returns:
             FiltreDTO: Objet de transfert avec les valeurs converties
                 en chaînes de caractères pour l'API Légifrance.
         """
+        
+        if fond == "CODE_ETAT":
+            facette_value = "TEXT_NOM_CODE"
+        else:
+            facette_value = "NOM_CODE"
+        
         return FiltreDTO(
-            facette=self.facette.value,
+            facette=facette_value,
             valeurs=[valeur.value for valeur in self.valeurs],
             dates=None,
             singleDate=None,
@@ -277,11 +283,19 @@ class CodeSearchCriteria(BaseModel):
         description="Type de pagination à utiliser",
     )
 
-    def to_generated(self) -> RechercheSpecifiqueDTO:
+    def to_generated(self, fond: str = "CODE_DATE") -> RechercheSpecifiqueDTO:
         """Convertit vers le DTO pour l'API."""
+        
+        filtres_converted = []
+        for f in self.filtres:
+            if isinstance(f, NomCodeFiltre):
+                filtres_converted.append(f.to_generated(fond))
+            else:
+                filtres_converted.append(f.to_generated())
+        
         return RechercheSpecifiqueDTO(
             champs=[c.to_generated() for c in self.champs],
-            filtres=[f.to_generated() for f in self.filtres],
+            filtres=filtres_converted,
             pageNumber=self.page_number,
             pageSize=self.page_size,
             operateur=self.operateur.to_generated(),
