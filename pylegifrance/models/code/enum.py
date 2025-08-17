@@ -5,6 +5,7 @@ class NomCode(str, Enum):
     """Énumération des noms officiels des codes juridiques français."""
 
     CC = "Code civil"
+    CPC = "Code de procédure civile"
     CCOM = "Code de commerce"
     CPD = "Code pénal"
     CDC = "Code des communes"
