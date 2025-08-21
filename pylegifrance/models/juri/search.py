@@ -59,6 +59,11 @@ class SearchRequest(PyLegifranceBaseModel):
         description="Date facet to filter on (DATE_DECISION, DATE_PUBLI, etc.)"
     )
     
+    formation: Optional[List[str]] = Field(
+        default=None, 
+        description="Formation filter (e.g., 'Chambre sociale', 'Première chambre civile', 'Chambre criminelle')"
+    )
+    
     @validator('date_start', 'date_end')
     def validate_date_format(cls, v):
         """Validate date format is ISO YYYY-MM-DD."""
@@ -119,6 +124,10 @@ class SearchRequest(PyLegifranceBaseModel):
         # Add date filter if specified
         if self.date_start and self.date_end:
             filters.append(self._create_date_filter())
+            
+        # Add formation filter if specified
+        if self.formation:
+            filters.append(self._create_formation_filter())
 
         return filters
 
@@ -156,6 +165,16 @@ class SearchRequest(PyLegifranceBaseModel):
                 start=datetime.fromisoformat(self.date_start),
                 end=datetime.fromisoformat(self.date_end)
             ),
+            singleDate=None,
+            multiValeurs=None,
+        )
+    
+    def _create_formation_filter(self) -> FiltreDTO:
+        """Create formation filter."""
+        return FiltreDTO(
+            facette=FacettesJURI.CASSATION_FORMATION.value,
+            valeurs=self.formation,
+            dates=None,
             singleDate=None,
             multiValeurs=None,
         )
