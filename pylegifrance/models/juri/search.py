@@ -1,7 +1,8 @@
 """Search models and functionality for JURI."""
 
 from typing import List, Optional
-from pydantic import Field
+from pydantic import Field, validator
+from datetime import datetime
 
 from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.juri.constants import (
@@ -20,6 +21,7 @@ from pylegifrance.models.generated.model import (
     TypeChamp,
     TypeRecherche,
     Fond,
+    DatePeriod
 )
 
 
@@ -43,6 +45,39 @@ class SearchRequest(PyLegifranceBaseModel):
         default=None, description="Specific field extraction keys"
     )
     juridiction_judiciaire: Optional[List[str]] = Field(default=None)
+    
+    date_start: Optional[str] = Field(
+        default=None, 
+        description="Start date for decision filtering (ISO format: YYYY-MM-DD)"
+    )
+    date_end: Optional[str] = Field(
+        default=None, 
+        description="End date for decision filtering (ISO format: YYYY-MM-DD)"
+    )
+    date_facet: str = Field(
+        default="DATE_DECISION", 
+        description="Date facet to filter on (DATE_DECISION, DATE_PUBLI, etc.)"
+    )
+    
+    @validator('date_start', 'date_end')
+    def validate_date_format(cls, v):
+        """Validate date format is ISO YYYY-MM-DD."""
+        if v is not None:
+            try:
+                datetime.fromisoformat(v)
+            except ValueError:
+                raise ValueError(f"Date must be in ISO format (YYYY-MM-DD), got: {v}")
+        return v
+
+    @validator('date_end')
+    def validate_date_range(cls, v, values):
+        """Validate that end date is after start date."""
+        if v is not None and 'date_start' in values and values['date_start'] is not None:
+            start_date = datetime.fromisoformat(values['date_start'])
+            end_date = datetime.fromisoformat(v)
+            if end_date < start_date:
+                raise ValueError("End date must be after start date")
+        return v
 
     def to_api_model(self) -> SearchRequestDTO:
         """Convert to generated model for API calls."""
@@ -80,6 +115,10 @@ class SearchRequest(PyLegifranceBaseModel):
         # Add jurisdiction judiciaire filter if specified
         if self.juridiction_judiciaire:
             filters.append(self._create_jurisdiction_filter())
+            
+        # Add date filter if specified
+        if self.date_start and self.date_end:
+            filters.append(self._create_date_filter())
 
         return filters
 
@@ -104,6 +143,19 @@ class SearchRequest(PyLegifranceBaseModel):
             facette=FacettesJURI.JURIDICTION_JUDICIAIRE.value,
             valeurs=self.juridiction_judiciaire,
             dates=None,
+            singleDate=None,
+            multiValeurs=None,
+        )
+    
+    def _create_date_filter(self) -> FiltreDTO:
+        """Create date range filter."""
+        return FiltreDTO(
+            facette=self.date_facet,
+            valeurs=None,
+            dates=DatePeriod(
+                start=datetime.fromisoformat(self.date_start),
+                end=datetime.fromisoformat(self.date_end)
+            ),
             singleDate=None,
             multiValeurs=None,
         )
