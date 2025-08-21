@@ -64,6 +64,11 @@ class SearchRequest(PyLegifranceBaseModel):
         description="Formation filter (e.g., 'Chambre sociale', 'Première chambre civile', 'Chambre criminelle')"
     )
     
+    cour_appel: Optional[List[str]] = Field(
+        default=None, 
+        description="Court of appeal location filter (only for 'Juridictions d'appel')"
+    )
+    
     @validator('date_start', 'date_end')
     def validate_date_format(cls, v):
         """Validate date format is ISO YYYY-MM-DD."""
@@ -128,6 +133,10 @@ class SearchRequest(PyLegifranceBaseModel):
         # Add formation filter if specified
         if self.formation:
             filters.append(self._create_formation_filter())
+        
+        # Add court of appeal filter if specified  
+        if self.cour_appel and self.juridiction_judiciaire and "Juridictions d'appel" in self.juridiction_judiciaire:
+            filters.append(self._create_cour_appel_filter())
 
         return filters
 
@@ -174,6 +183,15 @@ class SearchRequest(PyLegifranceBaseModel):
         return FiltreDTO(
             facette=FacettesJURI.CASSATION_FORMATION.value,
             valeurs=self.formation,
+            dates=None,
+            singleDate=None,
+            multiValeurs=None,
+        )
+    
+    def _create_cour_appel_filter(self) -> FiltreDTO:
+        return FiltreDTO(
+            facette=FacettesJURI.APPEL_SIEGE_APPEL.value,
+            valeurs=self.cour_appel,
             dates=None,
             singleDate=None,
             multiValeurs=None,
