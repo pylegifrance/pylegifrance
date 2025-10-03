@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pylegifrance"
 version = "1.2.1b2"
 description = "Librairie qui fournit des fonctions simples pour rechercher dans legifrance"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 readme = "README.md"
 license = "MIT"
 
@@ -16,6 +16,7 @@ authors = [
 ]
 
 classifiers = [
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent"
 ]
@@ -73,7 +74,7 @@ input = "pylegifrance/models/generated/legifrance.json"
 input-file-type = "jsonschema"
 output = "pylegifrance/models/generated/model.py"
 output-model-type = "pydantic_v2.BaseModel"
-target-python-version = "3.12"
+target-python-version = "3.11"
 
 field-constraints = true
 snake-case-field = true
