@@ -70,6 +70,10 @@ class NomCode(str, Enum):
     CREDLPM = "Code rural et de la pêche maritime"
     CE = "Code électoral"
     LDPF = "Livre des procédures fiscales"
+    CENV = "Code de l'environnement"
+    CEDUC = "Code de l'éducation"
+    CRECH = "Code de la recherche"
+    CTRANS = "Code des transports"
 
 
 class TypeChampCode(str, Enum):
