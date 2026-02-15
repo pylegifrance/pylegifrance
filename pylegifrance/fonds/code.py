@@ -170,9 +170,7 @@ class CodeSearchBuilder:
         self._filtres.append(DateVersionFiltre(singleDate=date_obj))
         return self
 
-    def with_legal_status(
-        self, status: list[EtatJuridique] | None = None
-    ) -> Self:
+    def with_legal_status(self, status: list[EtatJuridique] | None = None) -> Self:
         """Filtre la recherche par statut juridique.
 
         Args:

@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
+
+from pylegifrance.models.base import PyLegifranceBaseModel
 
 # Import from your existing modules
 from pylegifrance.models.constants import (
@@ -24,7 +26,7 @@ from pylegifrance.models.generated.model import (
 from .enum import NomCode, SortCode, TypeChampCode
 
 
-class DateVersionFiltre(BaseModel):
+class DateVersionFiltre(PyLegifranceBaseModel):
     """Filtre par date de version pour rechercher dans une version historique.
 
     Utilisé avec CODE_DATE pour récupérer des articles à une date spécifique.
@@ -53,7 +55,6 @@ class DateVersionFiltre(BaseModel):
     )
     single_date: datetime = Field(
         ...,
-        alias="singleDate",
         description="Date de version (timestamp Unix en ms ou datetime)",
     )
 
@@ -68,7 +69,7 @@ class DateVersionFiltre(BaseModel):
         )
 
 
-class NomCodeFiltre(BaseModel):
+class NomCodeFiltre(PyLegifranceBaseModel):
     """Filtre de recherche par nom de code juridique.
 
     Permet de restreindre une recherche à un ou plusieurs codes juridiques
@@ -141,7 +142,7 @@ class NomCodeFiltre(BaseModel):
         )
 
 
-class TextLegalStatusFiltre(BaseModel):
+class TextLegalStatusFiltre(PyLegifranceBaseModel):
     """Filtre par statut juridique pour CODE_ETAT.
 
     Permet de filtrer les textes selon leur statut juridique actuel
@@ -181,7 +182,7 @@ class TextLegalStatusFiltre(BaseModel):
         )
 
 
-class CritereCode(BaseModel):
+class CritereCode(PyLegifranceBaseModel):
     """Critère de recherche pour les codes juridiques.
 
     Définit un critère de recherche textuelle avec ses paramètres.
@@ -196,7 +197,7 @@ class CritereCode(BaseModel):
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     type_recherche: TypeRecherche = Field(
-        ..., alias="typeRecherche", description="Type de recherche effectuée"
+        ..., description="Type de recherche effectuée"
     )
     valeur: str = Field(..., description="Mot(s)/expression recherchés", min_length=1)
     operateur: Operateur = Field(default=Operateur.ET, description="Opérateur logique")
@@ -216,7 +217,7 @@ class CritereCode(BaseModel):
         return CritereDTO(**data)
 
 
-class ChampCode(BaseModel):
+class ChampCode(PyLegifranceBaseModel):
     """Champ de recherche pour le fond CODE.
 
     Args:
@@ -229,7 +230,6 @@ class ChampCode(BaseModel):
 
     type_champ: TypeChampCode = Field(
         default=TypeChampCode.ALL,
-        alias="typeChamp",
         description="Type de champ de recherche",
     )
     criteres: list[CritereCode] = Field(
@@ -248,7 +248,7 @@ class ChampCode(BaseModel):
         )
 
 
-class CodeSearchCriteria(BaseModel):
+class CodeSearchCriteria(PyLegifranceBaseModel):
     """Critères de recherche complets pour les codes juridiques.
 
     Regroupe tous les paramètres de recherche pour CODE_DATE et CODE_ETAT.
@@ -263,13 +263,12 @@ class CodeSearchCriteria(BaseModel):
         default_factory=list, description="Filtres à appliquer à la recherche"
     )
     page_number: int = Field(
-        default=1, ge=1, alias="pageNumber", description="Numéro de page (commence à 1)"
+        default=1, ge=1, description="Numéro de page (commence à 1)"
     )
     page_size: int = Field(
         default=5,
         ge=1,
         le=100,
-        alias="pageSize",
         description="Nombre d'éléments par page",
     )
     operateur: Operateur = Field(
@@ -280,7 +279,6 @@ class CodeSearchCriteria(BaseModel):
     )
     type_pagination: TypePagination = Field(
         default=TypePagination.defaut,
-        alias="typePagination",
         description="Type de pagination à utiliser",
     )
 
@@ -393,7 +391,7 @@ class CodeEtatSearchRequest(SearchRequestDTO):
     recherche: CodeSearchCriteria = Field(..., description="Critères de recherche")
 
 
-class CodeSearchResponse(BaseModel):
+class CodeSearchResponse(PyLegifranceBaseModel):
     """Réponse de recherche dans les codes juridiques.
 
     Contient les résultats de recherche avec pagination et métadonnées.
@@ -404,13 +402,9 @@ class CodeSearchResponse(BaseModel):
     results: list[dict[str, Any]] = Field(
         default_factory=list, description="Liste des résultats de recherche"
     )
-    total_results: int = Field(
-        0, alias="totalResults", description="Nombre total de résultats"
-    )
-    page_number: int = Field(1, alias="pageNumber", description="Numéro de page actuel")
-    page_size: int = Field(
-        10, alias="pageSize", description="Nombre de résultats par page"
-    )
+    total_results: int = Field(0, description="Nombre total de résultats")
+    page_number: int = Field(1, description="Numéro de page actuel")
+    page_size: int = Field(10, description="Nombre de résultats par page")
     facets: dict[str, list[dict[str, Any]]] | None = Field(
         None, description="Facettes de filtrage disponibles"
     )

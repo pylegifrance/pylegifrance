@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import Field, validator
+from pydantic import Field, ValidationInfo, field_validator
 
 from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
@@ -69,25 +69,29 @@ class SearchRequest(PyLegifranceBaseModel):
         description="Court of appeal location filter (only for 'Juridictions d'appel')",
     )
 
-    @validator("date_start", "date_end")
-    def validate_date_format(cls, v):
+    @field_validator("date_start", "date_end")
+    @classmethod
+    def validate_date_format(cls, v: str | None) -> str | None:
         """Validate date format is ISO YYYY-MM-DD."""
         if v is not None:
             try:
                 datetime.fromisoformat(v)
             except ValueError:
-                raise ValueError(f"Date must be in ISO format (YYYY-MM-DD), got: {v}") from None
+                raise ValueError(
+                    f"Date must be in ISO format (YYYY-MM-DD), got: {v}"
+                ) from None
         return v
 
-    @validator("date_end")
-    def validate_date_range(cls, v, values):
+    @field_validator("date_end")
+    @classmethod
+    def validate_date_range(cls, v: str | None, info: ValidationInfo) -> str | None:
         """Validate that end date is after start date."""
         if (
             v is not None
-            and "date_start" in values
-            and values["date_start"] is not None
+            and "date_start" in info.data
+            and info.data["date_start"] is not None
         ):
-            start_date = datetime.fromisoformat(values["date_start"])
+            start_date = datetime.fromisoformat(info.data["date_start"])
             end_date = datetime.fromisoformat(v)
             if end_date < start_date:
                 raise ValueError("End date must be after start date")

@@ -16,15 +16,11 @@ from pylegifrance.config import ApiConfig
     ],
 )
 def test_client_initialization(config_type, description):
-    """
-    Test client initialization with different configuration methods.
+    """Test client initialization with different configuration methods.
 
-    Parameters
-    ----------
-    config_type : str
-        Type of configuration to test ('env_vars' or 'explicit')
-    description : str
-        Description of the test case
+    Args:
+        config_type: Type of configuration to test ('env_vars' or 'explicit').
+        description: Description of the test case.
     """
     # Given API credentials
     load_dotenv()

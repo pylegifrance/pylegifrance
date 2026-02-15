@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
+      "Bash(uvx ty:*)",
+      "Bash(uv run mkdocs:*)",
+      "Bash(uv run pre-commit:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv build:*)",
+      "Bash(uv add:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(ls:*)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(**/credentials*)",
+      "Read(**/*secret*)",
+      "Bash(git push --force:*)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}

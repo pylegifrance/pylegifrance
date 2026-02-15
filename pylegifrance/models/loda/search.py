@@ -2,8 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel
-
+from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     ChampDTO,
     CritereDTO,
@@ -25,7 +24,7 @@ from pylegifrance.models.generated.model import (
 )
 
 
-class SearchRequest(BaseModel):
+class SearchRequest(PyLegifranceBaseModel):
     """
     Model for constructing LODA search requests.
     """
