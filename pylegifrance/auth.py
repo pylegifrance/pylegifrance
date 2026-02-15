@@ -62,13 +62,10 @@ class AuthenticationManager:
     """
 
     def __init__(self, config: ApiConfig):
-        """
-        Initialize a new AuthenticationManager instance.
+        """Initialize a new AuthenticationManager instance.
 
-        Parameters
-        ----------
-        config : ApiConfig
-            Configuration for the API authentication.
+        Args:
+            config: Configuration for the API authentication.
         """
         self._client_id = config.client_id
         self._client_secret = config.client_secret
@@ -80,18 +77,13 @@ class AuthenticationManager:
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5), reraise=True)
     def _fetch_new_token(self) -> TokenInfo:
-        """
-        Fetch a new access token from the Legifrance API.
+        """Fetch a new access token from the Legifrance API.
 
-        Returns
-        -------
-        TokenInfo
+        Returns:
             Information about the newly acquired token.
 
-        Raises
-        ------
-        Exception
-            If the token acquisition fails.
+        Raises:
+            Exception: If the token acquisition fails.
         """
         data = {
             "grant_type": "client_credentials",
@@ -119,15 +111,11 @@ class AuthenticationManager:
             )
 
     def update_credentials(self, client_id: str, client_secret: str) -> None:
-        """
-        Update the authentication credentials.
+        """Update the authentication credentials.
 
-        Parameters
-        ----------
-        client_id : str
-            The new client ID.
-        client_secret : str
-            The new client secret.
+        Args:
+            client_id: The new client ID.
+            client_secret: The new client secret.
         """
         if self._client_id != client_id or self._client_secret != client_secret:
             self._client_id = client_id
@@ -136,18 +124,13 @@ class AuthenticationManager:
             self._token_info = TokenInfo(access_token="", issued_at=0, expires_in=0)
 
     def ensure_valid_token(self) -> str:
-        """
-        Ensure that a valid token is available, refreshing it if necessary.
+        """Ensure that a valid token is available, refreshing it if necessary.
 
-        Returns
-        -------
-        str
+        Returns:
             The valid access token.
 
-        Raises
-        ------
-        Exception
-            If the token acquisition or refresh fails.
+        Raises:
+            Exception: If the token acquisition or refresh fails.
         """
         if not self._token_info.is_valid:
             try:
@@ -168,14 +151,11 @@ class AuthenticationManager:
 
     @contextmanager
     def session_context(self):
-        """
-        Context manager for using the authentication manager in a with statement.
+        """Context manager for using the authentication manager in a with statement.
 
         This ensures that the session is properly closed after use.
 
-        Yields
-        ------
-        AuthenticationManager
+        Yields:
             The authentication manager instance.
         """
         try:

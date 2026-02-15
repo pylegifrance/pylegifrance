@@ -44,17 +44,12 @@ class ConsultResponse(PyLegifranceBaseModel):
 
     @classmethod
     def from_api_model(cls, model) -> "ConsultResponse":
-        """
-        Create from generated model or dictionary.
+        """Create from generated model or dictionary.
 
-        Parameters
-        ----------
-        model : Union[ConsultJuriTextResponse, dict]
-            The model or dictionary to convert from.
+        Args:
+            model: The model or dictionary to convert from.
 
-        Returns
-        -------
-        ConsultResponse
+        Returns:
             The converted response.
         """
         if isinstance(model, dict):

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     ConsultArticle,
     ConsultSection,
@@ -10,7 +11,7 @@ from pylegifrance.models.generated.model import (
 )
 
 
-class TexteLoda(BaseModel):
+class TexteLoda(PyLegifranceBaseModel):
     """
     Model representing a LODA text (Lois, Ordonnances, Décrets, Arrêtés).
     This is a wrapper around ConsultTextResponse.

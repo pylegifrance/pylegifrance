@@ -24,18 +24,14 @@ class EnumEncoder(json.JSONEncoder):
 
 
 def configure_session_timeouts(session: requests.Session, config: ApiConfig) -> None:
-    """
-    Configure default timeouts for all requests in a session.
+    """Configure default timeouts for all requests in a session.
 
     This function wraps the original request method to include default timeouts
     for all requests based on the provided configuration.
 
-    Parameters
-    ----------
-    session : requests.Session
-        The session to configure.
-    config : ApiConfig
-        The configuration containing timeout values.
+    Args:
+        session: The session to configure.
+        config: The configuration containing timeout values.
     """
     # Store the original request method
     original_request = session.request

@@ -1,7 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
-
+from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     ConsultDateRequest as GeneratedConsultVersionRequest,
 )
@@ -10,25 +9,22 @@ from pylegifrance.models.generated.model import (
 )
 
 
-class ConsultRequest(BaseModel):
+class ConsultRequest(PyLegifranceBaseModel):
     """
     Request model for consulting a LODA text.
 
     This model is compatible with LawDecreeConsultRequest from the generated model.
     """
 
-    text_id: str = Field(..., alias="textId")
-    searched_string: str | None = Field(default=None, alias="searchedString")
+    text_id: str
+    searched_string: str | None = None
     date: str | None = None
-    from_suggest: bool | None = Field(default=None, alias="fromSuggest")
+    from_suggest: bool | None = None
 
     def to_api_model(self) -> GeneratedConsultRequest:
-        """
-        Convert to API model format.
+        """Convert to API model format.
 
-        Returns
-        -------
-        LawDecreeConsultRequest
+        Returns:
             The API model.
         """
         # Use the current date if not provided
@@ -42,7 +38,7 @@ class ConsultRequest(BaseModel):
         )
 
 
-class ConsultResponse(BaseModel):
+class ConsultResponse(PyLegifranceBaseModel):
     """
     Response model for consulting a LODA text.
 
@@ -50,22 +46,17 @@ class ConsultResponse(BaseModel):
     """
 
     text: dict[str, Any] | None = None
-    execution_time: int | None = Field(None, alias="executionTime")
+    execution_time: int | None = None
     dereferenced: bool | None = None
 
     @classmethod
     def from_api_model(cls, data: dict[str, Any]) -> "ConsultResponse":
-        """
-        Create a ConsultResponse from API response data.
+        """Create a ConsultResponse from API response data.
 
-        Parameters
-        ----------
-        data : Dict[str, Any]
-            The API response data.
+        Args:
+            data: The API response data.
 
-        Returns
-        -------
-        ConsultResponse
+        Returns:
             The ConsultResponse object.
         """
         # Handle old API format (with 'texte' field)
@@ -96,23 +87,20 @@ class ConsultResponse(BaseModel):
         )
 
 
-class ConsultVersionRequest(BaseModel):
+class ConsultVersionRequest(PyLegifranceBaseModel):
     """
     Request model for consulting a specific version of a LODA text.
 
     This model is compatible with ConsultDateRequest from the generated model.
     """
 
-    text_id: str = Field(..., alias="textId")
+    text_id: str
     date: str
 
     def to_api_model(self) -> dict[str, Any]:
-        """
-        Convert to API model format.
+        """Convert to API model format.
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
             The API model as a dictionary.
         """
         # Parse the date string to extract year, month, and day
@@ -133,20 +121,17 @@ class ConsultVersionRequest(BaseModel):
         return result
 
 
-class ListVersionsRequest(BaseModel):
+class ListVersionsRequest(PyLegifranceBaseModel):
     """
     Request model for listing versions of a LODA text.
     """
 
-    text_id: str = Field(..., alias="textId")
+    text_id: str
 
     def to_api_model(self) -> dict[str, Any]:
-        """
-        Convert to API model format.
+        """Convert to API model format.
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
             The API model as a dictionary.
         """
         return {"textId": self.text_id}

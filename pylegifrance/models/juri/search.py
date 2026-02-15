@@ -76,7 +76,9 @@ class SearchRequest(PyLegifranceBaseModel):
             try:
                 datetime.fromisoformat(v)
             except ValueError:
-                raise ValueError(f"Date must be in ISO format (YYYY-MM-DD), got: {v}") from None
+                raise ValueError(
+                    f"Date must be in ISO format (YYYY-MM-DD), got: {v}"
+                ) from None
         return v
 
     @validator("date_end")

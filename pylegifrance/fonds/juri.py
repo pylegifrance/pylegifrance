@@ -29,15 +29,11 @@ class JuriDecision:
     """
 
     def __init__(self, decision: Decision, client: LegifranceClient):
-        """
-        Initialise une instance de JuriDecision.
+        """Initialise une instance de JuriDecision.
 
-        Parameters
-        ----------
-        decision : Decision
-            Le modèle Decision sous-jacent.
-        client : LegifranceClient
-            Le client pour interagir avec l'API Legifrance.
+        Args:
+            decision: Le modèle Decision sous-jacent.
+            client: Le client pour interagir avec l'API Legifrance.
         """
         self._decision = decision
         self._client = client
@@ -131,12 +127,9 @@ class JuriDecision:
         return getattr(self._decision, "solution", None)
 
     def citations(self) -> list["JuriDecision"]:
-        """
-        Récupère les citations de la décision.
+        """Récupère les citations de la décision.
 
-        Returns
-        -------
-        List[JuriDecision]
+        Returns:
             Une liste d'objets JuriDecision représentant les citations.
         """
         citations = []
@@ -158,17 +151,12 @@ class JuriDecision:
         return citations
 
     def at(self, date: datetime | str) -> Optional["JuriDecision"]:
-        """
-        Récupère la version de la décision à la date spécifiée.
+        """Récupère la version de la décision à la date spécifiée.
 
-        Parameters
-        ----------
-        date : Union[datetime, str]
-            La date à laquelle récupérer la version.
+        Args:
+            date: La date à laquelle récupérer la version.
 
-        Returns
-        -------
-        Optional[JuriDecision]
+        Returns:
             La version de la décision à la date spécifiée, ou None si non trouvée.
         """
         if isinstance(date, str):
@@ -189,12 +177,9 @@ class JuriDecision:
             return None
 
     def latest(self) -> Optional["JuriDecision"]:
-        """
-        Récupère la dernière version de la décision.
+        """Récupère la dernière version de la décision.
 
-        Returns
-        -------
-        Optional[JuriDecision]
+        Returns:
             La dernière version de la décision, ou None si non trouvée.
         """
         if self.id is None:
@@ -206,12 +191,9 @@ class JuriDecision:
             return None
 
     def versions(self) -> list["JuriDecision"]:
-        """
-        Récupère toutes les versions de la décision.
+        """Récupère toutes les versions de la décision.
 
-        Returns
-        -------
-        List[JuriDecision]
+        Returns:
             Une liste d'objets JuriDecision représentant toutes les versions.
         """
         if self.id is None:
@@ -223,12 +205,9 @@ class JuriDecision:
             return []
 
     def to_dict(self) -> dict[str, Any]:
-        """
-        Convertit la décision en dictionnaire.
+        """Convertit la décision en dictionnaire.
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
             Une représentation sous forme de dictionnaire de la décision.
         """
         return self._decision.model_dump()
@@ -244,30 +223,22 @@ class JuriAPI:
     """
 
     def __init__(self, client: LegifranceClient):
-        """
-        Initialise une instance de JuriAPI.
+        """Initialise une instance de JuriAPI.
 
-        Parameters
-        ----------
-        client : LegifranceClient
-            Le client pour interagir avec l'API Legifrance.
+        Args:
+            client: Le client pour interagir avec l'API Legifrance.
         """
         self._client = client
 
     def _process_consult_response(
         self, response_data: ConsultResponse
     ) -> Decision | None:
-        """
-        Traite une réponse de consultation et extrait la Décision.
+        """Traite une réponse de consultation et extrait la Décision.
 
-        Parameters
-        ----------
-        response_data : dict
-            Les données de réponse JSON de l'API.
+        Args:
+            response_data: Les données de réponse JSON de l'API.
 
-        Returns
-        -------
-        Optional[Decision]
+        Returns:
             L'objet Decision, ou None si non trouvé.
         """
         consult_response = ConsultResponse.from_api_model(response_data)
@@ -284,25 +255,17 @@ class JuriAPI:
         return Decision.model_validate(decision_data)
 
     def fetch(self, text_id: str) -> JuriDecision | None:
-        """
-        Récupère une décision par son identifiant.
+        """Récupère une décision par son identifiant.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant de la décision à récupérer.
+        Args:
+            text_id: L'identifiant de la décision à récupérer.
 
-        Returns
-        -------
-        Optional[JuriDecision]
+        Returns:
             La décision, ou None si non trouvée.
 
-        Raises
-        ------
-        ValueError
-            Si l'identifiant du texte est invalide.
-        Exception
-            Si l'appel à l'API échoue.
+        Raises:
+            ValueError: Si l'identifiant du texte est invalide.
+            Exception: Si l'appel à l'API échoue.
         """
         if not text_id:
             raise ValueError("L'identifiant du texte ne peut pas être vide")
@@ -325,17 +288,12 @@ class JuriAPI:
         return JuriDecision(decision, self._client)
 
     def fetch_with_ancien_id(self, ancien_id: str) -> JuriDecision | None:
-        """
-        Récupère une décision par son ancien identifiant.
+        """Récupère une décision par son ancien identifiant.
 
-        Parameters
-        ----------
-        ancien_id : str
-            L'ancien identifiant de la décision à récupérer.
+        Args:
+            ancien_id: L'ancien identifiant de la décision à récupérer.
 
-        Returns
-        -------
-        Optional[JuriDecision]
+        Returns:
             La décision, ou None si non trouvée.
         """
         if not ancien_id:
@@ -360,19 +318,13 @@ class JuriAPI:
         return JuriDecision(decision, self._client)
 
     def fetch_version_at(self, text_id: str, date: str) -> JuriDecision | None:
-        """
-        Récupère la version d'une décision à une date spécifique.
+        """Récupère la version d'une décision à une date spécifique.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant de la décision à récupérer.
-        date : str
-            La date à laquelle récupérer la version, au format ISO.
+        Args:
+            text_id: L'identifiant de la décision à récupérer.
+            date: La date à laquelle récupérer la version, au format ISO.
 
-        Returns
-        -------
-        Optional[JuriDecision]
+        Returns:
             La version de la décision à la date spécifiée, ou None si non trouvée.
         """
         if not text_id:
@@ -398,17 +350,12 @@ class JuriAPI:
         return JuriDecision(decision, self._client)
 
     def fetch_versions(self, text_id: str) -> list[JuriDecision]:
-        """
-        Récupère toutes les versions d'une décision.
+        """Récupère toutes les versions d'une décision.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant de la décision dont on veut récupérer les versions.
+        Args:
+            text_id: L'identifiant de la décision dont on veut récupérer les versions.
 
-        Returns
-        -------
-        List[JuriDecision]
+        Returns:
             Une liste d'objets JuriDecision représentant toutes les versions.
         """
         if not text_id:
@@ -434,17 +381,12 @@ class JuriAPI:
         return versions
 
     def search(self, query: str | SearchRequest) -> list[JuriDecision]:
-        """
-        Recherche des décisions correspondant à la requête.
+        """Recherche des décisions correspondant à la requête.
 
-        Parameters
-        ----------
-        query : Union[str, SearchRequest]
-            La requête de recherche, soit sous forme de chaîne, soit sous forme d'objet SearchRequest.
+        Args:
+            query: La requête de recherche, soit sous forme de chaîne, soit sous forme d'objet SearchRequest.
 
-        Returns
-        -------
-        List[JuriDecision]
+        Returns:
             Une liste d'objets JuriDecision correspondant à la requête.
         """
         if isinstance(query, str):

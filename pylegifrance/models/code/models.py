@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
+from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     ConsultArticle,
     ConsultSection,
@@ -10,7 +11,7 @@ from pylegifrance.models.generated.model import (
 )
 
 
-class Code(BaseModel):
+class Code(PyLegifranceBaseModel):
     """Code juridique français avec contenu complet et métadonnées.
 
     Représente un code juridique français tel que retourné par l'API Légifrance.
@@ -128,7 +129,7 @@ class Code(BaseModel):
         return cls(**code_data)
 
 
-class Article(BaseModel):
+class Article(PyLegifranceBaseModel):
     """Article juridique français avec contenu complet et métadonnées.
 
     Représente un article de loi, de code ou de règlement français tel que retourné
@@ -211,13 +212,11 @@ class Article(BaseModel):
     )
     cid: str | None = Field(
         None,
-        alias="cid",
         description="Identifiant LEGITEXT du code parent",
         examples=["LEGITEXT000006070721"],
     )
     code_name: str | None = Field(
         None,
-        alias="codeName",
         description="Nom officiel du code juridique parent",
         examples=["Code civil", "Code pénal"],
     )

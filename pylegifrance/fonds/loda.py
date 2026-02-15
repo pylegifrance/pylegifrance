@@ -51,15 +51,11 @@ class TexteLoda:
     """
 
     def __init__(self, texte: TexteLodaModel, client: LegifranceClient):
-        """
-        Initialise une instance de TexteLoda.
+        """Initialise une instance de TexteLoda.
 
-        Parameters
-        ----------
-        texte : TexteLodaModel
-            Le modèle TexteLoda sous-jacent.
-        client : LegifranceClient
-            Le client pour interagir avec l'API Legifrance.
+        Args:
+            texte: Le modèle TexteLoda sous-jacent.
+            client: Le client pour interagir avec l'API Legifrance.
         """
         self._texte = texte
         self._client = client
@@ -166,14 +162,11 @@ class TexteLoda:
 
     @property
     def texte_brut(self) -> str | None:
-        """
-        Récupère le contenu du texte nettoyé des balises HTML avec formatage préservé.
+        """Récupère le contenu du texte nettoyé des balises HTML avec formatage préservé.
 
         Utilise BeautifulSoup (recommandé 2025) avec fallback regex.
 
-        Returns
-        -------
-        Optional[str]
+        Returns:
             Le contenu du texte sans balises HTML mais avec formatage lisible.
         """
         html_content = self.texte_html
@@ -239,23 +232,17 @@ class TexteLoda:
         return self._texte.articles
 
     def at(self, date: datetime | str) -> Optional["TexteLoda"]:
-        """
-        Récupère la version du texte à la date spécifiée.
+        """Récupère la version du texte à la date spécifiée.
 
-        Parameters
-        ----------
-        date : Union[datetime, str]
-            La date à laquelle récupérer la version, soit comme objet datetime, soit comme chaîne au format ISO.
+        Args:
+            date: La date à laquelle récupérer la version, soit comme objet datetime,
+                soit comme chaîne au format ISO.
 
-        Returns
-        -------
-        Optional[TexteLoda]
+        Returns:
             La version du texte à la date spécifiée, ou None si non trouvée.
 
-        Raises
-        ------
-        ValueError
-            Si la date est invalide.
+        Raises:
+            ValueError: Si la date est invalide.
         """
         # Convertir datetime en chaîne si nécessaire
         if isinstance(date, datetime):
@@ -275,12 +262,9 @@ class TexteLoda:
         return loda.fetch_version_at(self.id, date_str)
 
     def latest(self) -> Optional["TexteLoda"]:
-        """
-        Récupère la dernière version du texte.
+        """Récupère la dernière version du texte.
 
-        Returns
-        -------
-        Optional[TexteLoda]
+        Returns:
             La dernière version du texte, ou None si non trouvée.
         """
         # Créer une instance Loda pour utiliser sa méthode fetch
@@ -290,12 +274,9 @@ class TexteLoda:
         return loda.fetch(self.id)
 
     def versions(self) -> list["TexteLoda"]:
-        """
-        Récupère toutes les versions du texte.
+        """Récupère toutes les versions du texte.
 
-        Returns
-        -------
-        List[TexteLoda]
+        Returns:
             Une liste de toutes les versions du texte.
         """
         # Créer une instance Loda pour utiliser sa méthode fetch_versions
@@ -305,12 +286,9 @@ class TexteLoda:
         return loda.fetch_versions(self.id)
 
     def get_modified_articles(self) -> list[Article]:
-        """
-        Récupère les articles qui sont modifiés par cette loi.
+        """Récupère les articles qui sont modifiés par cette loi.
 
-        Returns
-        -------
-        List[Article]
+        Returns:
             Une liste des articles modifiés par cette loi.
         """
         from pylegifrance.fonds.code import Code
@@ -365,12 +343,9 @@ class TexteLoda:
         return modified_articles
 
     def get_created_articles(self) -> list[Article]:
-        """
-        Récupère les articles qui sont créés par cette loi.
+        """Récupère les articles qui sont créés par cette loi.
 
-        Returns
-        -------
-        List[Article]
+        Returns:
             Une liste des articles créés par cette loi.
         """
         from pylegifrance.fonds.code import Code
@@ -423,17 +398,12 @@ class TexteLoda:
         return created_articles
 
     def _is_outgoing_modification_link(self, lien: Any) -> bool:
-        """
-        Vérifie si le lien représente une modification sortante (cette loi modifie d'autres textes).
+        """Vérifie si le lien représente une modification sortante (cette loi modifie d'autres textes).
 
-        Parameters
-        ----------
-        lien : Any
-            Le lien de modification à vérifier.
+        Args:
+            lien: Le lien de modification à vérifier.
 
-        Returns
-        -------
-        bool
+        Returns:
             True si c'est une modification sortante valide.
         """
         return (
@@ -443,41 +413,28 @@ class TexteLoda:
         )
 
     def _is_outgoing_creation_link(self, lien: Any) -> bool:
-        """
-        Vérifie si le lien représente une création sortante (cette loi crée de nouveaux articles).
+        """Vérifie si le lien représente une création sortante (cette loi crée de nouveaux articles).
 
-        Parameters
-        ----------
-        lien : Any
-            Le lien de modification à vérifier.
+        Args:
+            lien: Le lien de modification à vérifier.
 
-        Returns
-        -------
-        bool
+        Returns:
             True si c'est une création sortante valide.
         """
         return lien.link_type in CREATION_LINK_TYPES and lien.article_id
 
     def _fetch_modified_article(self, lien: Any, code_api: Any) -> Article:
-        """
-        Récupère un article modifié à partir d'un lien de modification.
+        """Récupère un article modifié à partir d'un lien de modification.
 
-        Parameters
-        ----------
-        lien : Any
-            Le lien de modification contenant l'ID et la date.
-        code_api : Any
-            L'instance de l'API Code pour récupérer l'article.
+        Args:
+            lien: Le lien de modification contenant l'ID et la date.
+            code_api: L'instance de l'API Code pour récupérer l'article.
 
-        Returns
-        -------
-        Article
+        Returns:
             L'article modifié.
 
-        Raises
-        ------
-        Exception
-            Si la récupération échoue.
+        Raises:
+            Exception: Si la récupération échoue.
         """
         logger.debug(
             f"Récupération de l'article modifié {lien.article_id} à la date {lien.date_debut_cible}"
@@ -485,25 +442,17 @@ class TexteLoda:
         return self._fetch_article_with_date(lien, code_api, lien.date_debut_cible)
 
     def _fetch_created_article(self, lien: Any, code_api: Any) -> Article:
-        """
-        Récupère un article créé à partir d'un lien de création.
+        """Récupère un article créé à partir d'un lien de création.
 
-        Parameters
-        ----------
-        lien : Any
-            Le lien de création contenant l'ID.
-        code_api : Any
-            L'instance de l'API Code pour récupérer l'article.
+        Args:
+            lien: Le lien de création contenant l'ID.
+            code_api: L'instance de l'API Code pour récupérer l'article.
 
-        Returns
-        -------
-        Article
+        Returns:
             L'article créé.
 
-        Raises
-        ------
-        Exception
-            Si la récupération échoue.
+        Raises:
+            Exception: Si la récupération échoue.
         """
         logger.debug(f"Récupération de l'article créé {lien.article_id}")
         # Pour les articles créés, récupérer la version courante ou à la date de création
@@ -517,21 +466,14 @@ class TexteLoda:
     def _fetch_article_with_date(
         self, lien: Any, code_api: Any, target_date: Any
     ) -> Article:
-        """
-        Récupère un article avec une date spécifiée ou la version courante.
+        """Récupère un article avec une date spécifiée ou la version courante.
 
-        Parameters
-        ----------
-        lien : Any
-            Le lien contenant l'ID de l'article.
-        code_api : Any
-            L'instance de l'API Code pour récupérer l'article.
-        target_date : Any
-            La date cible pour la récupération, ou None pour la version courante.
+        Args:
+            lien: Le lien contenant l'ID de l'article.
+            code_api: L'instance de l'API Code pour récupérer l'article.
+            target_date: La date cible pour la récupération, ou None pour la version courante.
 
-        Returns
-        -------
-        Article
+        Returns:
             L'article récupéré.
         """
         if target_date:
@@ -540,12 +482,9 @@ class TexteLoda:
             return code_api.fetch_article(lien.article_id)
 
     def format_modifications_report(self) -> str:
-        """
-        Formate un rapport complet de l'impact de cette loi (modifications, créations, abrogations).
+        """Formate un rapport complet de l'impact de cette loi (modifications, créations, abrogations).
 
-        Returns
-        -------
-        str
+        Returns:
             Un rapport markdown de tous les impacts apportés par cette loi.
         """
         # Guard clause: early return for empty articles
@@ -718,17 +657,12 @@ class TexteLoda:
         return f"**{content_label}**:\n\n```\n{contenu_nettoye}\n```\n\n"
 
     def _clean_html_for_markdown(self, html_content: str) -> str:
-        """
-        Nettoie le contenu HTML pour un affichage propre en markdown.
+        """Nettoie le contenu HTML pour un affichage propre en markdown.
 
-        Parameters
-        ----------
-        html_content : str
-            Le contenu HTML à nettoyer.
+        Args:
+            html_content: Le contenu HTML à nettoyer.
 
-        Returns
-        -------
-        str
+        Returns:
             Le contenu nettoyé pour markdown.
         """
         if not html_content:
@@ -831,12 +765,9 @@ class TexteLoda:
         return text.strip()
 
     def to_dict(self) -> dict[str, Any]:
-        """
-        Convertit le texte en dictionnaire.
+        """Convertit le texte en dictionnaire.
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns:
             Une représentation du texte sous forme de dictionnaire.
         """
         return self._texte.model_dump()
@@ -852,29 +783,23 @@ class Loda:
     """
 
     def __init__(self, client: LegifranceClient):
-        """
-        Initialise une instance de Loda.
+        """Initialise une instance de Loda.
 
-        Parameters
-        ----------
-        client : LegifranceClient
-            Le client pour interagir avec l'API Legifrance.
+        Args:
+            client: Le client pour interagir avec l'API Legifrance.
         """
         self._client = client
 
     def _extract_date_from_id(self, text_id: str) -> tuple[str, str | None]:
-        """
-        Extrait la date d'un identifiant de texte s'il en contient une.
+        """Extrait la date d'un identifiant de texte s'il en contient une.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant du texte, potentiellement avec une date (format: LEGITEXT000043987391_01-01-2023).
+        Args:
+            text_id: L'identifiant du texte, potentiellement avec une date
+                (format: LEGITEXT000043987391_01-01-2023).
 
-        Returns
-        -------
-        Tuple[str, Optional[str]]
-            Un tuple contenant l'identifiant de base et la date extraite (ou None si aucune date n'est présente).
+        Returns:
+            Un tuple contenant l'identifiant de base et la date extraite
+            (ou None si aucune date n'est présente).
         """
         # Guard clause: vérifier si l'ID contient un séparateur de date
         if DATE_SEPARATOR not in text_id:
@@ -919,17 +844,12 @@ class Loda:
     def _process_consult_response(
         self, response_data: dict[str, Any]
     ) -> TexteLodaModel | None:
-        """
-        Traite une réponse de consultation et extrait le modèle TexteLoda.
+        """Traite une réponse de consultation et extrait le modèle TexteLoda.
 
-        Parameters
-        ----------
-        response_data : Dict[str, Any]
-            Les données JSON de la réponse de l'API.
+        Args:
+            response_data: Les données JSON de la réponse de l'API.
 
-        Returns
-        -------
-        Optional[TexteLodaModel]
+        Returns:
             Le modèle TexteLoda, ou None si non trouvé.
         """
         # Cas 1: Format d'API ancien avec champ 'texte'
@@ -942,34 +862,24 @@ class Loda:
     def _extract_texte_from_old_format(
         self, response_data: dict[str, Any]
     ) -> TexteLodaModel | None:
-        """
-        Extrait le modèle TexteLoda à partir du format ancien de l'API (avec champ 'texte').
+        """Extrait le modèle TexteLoda à partir du format ancien de l'API (avec champ 'texte').
 
-        Parameters
-        ----------
-        response_data : Dict[str, Any]
-            Les données JSON de la réponse de l'API.
+        Args:
+            response_data: Les données JSON de la réponse de l'API.
 
-        Returns
-        -------
-        Optional[TexteLodaModel]
+        Returns:
             Le modèle TexteLoda, ou None si non trouvé.
         """
 
     def _extract_texte_from_new_format(
         self, response_data: dict[str, Any]
     ) -> TexteLodaModel | None:
-        """
-        Extrait le modèle TexteLoda à partir du nouveau format de l'API (champs au niveau supérieur).
+        """Extrait le modèle TexteLoda à partir du nouveau format de l'API (champs au niveau supérieur).
 
-        Parameters
-        ----------
-        response_data : Dict[str, Any]
-            Les données JSON de la réponse de l'API.
+        Args:
+            response_data: Les données JSON de la réponse de l'API.
 
-        Returns
-        -------
-        Optional[TexteLodaModel]
+        Returns:
             Le modèle TexteLoda, ou None si non trouvé.
         """
         if "id" not in response_data:
@@ -997,25 +907,17 @@ class Loda:
             return None
 
     def fetch(self, text_id: str) -> TexteLoda | None:
-        """
-        Récupère un texte par son identifiant.
+        """Récupère un texte par son identifiant.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant du texte à récupérer.
+        Args:
+            text_id: L'identifiant du texte à récupérer.
 
-        Returns
-        -------
-        Optional[TexteLoda]
+        Returns:
             Le texte, ou None si non trouvé.
 
-        Raises
-        ------
-        ValueError
-            Si text_id est invalide.
-        Exception
-            Si l'appel API échoue.
+        Raises:
+            ValueError: Si text_id est invalide.
+            Exception: Si l'appel API échoue.
         """
         if not text_id:
             raise ValueError("text_id ne peut pas être vide")
@@ -1052,27 +954,18 @@ class Loda:
         return TexteLoda(texte_model, self._client)
 
     def fetch_version_at(self, text_id: str, date: str) -> TexteLoda | None:
-        """
-        Récupère une version d'un texte à une date spécifique.
+        """Récupère une version d'un texte à une date spécifique.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant du texte à récupérer.
-        date : str
-            La date à laquelle récupérer la version, au format ISO.
+        Args:
+            text_id: L'identifiant du texte à récupérer.
+            date: La date à laquelle récupérer la version, au format ISO.
 
-        Returns
-        -------
-        Optional[TexteLoda]
+        Returns:
             La version du texte à la date spécifiée, ou None si non trouvée.
 
-        Raises
-        ------
-        ValueError
-            Si text_id ou date est invalide.
-        Exception
-            Si l'appel API échoue.
+        Raises:
+            ValueError: Si text_id ou date est invalide.
+            Exception: Si l'appel API échoue.
         """
         if not text_id:
             raise ValueError("text_id ne peut pas être vide")
@@ -1099,25 +992,17 @@ class Loda:
         return TexteLoda(texte_model, self._client)
 
     def fetch_versions(self, text_id: str) -> list[TexteLoda]:
-        """
-        Récupère toutes les versions d'un texte.
+        """Récupère toutes les versions d'un texte.
 
-        Parameters
-        ----------
-        text_id : str
-            L'identifiant du texte dont on veut récupérer les versions.
+        Args:
+            text_id: L'identifiant du texte dont on veut récupérer les versions.
 
-        Returns
-        -------
-        List[TexteLoda]
+        Returns:
             Une liste d'objets TexteLoda représentant toutes les versions.
 
-        Raises
-        ------
-        ValueError
-            Si text_id est invalide.
-        Exception
-            Si l'appel API échoue.
+        Raises:
+            ValueError: Si text_id est invalide.
+            Exception: Si l'appel API échoue.
         """
         if not text_id:
             raise ValueError("text_id ne peut pas être vide")
@@ -1145,17 +1030,12 @@ class Loda:
         return versions
 
     def _process_search_results(self, response_data: dict[str, Any]) -> list[TexteLoda]:
-        """
-        Traite les résultats de recherche de la réponse de l'API.
+        """Traite les résultats de recherche de la réponse de l'API.
 
-        Parameters
-        ----------
-        response_data : Dict[str, Any]
-            Les données JSON de la réponse de l'API.
+        Args:
+            response_data: Les données JSON de la réponse de l'API.
 
-        Returns
-        -------
-        List[TexteLoda]
+        Returns:
             Une liste d'objets TexteLoda extraits de la réponse.
         """
         results_list = self._normalize_search_results_structure(response_data)
@@ -1178,17 +1058,12 @@ class Loda:
     def _normalize_search_results_structure(
         self, response_data: dict[str, Any]
     ) -> list[dict[str, Any]]:
-        """
-        Normalise la structure des résultats de recherche pour gérer différents formats d'API.
+        """Normalise la structure des résultats de recherche pour gérer différents formats d'API.
 
-        Parameters
-        ----------
-        response_data : Dict[str, Any]
-            Les données JSON de la réponse de l'API.
+        Args:
+            response_data: Les données JSON de la réponse de l'API.
 
-        Returns
-        -------
-        List[Dict[str, Any]]
+        Returns:
             Liste normalisée des résultats de recherche.
         """
         # Vérifier si la structure attendue est présente
@@ -1216,17 +1091,12 @@ class Loda:
         return response_data["results"]
 
     def _extract_title_info(self, result: dict[str, Any]) -> tuple[str, str] | None:
-        """
-        Extrait l'ID et le titre d'un résultat de recherche.
+        """Extrait l'ID et le titre d'un résultat de recherche.
 
-        Parameters
-        ----------
-        result : Dict[str, Any]
-            Un résultat de recherche individuel.
+        Args:
+            result: Un résultat de recherche individuel.
 
-        Returns
-        -------
-        Optional[Tuple[str, str]]
+        Returns:
             Un tuple contenant l'ID du texte et son titre, ou None si non trouvé.
         """
         # Vérifier si le résultat a un champ 'titles' valide
@@ -1251,15 +1121,11 @@ class Loda:
     def _extract_date_from_text_id(
         self, text_id: str, consult_response_data: dict[str, Any]
     ) -> None:
-        """
-        Extrait la date à partir de l'ID du texte et l'ajoute aux données de réponse.
+        """Extrait la date à partir de l'ID du texte et l'ajoute aux données de réponse.
 
-        Parameters
-        ----------
-        text_id : str
-            L'ID du texte.
-        consult_response_data : Dict[str, Any]
-            Dictionnaire des données de réponse à enrichir.
+        Args:
+            text_id: L'ID du texte.
+            consult_response_data: Dictionnaire des données de réponse à enrichir.
         """
         base_id, date_str = self._extract_date_from_id(text_id)
         if not date_str:
@@ -1275,15 +1141,11 @@ class Loda:
     def _extract_metadata_from_result(
         self, result: dict[str, Any], consult_response_data: dict[str, Any]
     ) -> None:
-        """
-        Extrait les métadonnées du résultat de recherche et les ajoute aux données de réponse.
+        """Extrait les métadonnées du résultat de recherche et les ajoute aux données de réponse.
 
-        Parameters
-        ----------
-        result : Dict[str, Any]
-            Le résultat de recherche.
-        consult_response_data : Dict[str, Any]
-            Dictionnaire des données de réponse à enrichir.
+        Args:
+            result: Le résultat de recherche.
+            consult_response_data: Dictionnaire des données de réponse à enrichir.
         """
         # Mapping des champs du résultat vers les champs de la réponse
         field_mapping = {
@@ -1303,15 +1165,11 @@ class Loda:
     def _extract_data_from_titles(
         self, result: dict[str, Any], consult_response_data: dict[str, Any]
     ) -> None:
-        """
-        Extrait les données des titres pour les recherches LODA_ETAT.
+        """Extrait les données des titres pour les recherches LODA_ETAT.
 
-        Parameters
-        ----------
-        result : Dict[str, Any]
-            Le résultat de recherche.
-        consult_response_data : Dict[str, Any]
-            Dictionnaire des données de réponse à enrichir.
+        Args:
+            result: Le résultat de recherche.
+            consult_response_data: Dictionnaire des données de réponse à enrichir.
         """
         if not result.get("titles"):
             return
@@ -1331,21 +1189,14 @@ class Loda:
     def _create_minimal_text(
         self, text_id: str, title_text: str, result: dict[str, Any]
     ) -> TexteLoda | None:
-        """
-        Crée un TexteLoda minimal à partir des métadonnées de recherche uniquement.
+        """Crée un TexteLoda minimal à partir des métadonnées de recherche uniquement.
 
-        Parameters
-        ----------
-        text_id : str
-            L'ID du texte.
-        title_text : str
-            Le titre du texte.
-        result : Dict[str, Any]
-            Le résultat de recherche.
+        Args:
+            text_id: L'ID du texte.
+            title_text: Le titre du texte.
+            result: Le résultat de recherche.
 
-        Returns
-        -------
-        Optional[TexteLoda]
+        Returns:
             Le texte minimal, ou None en cas d'erreur.
         """
         try:
@@ -1405,15 +1256,11 @@ class Loda:
     def _enrich_text_with_html_content(
         self, texte: TexteLoda, result: dict[str, Any]
     ) -> None:
-        """
-        Enrichit un texte avec du contenu HTML extrait des sections du résultat de recherche.
+        """Enrichit un texte avec du contenu HTML extrait des sections du résultat de recherche.
 
-        Parameters
-        ----------
-        texte : TexteLoda
-            Le texte à enrichir.
-        result : Dict[str, Any]
-            Le résultat de recherche contenant les sections avec du contenu HTML.
+        Args:
+            texte: Le texte à enrichir.
+            result: Le résultat de recherche contenant les sections avec du contenu HTML.
         """
         needs_html_content = (
             texte.texte_html is None
@@ -1438,23 +1285,18 @@ class Loda:
             texte._texte.texte_html = html_content
 
     def search(self, query: SearchRequest | str) -> list[TexteLoda]:
-        """
-        Recherche des textes correspondant à la requête.
+        """Recherche des textes correspondant à la requête.
 
-        Parameters
-        ----------
-        query : Union[str, SearchRequest]
-            La requête de recherche, soit sous forme de chaîne, soit sous forme d'objet SearchRequest.
+        Args:
+            query: La requête de recherche, soit sous forme de chaîne,
+                soit sous forme d'objet SearchRequest.
 
-        Returns
-        -------
-        List[TexteLoda]
+        Returns:
             Une liste d'objets TexteLoda correspondant à la requête.
 
-        Raises
-        ------
-        ValueError
-            Si la requête contient des valeurs invalides (comme une nature non reconnue).
+        Raises:
+            ValueError: Si la requête contient des valeurs invalides
+                (comme une nature non reconnue).
         """
         try:
             search_query = self._normalize_search_query(query)
@@ -1510,23 +1352,18 @@ class Loda:
             raise
 
     def _normalize_search_query(self, query: str | SearchRequest) -> SearchRequest:
-        """
-        Normalise une requête de recherche en objet SearchRequest.
+        """Normalise une requête de recherche en objet SearchRequest.
 
-        Parameters
-        ----------
-        query : Union[str, SearchRequest]
-            La requête de recherche, soit sous forme de chaîne, soit sous forme d'objet SearchRequest.
+        Args:
+            query: La requête de recherche, soit sous forme de chaîne,
+                soit sous forme d'objet SearchRequest.
 
-        Returns
-        -------
-        SearchRequest
+        Returns:
             L'objet SearchRequest normalisé.
 
-        Raises
-        ------
-        ValueError
-            Si la requête contient des valeurs invalides (comme une nature non reconnue).
+        Raises:
+            ValueError: Si la requête contient des valeurs invalides
+                (comme une nature non reconnue).
         """
         is_string_query = isinstance(query, str)
 

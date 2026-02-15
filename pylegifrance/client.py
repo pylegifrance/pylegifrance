@@ -28,18 +28,14 @@ class LegifranceClient:
     """
 
     def __init__(self, config: ApiConfig | None = None):
-        """
-        Initialize a new LegifranceClient instance.
+        """Initialize a new LegifranceClient instance.
 
-        Parameters
-        ----------
-        config : ApiConfig, optional
-            Configuration for the API client. If None, will attempt to load from environment variables.
+        Args:
+            config: Configuration for the API client. If None, will attempt to load
+                from environment variables.
 
-        Raises
-        ------
-        ValueError
-            If config is not provided and environment variables are not set.
+        Raises:
+            ValueError: If config is not provided and environment variables are not set.
         """
         if config is None:
             try:
@@ -57,27 +53,21 @@ class LegifranceClient:
     def update_api_keys(
         self, client_id: str | None = None, client_secret: str | None = None
     ) -> None:
-        """
-        Update the API keys for the client.
+        """Update the API keys for the client.
 
         If keys are provided, they replace the current values.
         If keys are not provided, the method attempts to retrieve them
         from environment variables.
 
-        Parameters
-        ----------
-        client_id : str, optional
-            Legifrance API key. If None, attempts to retrieve from
-            environment variable.
-        client_secret : str, optional
-            Legifrance API secret. If None, attempts to retrieve from
-            environment variable.
+        Args:
+            client_id: Legifrance API key. If None, attempts to retrieve from
+                environment variable.
+            client_secret: Legifrance API secret. If None, attempts to retrieve from
+                environment variable.
 
-        Raises
-        ------
-        ValueError
-            If keys are not provided and cannot be retrieved
-            from environment variables.
+        Raises:
+            ValueError: If keys are not provided and cannot be retrieved
+                from environment variables.
         """
         if client_id is not None and client_secret is not None:
             # Use provided keys
@@ -94,27 +84,18 @@ class LegifranceClient:
                 raise
 
     def call_api(self, route: str, data: Any) -> requests.Response:
-        """
-        Call the Legifrance API with token management and error logging.
+        """Call the Legifrance API with token management and error logging.
 
-        Parameters
-        ----------
-        route : str
-            The API route to use.
-        data : Any
-            The data to send as JSON.
+        Args:
+            route: The API route to use.
+            data: The data to send as JSON.
 
-        Returns
-        -------
-        requests.Response
+        Returns:
             The API response.
 
-        Raises
-        ------
-        ValueError
-            If no data is provided.
-        Exception
-            If the API call fails or authentication fails.
+        Raises:
+            ValueError: If no data is provided.
+            Exception: If the API call fails or authentication fails.
         """
         if data is None:
             logger.warning("No data provided to call_api; request not sent.")
@@ -145,25 +126,18 @@ class LegifranceClient:
         return response
 
     def get(self, route: str) -> requests.Response:
-        """
-        Perform a GET request on the given API route.
+        """Perform a GET request on the given API route.
 
-        Parameters
-        ----------
-        route : str
-            The route to target.
+        Args:
+            route: The route to target.
 
-        Returns
-        -------
-        requests.Response
+        Returns:
             The API response.
 
-        Raises
-        ------
-        requests.exceptions.HTTPError
-            If the HTTP request returns an unsuccessful status code.
-        Exception
-            If authentication fails.
+        Raises:
+            requests.exceptions.HTTPError: If the HTTP request returns an unsuccessful
+                status code.
+            Exception: If authentication fails.
         """
         token = self._auth_manager.ensure_valid_token()
         headers = {"Authorization": f"Bearer {token}"}
@@ -177,23 +151,16 @@ class LegifranceClient:
         return response
 
     def ping(self, route: str = "consult/ping") -> bool:
-        """
-        Check connectivity with the Legifrance API by sending a ping request.
+        """Check connectivity with the Legifrance API by sending a ping request.
 
-        Parameters
-        ----------
-        route : str, optional
-            Route to use for the ping (default: "consult/ping").
+        Args:
+            route: Route to use for the ping (default: "consult/ping").
 
-        Returns
-        -------
-        bool
+        Returns:
             True if the connection is successful, otherwise False.
 
-        Raises
-        ------
-        Exception
-            In case of API connection error or authentication failure.
+        Raises:
+            Exception: In case of API connection error or authentication failure.
         """
         try:
             token = self._auth_manager.ensure_valid_token()
@@ -222,31 +189,24 @@ class LegifranceClient:
 
     @classmethod
     def create(cls, config: ApiConfig | None = None) -> Self:
-        """
-        Factory method to create a new LegifranceClient instance.
+        """Factory method to create a new LegifranceClient instance.
 
-        Parameters
-        ----------
-        config : ApiConfig, optional
-            Configuration for the API client. If None, will attempt to load from environment variables.
+        Args:
+            config: Configuration for the API client. If None, will attempt to load
+                from environment variables.
 
-        Returns
-        -------
-        LegifranceClient
+        Returns:
             A new instance of LegifranceClient.
         """
         return cls(config=config)
 
     @contextmanager
     def session_context(self):
-        """
-        Context manager for using the client in a with statement.
+        """Context manager for using the client in a with statement.
 
         This ensures that the session is properly closed after use.
 
-        Yields
-        ------
-        LegifranceClient
+        Yields:
             The client instance.
         """
         try:
