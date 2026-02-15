@@ -4,12 +4,13 @@ This module provides a class for handling authentication with the Legifrance API
 including token acquisition, storage, and refresh logic.
 """
 
-import time
 import logging
-from dataclasses import dataclass
-import requests
+import time
 from contextlib import contextmanager
-from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
+from dataclasses import dataclass
+
+import requests
+from tenacity import RetryError, retry, stop_after_attempt, wait_fixed
 
 from pylegifrance.config import ApiConfig
 from pylegifrance.utils import configure_session_timeouts

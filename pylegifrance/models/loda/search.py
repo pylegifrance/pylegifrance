@@ -1,22 +1,26 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any
+from typing import Any
 
 from pydantic import BaseModel
 
 from pylegifrance.models.generated.model import (
-    TypeRecherche,
-    Operateur,
-    Fond,
-    CritereDTO,
     ChampDTO,
+    CritereDTO,
+    DatePeriod,
     FiltreDTO,
-    TypeChamp,
-    TypePagination,
+    Fond,
+    Operateur,
     RechercheSpecifiqueDTO,
     SearchRequestDTO,
-    DatePeriod,
+    TypeChamp,
+    TypePagination,
+    TypeRecherche,
+)
+from pylegifrance.models.generated.model import (
     Nature2 as Nature,
+)
+from pylegifrance.models.generated.model import (
     Sort1 as Sort,
 )
 
@@ -31,7 +35,7 @@ class SearchRequest(BaseModel):
     champ: TypeChamp | None = TypeChamp.all
     type_recherche: TypeRecherche | None = TypeRecherche.tous_les_mots_dans_un_champ
     fond: Fond = Fond.loda_date
-    natures: List[Nature] | List[str] = []
+    natures: list[Nature] | list[str] = []
     date_signature: DatePeriod | str | None = None
     date_publication: DatePeriod | str | None = None
     page_number: int = 1
@@ -57,7 +61,7 @@ class SearchRequest(BaseModel):
 
         super().__init__(**data)
 
-    def to_generated_model(self) -> Dict[str, Any]:
+    def to_generated_model(self) -> dict[str, Any]:
         """
         Convert to the generated model format.
 

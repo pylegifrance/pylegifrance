@@ -2,24 +2,24 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import List, Optional, Union, Dict, Any, Tuple
+from typing import Any, Optional
 
 from pylegifrance.client import LegifranceClient
-from pylegifrance.models.identifier import Cid, Nor
-from pylegifrance.utils import EnumEncoder
-from pylegifrance.models.loda.models import TexteLoda as TexteLodaModel
+from pylegifrance.models.code.models import Article
 from pylegifrance.models.generated.model import (
-    ConsultSection,
     ConsultArticle,
+    ConsultSection,
     ConsultTextResponse,
 )
-from pylegifrance.models.loda.search import SearchRequest
+from pylegifrance.models.identifier import Cid, Nor
 from pylegifrance.models.loda.api_wrappers import (
     ConsultRequest,
     ConsultVersionRequest,
     ListVersionsRequest,
 )
-from pylegifrance.models.code.models import Article
+from pylegifrance.models.loda.models import TexteLoda as TexteLodaModel
+from pylegifrance.models.loda.search import SearchRequest
+from pylegifrance.utils import EnumEncoder
 
 # Constantes
 HTTP_OK = 200
@@ -66,58 +66,58 @@ class TexteLoda:
         self._code_client = None
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Récupère l'identifiant du texte."""
         if not self._texte.id:
             return None
         return self._texte.id
 
     @property
-    def cid(self) -> Optional[Cid]:
+    def cid(self) -> Cid | None:
         """Récupère le CID du texte avec validation."""
         if not self._texte.cid:
             return None
         return Cid(self._texte.cid)
 
     @property
-    def nor(self) -> Optional[Nor]:
+    def nor(self) -> Nor | None:
         """Récupère le NOR du texte avec validation."""
         if not self._texte.nor:
             return None
         return Nor(self._texte.nor)
 
     @property
-    def titre(self) -> Optional[str]:
+    def titre(self) -> str | None:
         """Récupère le titre du texte."""
         return self._texte.titre
 
     @property
-    def titre_long(self) -> Optional[str]:
+    def titre_long(self) -> str | None:
         """Récupère le titre long du texte."""
         return self._texte.titre_long
 
     @property
-    def date_debut(self) -> Optional[datetime]:
+    def date_debut(self) -> datetime | None:
         """Récupère la date de début du texte."""
         return self._texte.date_debut_dt
 
     @property
-    def date_fin(self) -> Optional[datetime]:
+    def date_fin(self) -> datetime | None:
         """Récupère la date de fin du texte."""
         return self._texte.date_fin_dt
 
     @property
-    def etat(self) -> Optional[str]:
+    def etat(self) -> str | None:
         """Récupère l'état juridique du texte."""
         return self._texte.etat
 
     @property
-    def last_update(self) -> Optional[datetime]:
+    def last_update(self) -> datetime | None:
         """Récupère la date de dernière mise à jour du texte."""
         return self._texte.last_update_dt
 
     @property
-    def date_publication(self) -> Optional[datetime]:
+    def date_publication(self) -> datetime | None:
         """Récupère la date de publication du texte."""
         return (
             self._texte.consult_response.date_parution
@@ -126,7 +126,7 @@ class TexteLoda:
         )
 
     @property
-    def texte_html(self) -> Optional[str]:
+    def texte_html(self) -> str | None:
         """
         Récupère le contenu HTML du texte.
 
@@ -165,7 +165,7 @@ class TexteLoda:
         return None
 
     @property
-    def texte_brut(self) -> Optional[str]:
+    def texte_brut(self) -> str | None:
         """
         Récupère le contenu du texte nettoyé des balises HTML avec formatage préservé.
 
@@ -229,16 +229,16 @@ class TexteLoda:
             return text.strip() or None
 
     @property
-    def sections(self) -> Optional[List[ConsultSection]]:
+    def sections(self) -> list[ConsultSection] | None:
         """Récupère les sections du texte."""
         return self._texte.sections
 
     @property
-    def articles(self) -> Optional[List[ConsultArticle]]:
+    def articles(self) -> list[ConsultArticle] | None:
         """Récupère les articles racine du texte."""
         return self._texte.articles
 
-    def at(self, date: Union[datetime, str]) -> Optional["TexteLoda"]:
+    def at(self, date: datetime | str) -> Optional["TexteLoda"]:
         """
         Récupère la version du texte à la date spécifiée.
 
@@ -266,7 +266,7 @@ class TexteLoda:
             try:
                 datetime.fromisoformat(date_str)
             except ValueError:
-                raise ValueError(f"Format de date invalide: {date_str}")
+                raise ValueError(f"Format de date invalide: {date_str}") from None
 
         # Créer une instance Loda pour utiliser sa méthode fetch_version_at
         loda = Loda(self._client)
@@ -289,7 +289,7 @@ class TexteLoda:
         loda = Loda(self._client)
         return loda.fetch(self.id)
 
-    def versions(self) -> List["TexteLoda"]:
+    def versions(self) -> list["TexteLoda"]:
         """
         Récupère toutes les versions du texte.
 
@@ -304,7 +304,7 @@ class TexteLoda:
             return []
         return loda.fetch_versions(self.id)
 
-    def get_modified_articles(self) -> List[Article]:
+    def get_modified_articles(self) -> list[Article]:
         """
         Récupère les articles qui sont modifiés par cette loi.
 
@@ -364,7 +364,7 @@ class TexteLoda:
         logger.debug(f"Total des articles modifiés récupérés: {len(modified_articles)}")
         return modified_articles
 
-    def get_created_articles(self) -> List[Article]:
+    def get_created_articles(self) -> list[Article]:
         """
         Récupère les articles qui sont créés par cette loi.
 
@@ -830,7 +830,7 @@ class TexteLoda:
 
         return text.strip()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convertit le texte en dictionnaire.
 
@@ -862,7 +862,7 @@ class Loda:
         """
         self._client = client
 
-    def _extract_date_from_id(self, text_id: str) -> Tuple[str, Optional[str]]:
+    def _extract_date_from_id(self, text_id: str) -> tuple[str, str | None]:
         """
         Extrait la date d'un identifiant de texte s'il en contient une.
 
@@ -917,8 +917,8 @@ class Loda:
             return base_id, date_str
 
     def _process_consult_response(
-        self, response_data: Dict[str, Any]
-    ) -> Optional[TexteLodaModel]:
+        self, response_data: dict[str, Any]
+    ) -> TexteLodaModel | None:
         """
         Traite une réponse de consultation et extrait le modèle TexteLoda.
 
@@ -940,8 +940,8 @@ class Loda:
         return self._extract_texte_from_new_format(response_data)
 
     def _extract_texte_from_old_format(
-        self, response_data: Dict[str, Any]
-    ) -> Optional[TexteLodaModel]:
+        self, response_data: dict[str, Any]
+    ) -> TexteLodaModel | None:
         """
         Extrait le modèle TexteLoda à partir du format ancien de l'API (avec champ 'texte').
 
@@ -957,8 +957,8 @@ class Loda:
         """
 
     def _extract_texte_from_new_format(
-        self, response_data: Dict[str, Any]
-    ) -> Optional[TexteLodaModel]:
+        self, response_data: dict[str, Any]
+    ) -> TexteLodaModel | None:
         """
         Extrait le modèle TexteLoda à partir du nouveau format de l'API (champs au niveau supérieur).
 
@@ -996,7 +996,7 @@ class Loda:
             )
             return None
 
-    def fetch(self, text_id: str) -> Optional[TexteLoda]:
+    def fetch(self, text_id: str) -> TexteLoda | None:
         """
         Récupère un texte par son identifiant.
 
@@ -1051,7 +1051,7 @@ class Loda:
         )
         return TexteLoda(texte_model, self._client)
 
-    def fetch_version_at(self, text_id: str, date: str) -> Optional[TexteLoda]:
+    def fetch_version_at(self, text_id: str, date: str) -> TexteLoda | None:
         """
         Récupère une version d'un texte à une date spécifique.
 
@@ -1080,7 +1080,7 @@ class Loda:
         try:
             datetime.fromisoformat(date)
         except ValueError:
-            raise ValueError(f"Format de date invalide: {date}")
+            raise ValueError(f"Format de date invalide: {date}") from None
 
         request = ConsultVersionRequest(textId=text_id, date=date)
         api_model = request.to_api_model()
@@ -1098,7 +1098,7 @@ class Loda:
 
         return TexteLoda(texte_model, self._client)
 
-    def fetch_versions(self, text_id: str) -> List[TexteLoda]:
+    def fetch_versions(self, text_id: str) -> list[TexteLoda]:
         """
         Récupère toutes les versions d'un texte.
 
@@ -1144,7 +1144,7 @@ class Loda:
 
         return versions
 
-    def _process_search_results(self, response_data: Dict[str, Any]) -> List[TexteLoda]:
+    def _process_search_results(self, response_data: dict[str, Any]) -> list[TexteLoda]:
         """
         Traite les résultats de recherche de la réponse de l'API.
 
@@ -1176,8 +1176,8 @@ class Loda:
         return processed_results
 
     def _normalize_search_results_structure(
-        self, response_data: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, response_data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Normalise la structure des résultats de recherche pour gérer différents formats d'API.
 
@@ -1215,7 +1215,7 @@ class Loda:
 
         return response_data["results"]
 
-    def _extract_title_info(self, result: Dict[str, Any]) -> Optional[Tuple[str, str]]:
+    def _extract_title_info(self, result: dict[str, Any]) -> tuple[str, str] | None:
         """
         Extrait l'ID et le titre d'un résultat de recherche.
 
@@ -1249,7 +1249,7 @@ class Loda:
             return None
 
     def _extract_date_from_text_id(
-        self, text_id: str, consult_response_data: Dict[str, Any]
+        self, text_id: str, consult_response_data: dict[str, Any]
     ) -> None:
         """
         Extrait la date à partir de l'ID du texte et l'ajoute aux données de réponse.
@@ -1273,7 +1273,7 @@ class Loda:
             pass
 
     def _extract_metadata_from_result(
-        self, result: Dict[str, Any], consult_response_data: Dict[str, Any]
+        self, result: dict[str, Any], consult_response_data: dict[str, Any]
     ) -> None:
         """
         Extrait les métadonnées du résultat de recherche et les ajoute aux données de réponse.
@@ -1301,7 +1301,7 @@ class Loda:
                 consult_response_data[target_field] = result[source_field]
 
     def _extract_data_from_titles(
-        self, result: Dict[str, Any], consult_response_data: Dict[str, Any]
+        self, result: dict[str, Any], consult_response_data: dict[str, Any]
     ) -> None:
         """
         Extrait les données des titres pour les recherches LODA_ETAT.
@@ -1329,8 +1329,8 @@ class Loda:
                     consult_response_data[target_field] = title[source_field]
 
     def _create_minimal_text(
-        self, text_id: str, title_text: str, result: Dict[str, Any]
-    ) -> Optional[TexteLoda]:
+        self, text_id: str, title_text: str, result: dict[str, Any]
+    ) -> TexteLoda | None:
         """
         Crée un TexteLoda minimal à partir des métadonnées de recherche uniquement.
 
@@ -1403,7 +1403,7 @@ class Loda:
             return None
 
     def _enrich_text_with_html_content(
-        self, texte: TexteLoda, result: Dict[str, Any]
+        self, texte: TexteLoda, result: dict[str, Any]
     ) -> None:
         """
         Enrichit un texte avec du contenu HTML extrait des sections du résultat de recherche.
@@ -1437,7 +1437,7 @@ class Loda:
             html_content = " ".join(extracts)
             texte._texte.texte_html = html_content
 
-    def search(self, query: SearchRequest | str) -> List[TexteLoda]:
+    def search(self, query: SearchRequest | str) -> list[TexteLoda]:
         """
         Recherche des textes correspondant à la requête.
 
@@ -1506,12 +1506,10 @@ class Loda:
         except Exception as e:
             # Convert Pydantic validation errors to ValueError for better error handling
             if "not a valid" in str(e):
-                raise ValueError(str(e))
+                raise ValueError(str(e)) from e
             raise
 
-    def _normalize_search_query(
-        self, query: Union[str, SearchRequest]
-    ) -> SearchRequest:
+    def _normalize_search_query(self, query: str | SearchRequest) -> SearchRequest:
         """
         Normalise une requête de recherche en objet SearchRequest.
 
@@ -1540,5 +1538,5 @@ class Loda:
         except Exception as e:
             # Convert Pydantic validation errors to ValueError for better error handling
             if "not a valid" in str(e):
-                raise ValueError(str(e))
+                raise ValueError(str(e)) from e
             raise

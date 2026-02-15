@@ -1,13 +1,12 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
 from pylegifrance.models.generated.model import (
+    ConsultArticle,
+    ConsultSection,
     ConsultTextResponse,
     DossierLegislatif,
-    ConsultSection,
-    ConsultArticle,
 )
 
 
@@ -18,43 +17,43 @@ class TexteLoda(BaseModel):
     """
 
     # The wrapped ConsultTextResponse instance
-    consult_response: Optional[ConsultTextResponse] = Field(None, exclude=True)
+    consult_response: ConsultTextResponse | None = Field(None, exclude=True)
 
     # Fields that are not directly available in ConsultTextResponse
-    titre_long: Optional[str] = Field(None, description="Titre long du texte")
-    last_update: Optional[str] = Field(None, description="Date de dernière mise à jour")
-    texte_html: Optional[str] = Field(None, description="Contenu HTML du texte")
+    titre_long: str | None = Field(None, description="Titre long du texte")
+    last_update: str | None = Field(None, description="Date de dernière mise à jour")
+    texte_html: str | None = Field(None, description="Contenu HTML du texte")
 
     # Properties delegated to ConsultTextResponse
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Identifiant unique du texte"""
         return self.consult_response.id if self.consult_response else None
 
     @property
-    def cid(self) -> Optional[str]:
+    def cid(self) -> str | None:
         """Chronical ID du texte"""
         return self.consult_response.cid if self.consult_response else None
 
     @property
-    def titre(self) -> Optional[str]:
+    def titre(self) -> str | None:
         """Titre du texte"""
         return self.consult_response.title if self.consult_response else None
 
     @property
-    def date_debut(self) -> Optional[str]:
+    def date_debut(self) -> str | None:
         """Date de début de la version"""
         return (
             self.consult_response.date_debut_version if self.consult_response else None
         )
 
     @property
-    def date_fin(self) -> Optional[str]:
+    def date_fin(self) -> str | None:
         """Date de fin de la version"""
         return self.consult_response.date_fin_version if self.consult_response else None
 
     @property
-    def etat(self) -> Optional[str]:
+    def etat(self) -> str | None:
         """État juridique du texte"""
         if not self.consult_response:
             return None
@@ -69,17 +68,17 @@ class TexteLoda(BaseModel):
         return None
 
     @property
-    def sections(self) -> Optional[List[ConsultSection]]:
+    def sections(self) -> list[ConsultSection] | None:
         """Liste des sections de premier niveau du texte"""
         return self.consult_response.sections if self.consult_response else None
 
     @property
-    def nor(self) -> Optional[str]:
+    def nor(self) -> str | None:
         """Numéro NOR du texte"""
         return self.consult_response.nor if self.consult_response else None
 
     @property
-    def dossiers_legislatifs(self) -> Optional[List[DossierLegislatif]]:
+    def dossiers_legislatifs(self) -> list[DossierLegislatif] | None:
         """Liste des dossiers législatifs"""
         return (
             self.consult_response.dossiers_legislatifs
@@ -88,52 +87,52 @@ class TexteLoda(BaseModel):
         )
 
     @property
-    def nature(self) -> Optional[str]:
+    def nature(self) -> str | None:
         """Nature du texte"""
         return self.consult_response.nature if self.consult_response else None
 
     @property
-    def resume(self) -> Optional[str]:
+    def resume(self) -> str | None:
         """Résumé du texte"""
         return self.consult_response.resume if self.consult_response else None
 
     @property
-    def visa(self) -> Optional[str]:
+    def visa(self) -> str | None:
         """Visas du texte"""
         return self.consult_response.visa if self.consult_response else None
 
     @property
-    def signers(self) -> Optional[str]:
+    def signers(self) -> str | None:
         """Signataires du texte"""
         return self.consult_response.signers if self.consult_response else None
 
     @property
-    def nota(self) -> Optional[str]:
+    def nota(self) -> str | None:
         """Nota du texte"""
         return self.consult_response.nota if self.consult_response else None
 
     @property
-    def observations(self) -> Optional[str]:
+    def observations(self) -> str | None:
         """Observations sur le texte"""
         return self.consult_response.observations if self.consult_response else None
 
     @property
-    def date_texte(self) -> Optional[datetime]:
+    def date_texte(self) -> datetime | None:
         """Date de signature du texte"""
         return self.consult_response.date_texte if self.consult_response else None
 
     @property
-    def text_abroge(self) -> Optional[bool]:
+    def text_abroge(self) -> bool | None:
         """Indique si le texte est abrogé"""
         return self.consult_response.text_abroge if self.consult_response else None
 
     @property
-    def articles(self) -> Optional[List[ConsultArticle]]:
+    def articles(self) -> list[ConsultArticle] | None:
         """Liste des articles du texte"""
         return self.consult_response.articles if self.consult_response else None
 
     @property
-    def date_debut_dt(self) -> Optional[datetime]:
+    def date_debut_dt(self) -> datetime | None:
         """Get the start date as a datetime object."""
         if not self.date_debut:
             return None
@@ -143,7 +142,7 @@ class TexteLoda(BaseModel):
             return None
 
     @property
-    def date_fin_dt(self) -> Optional[datetime]:
+    def date_fin_dt(self) -> datetime | None:
         """Get the end date as a datetime object."""
         if not self.date_fin:
             return None
@@ -153,7 +152,7 @@ class TexteLoda(BaseModel):
             return None
 
     @property
-    def last_update_dt(self) -> Optional[datetime]:
+    def last_update_dt(self) -> datetime | None:
         """Get the last update date as a datetime object."""
         if not self.last_update:
             return None
@@ -163,7 +162,7 @@ class TexteLoda(BaseModel):
             return None
 
     @property
-    def date_texte_dt(self) -> Optional[datetime]:
+    def date_texte_dt(self) -> datetime | None:
         """Get the text date as a datetime object."""
         # date_texte is already a datetime object, so we just return it
         return self.date_texte

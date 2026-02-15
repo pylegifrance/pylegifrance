@@ -5,14 +5,14 @@ This module centralizes all shared constants and enumerations to avoid duplicati
 and ensure consistency across the codebase.
 """
 
-from pylegifrance.models.generated.model import TypeRecherche as _GeneratedTypeRecherche
-from pylegifrance.models.generated.model import Operateur as _GeneratedOperateur
-from pylegifrance.models.generated.model import LegalStatu as _GeneratedLegalStatu
-from pylegifrance.models.generated.model import TypeChamp as _TypeChamp
-from pylegifrance.models.generated.model import Fond as _GeneratedFond
-from pylegifrance.models.generated.model import Nature2 as _Nature2
 from enum import Enum
-from typing import Dict, List, Tuple
+
+from pylegifrance.models.generated.model import Fond as _GeneratedFond
+from pylegifrance.models.generated.model import LegalStatu as _GeneratedLegalStatu
+from pylegifrance.models.generated.model import Nature2 as _Nature2
+from pylegifrance.models.generated.model import Operateur as _GeneratedOperateur
+from pylegifrance.models.generated.model import TypeChamp as _TypeChamp
+from pylegifrance.models.generated.model import TypeRecherche as _GeneratedTypeRecherche
 
 
 class SupplyEnum(str, Enum):
@@ -410,6 +410,6 @@ class TypeFacette(str, Enum):
 # List of deprecated routes and their replacements
 # Format: (deprecated_route, replacement_route, replacement_params)
 # If there are no special parameters needed for the replacement, use None
-DEPRECATED_ROUTES: List[Tuple[str, str, Dict[str, str]]] = [
+DEPRECATED_ROUTES: list[tuple[str, str, dict[str, str]]] = [
     ("consult/code/tableMatieres", "consult/legi/tableMatieres", {"nature": "CODE"}),
 ]

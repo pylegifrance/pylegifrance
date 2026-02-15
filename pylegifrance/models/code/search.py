@@ -1,26 +1,27 @@
-from typing import List, Literal, Union, Optional, Any, Dict
 from datetime import datetime
+from typing import Any, Literal
 
-from pydantic import Field, BaseModel, model_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # Import from your existing modules
 from pylegifrance.models.constants import (
+    EtatJuridique,
     Facette,
     Fond,
     Operateur,
     TypeRecherche,
-    EtatJuridique,
 )
 from pylegifrance.models.generated.model import (
+    ChampDTO,
+    CritereDTO,
     FiltreDTO,
     RechercheSpecifiqueDTO,
     SearchRequestDTO,
-    ChampDTO,
-    CritereDTO,
-    TypePagination,
     TypeChamp,
+    TypePagination,
 )
-from .enum import TypeChampCode, SortCode, NomCode
+
+from .enum import NomCode, SortCode, TypeChampCode
 
 
 class DateVersionFiltre(BaseModel):
@@ -111,7 +112,7 @@ class NomCodeFiltre(BaseModel):
         frozen=True,
         description="Facette de filtrage par nom de code (non modifiable)",
     )
-    valeurs: List[NomCode] = Field(
+    valeurs: list[NomCode] = Field(
         ...,
         description="Codes juridiques ciblés pour la recherche",
         examples=[[NomCode.CC], [NomCode.CC, NomCode.CPD, NomCode.CDPEDCE]],
@@ -125,12 +126,12 @@ class NomCodeFiltre(BaseModel):
             FiltreDTO: Objet de transfert avec les valeurs converties
                 en chaînes de caractères pour l'API Légifrance.
         """
-        
+
         if fond == "CODE_ETAT":
             facette_value = "TEXT_NOM_CODE"
         else:
             facette_value = "NOM_CODE"
-        
+
         return FiltreDTO(
             facette=facette_value,
             valeurs=[valeur.value for valeur in self.valeurs],
@@ -165,7 +166,7 @@ class TextLegalStatusFiltre(BaseModel):
         frozen=True,
         description="Facette de filtrage par statut juridique",
     )
-    valeurs: List[EtatJuridique] = Field(
+    valeurs: list[EtatJuridique] = Field(
         default=[EtatJuridique.VIGUEUR], description="Statut juridique du texte"
     )
 
@@ -199,7 +200,7 @@ class CritereCode(BaseModel):
     )
     valeur: str = Field(..., description="Mot(s)/expression recherchés", min_length=1)
     operateur: Operateur = Field(default=Operateur.ET, description="Opérateur logique")
-    proximite: Optional[int] = Field(
+    proximite: int | None = Field(
         None, ge=1, le=100, description="Distance maximale entre les mots"
     )
 
@@ -231,7 +232,7 @@ class ChampCode(BaseModel):
         alias="typeChamp",
         description="Type de champ de recherche",
     )
-    criteres: List[CritereCode] = Field(
+    criteres: list[CritereCode] = Field(
         ..., min_length=1, description="Critères de recherche pour ce champ"
     )
     operateur: Operateur = Field(
@@ -255,11 +256,11 @@ class CodeSearchCriteria(BaseModel):
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
-    champs: List[ChampCode] = Field(
+    champs: list[ChampCode] = Field(
         default_factory=list, description="Champs de recherche avec leurs critères"
     )
-    filtres: List[Union[NomCodeFiltre, DateVersionFiltre, TextLegalStatusFiltre]] = (
-        Field(default_factory=list, description="Filtres à appliquer à la recherche")
+    filtres: list[NomCodeFiltre | DateVersionFiltre | TextLegalStatusFiltre] = Field(
+        default_factory=list, description="Filtres à appliquer à la recherche"
     )
     page_number: int = Field(
         default=1, ge=1, alias="pageNumber", description="Numéro de page (commence à 1)"
@@ -285,14 +286,14 @@ class CodeSearchCriteria(BaseModel):
 
     def to_generated(self, fond: str = "CODE_DATE") -> RechercheSpecifiqueDTO:
         """Convertit vers le DTO pour l'API."""
-        
+
         filtres_converted = []
         for f in self.filtres:
             if isinstance(f, NomCodeFiltre):
                 filtres_converted.append(f.to_generated(fond))
             else:
                 filtres_converted.append(f.to_generated())
-        
+
         return RechercheSpecifiqueDTO(
             champs=[c.to_generated() for c in self.champs],
             filtres=filtres_converted,
@@ -400,7 +401,7 @@ class CodeSearchResponse(BaseModel):
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
-    results: List[Dict[str, Any]] = Field(
+    results: list[dict[str, Any]] = Field(
         default_factory=list, description="Liste des résultats de recherche"
     )
     total_results: int = Field(
@@ -410,7 +411,7 @@ class CodeSearchResponse(BaseModel):
     page_size: int = Field(
         10, alias="pageSize", description="Nombre de résultats par page"
     )
-    facets: Optional[Dict[str, List[Dict[str, Any]]]] = Field(
+    facets: dict[str, list[dict[str, Any]]] | None = Field(
         None, description="Facettes de filtrage disponibles"
     )
 

@@ -1,4 +1,5 @@
 from enum import Enum
+
 from pylegifrance.models.generated.model import Sort1 as _Sort
 
 

@@ -1,10 +1,12 @@
-from typing import Dict, Any
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 from pylegifrance.models.generated.model import (
-    LawDecreeConsultRequest as GeneratedConsultRequest,
     ConsultDateRequest as GeneratedConsultVersionRequest,
+)
+from pylegifrance.models.generated.model import (
+    LawDecreeConsultRequest as GeneratedConsultRequest,
 )
 
 
@@ -47,12 +49,12 @@ class ConsultResponse(BaseModel):
     This model is compatible with ConsultTextResponse from the generated model.
     """
 
-    text: Dict[str, Any] | None = None
+    text: dict[str, Any] | None = None
     execution_time: int | None = Field(None, alias="executionTime")
     dereferenced: bool | None = None
 
     @classmethod
-    def from_api_model(cls, data: Dict[str, Any]) -> "ConsultResponse":
+    def from_api_model(cls, data: dict[str, Any]) -> "ConsultResponse":
         """
         Create a ConsultResponse from API response data.
 
@@ -104,7 +106,7 @@ class ConsultVersionRequest(BaseModel):
     text_id: str = Field(..., alias="textId")
     date: str
 
-    def to_api_model(self) -> Dict[str, Any]:
+    def to_api_model(self) -> dict[str, Any]:
         """
         Convert to API model format.
 
@@ -138,7 +140,7 @@ class ListVersionsRequest(BaseModel):
 
     text_id: str = Field(..., alias="textId")
 
-    def to_api_model(self) -> Dict[str, Any]:
+    def to_api_model(self) -> dict[str, Any]:
         """
         Convert to API model format.
 

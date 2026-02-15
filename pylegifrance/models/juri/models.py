@@ -1,9 +1,8 @@
 """Core domain models for JURI."""
 
-from typing import List, Optional
 from pydantic import Field
 
-from pylegifrance.models.generated.model import TexteSimple, TexteLien
+from pylegifrance.models.generated.model import TexteLien, TexteSimple
 
 
 class Decision(TexteSimple):
@@ -13,6 +12,6 @@ class Decision(TexteSimple):
     Extends the generated TexteSimple model with JURI-specific fields.
     """
 
-    siege_appel: Optional[str] = Field(alias="siegeAppel", default=None)
-    avocat_general: Optional[str] = Field(alias="avocatGl", default=None)
-    liens: List[TexteLien] = Field(default=[])
+    siege_appel: str | None = Field(alias="siegeAppel", default=None)
+    avocat_general: str | None = Field(alias="avocatGl", default=None)
+    liens: list[TexteLien] = Field(default=[])

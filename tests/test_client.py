@@ -1,6 +1,9 @@
 import os
+
 import pytest
+import requests
 from dotenv import load_dotenv
+
 from pylegifrance.client import LegifranceClient
 from pylegifrance.config import ApiConfig
 
@@ -71,7 +74,7 @@ def test_update_api_keys_with_valid_credentials(monkeypatch):
     client = LegifranceClient(config=bad_config)
 
     # The initial ping should fail
-    with pytest.raises(Exception):
+    with pytest.raises((Exception, requests.exceptions.RequestException)):
         client.ping()
 
     # Simulate using other credentials
