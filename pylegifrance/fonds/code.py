@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Iterator
 from datetime import datetime
 from typing import Self
 
@@ -20,6 +21,36 @@ from pylegifrance.models.code.search import (
 from pylegifrance.models.constants import EtatJuridique, TypeRecherche
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_articles_from_response(
+    results: list[dict],
+    formatter: bool,
+) -> Iterator[dict]:
+    """Yield merged article dicts from a search response.
+
+    Flattens the nested results -> sections -> extracts structure
+    into individual article dicts ready for ``Article.from_orm()``.
+
+    Args:
+        results: The ``results`` list from the search JSON response.
+        formatter: Whether the formatter is enabled (adds CID from section).
+
+    Yields:
+        Merged dicts combining top-level result data with extract data.
+    """
+    for item in results:
+        if "sections" in item and item["sections"]:
+            for section in item["sections"]:
+                section_cid = section.get("id") if formatter else None
+                for extract in section.get("extracts") or []:
+                    if extract.get("type") != "articles":
+                        continue
+                    if section_cid:
+                        extract["cid"] = section_cid
+                    yield {**item, **extract}
+        else:
+            yield item
 
 
 class CodeSearchBuilder:
@@ -308,49 +339,12 @@ class CodeSearchBuilder:
                     f"Results: {json.dumps(response_json['results'], indent=2, ensure_ascii=False)}"
                 )
 
-                # Process each result item
-                for item in response_json["results"]:
-                    # Process items with sections
-                    if "sections" in item and item["sections"]:
-                        for section in item["sections"]:
-                            # If formatter is enabled, add CID from section to extracts
-                            section_cid = None
-                            if self._formatter and "id" in section and section["id"]:
-                                section_cid = section["id"]
-
-                            if "extracts" in section and section["extracts"]:
-                                for extract in section["extracts"]:
-                                    if extract.get("type") == "articles":
-                                        # Add section CID to extract if formatter is enabled
-                                        if self._formatter and section_cid:
-                                            extract["cid"] = section_cid
-
-                                        # Use enhanced models.Article.from_orm to process the extract
-                                        article = models.Article.from_orm(
-                                            {**extract, **item}
-                                        )
-
-                                        results.append(article)
-
-                                        # Respect page size
-                                        if len(results) >= self.criteria.page_size:
-                                            break
-
-                            # Respect page size
-                            if len(results) >= self.criteria.page_size:
-                                break
-
-                        # Respect page size
-                        if len(results) >= self.criteria.page_size:
-                            break
-                    else:
-                        # Standard processing for results not structured in sections
-                        article = models.Article.from_orm(item)
-                        results.append(article)
-
-                        # Respect page size
-                        if len(results) >= self.criteria.page_size:
-                            break
+                for article_data in _extract_articles_from_response(
+                    response_json["results"], self._formatter
+                ):
+                    results.append(models.Article.from_orm(article_data))
+                    if len(results) >= self.criteria.page_size:
+                        break
 
         return results
 

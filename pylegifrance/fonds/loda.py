@@ -846,64 +846,49 @@ class Loda:
     ) -> TexteLodaModel | None:
         """Traite une réponse de consultation et extrait le modèle TexteLoda.
 
+        Gère deux formats de réponse API :
+        - Ancien format : les données sont dans un champ 'texte'
+        - Nouveau format : les données sont au niveau supérieur
+
         Args:
             response_data: Les données JSON de la réponse de l'API.
 
         Returns:
             Le modèle TexteLoda, ou None si non trouvé.
         """
-        # Cas 1: Format d'API ancien avec champ 'texte'
+        # Ancien format : extraire le dict imbriqué sous 'texte'
         if "texte" in response_data:
-            return self._extract_texte_from_old_format(response_data)
+            texte_data = response_data.get("texte")
+            if not texte_data or not isinstance(texte_data, dict):
+                logger.warning(
+                    "Le champ 'texte' est absent ou invalide dans la réponse"
+                )
+                return None
+            return self._build_texte_model(texte_data)
 
-        # Cas 2: Nouveau format d'API (champs au niveau supérieur)
-        return self._extract_texte_from_new_format(response_data)
+        # Nouveau format : les données sont directement dans response_data
+        return self._build_texte_model(response_data)
 
-    def _extract_texte_from_old_format(
-        self, response_data: dict[str, Any]
-    ) -> TexteLodaModel | None:
-        """Extrait le modèle TexteLoda à partir du format ancien de l'API (avec champ 'texte').
+    def _build_texte_model(self, data: dict[str, Any]) -> TexteLodaModel | None:
+        """Construit un TexteLodaModel à partir d'un dict de données.
 
         Args:
-            response_data: Les données JSON de la réponse de l'API.
+            data: Les données contenant les champs du texte.
 
         Returns:
             Le modèle TexteLoda, ou None si non trouvé.
         """
-
-    def _extract_texte_from_new_format(
-        self, response_data: dict[str, Any]
-    ) -> TexteLodaModel | None:
-        """Extrait le modèle TexteLoda à partir du nouveau format de l'API (champs au niveau supérieur).
-
-        Args:
-            response_data: Les données JSON de la réponse de l'API.
-
-        Returns:
-            Le modèle TexteLoda, ou None si non trouvé.
-        """
-        if "id" not in response_data:
-            logger.warning("La réponse ne contient pas le champ 'id' requis")
+        if "id" not in data:
+            logger.warning("Les données ne contiennent pas le champ 'id' requis")
             return None
 
         try:
-            logger.debug(
-                f"Création de TexteLodaModel directement à partir de la réponse avec ID: {response_data['id']}"
-            )
-            # Create the TexteLodaModel
-            texte_model = TexteLodaModel.model_validate(response_data)
-
-            # Create a ConsultTextResponse from the response data and set it as the consult_response
-            from pylegifrance.models.generated.model import ConsultTextResponse
-
-            consult_response = ConsultTextResponse.model_validate(response_data)
-            texte_model.consult_response = consult_response
-
+            logger.debug(f"Création de TexteLodaModel avec ID: {data['id']}")
+            texte_model = TexteLodaModel.model_validate(data)
+            texte_model.consult_response = ConsultTextResponse.model_validate(data)
             return texte_model
         except Exception as e:
-            logger.error(
-                f"Échec de création de TexteLodaModel à partir de la réponse: {e}"
-            )
+            logger.error(f"Échec de création de TexteLodaModel: {e}")
             return None
 
     def fetch(self, text_id: str) -> TexteLoda | None:

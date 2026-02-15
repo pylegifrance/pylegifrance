@@ -11,6 +11,112 @@ from pylegifrance.models.generated.model import (
 )
 
 
+def _first_of(data: dict, *keys: str) -> Any:
+    """Return first non-None value found for the given keys.
+
+    Args:
+        data: Dictionary to search in.
+        *keys: Keys to look up in priority order.
+
+    Returns:
+        The first non-None value, or None if all are missing/None.
+    """
+    for key in keys:
+        value = data.get(key)
+        if value is not None:
+            return value
+    return None
+
+
+def _to_dict(data: Any) -> dict:
+    """Normalize any input to a plain dict.
+
+    Args:
+        data: A dict, Pydantic model, or arbitrary object.
+
+    Returns:
+        A plain dictionary representation of the input.
+    """
+    if isinstance(data, dict):
+        return data
+    if hasattr(data, "model_dump"):
+        return data.model_dump()
+    return vars(data) if hasattr(data, "__dict__") else {}
+
+
+def _extract_code_name(
+    article_data: dict,
+    raw_data: dict,
+) -> str | None:
+    """Extract the code name from article or raw response data.
+
+    Tries multiple locations in priority order to find the code name,
+    covering both consult and search response shapes.
+
+    Args:
+        article_data: Normalized article-level dict (nested or top-level).
+        raw_data: The full top-level response dict.
+
+    Returns:
+        The code name string, or None if not found.
+    """
+    # 1. consult: textTitles list
+    text_titles = article_data.get("textTitles")
+    if isinstance(text_titles, list):
+        for title in text_titles:
+            titre = title.get("titre") if isinstance(title, dict) else None
+            if titre is not None:
+                return titre
+
+    # 2-4. consult: context block inside article_data
+    context = article_data.get("context")
+    if isinstance(context, dict):
+        titre_txt_list = context.get("titreTxt")
+        if isinstance(titre_txt_list, list) and titre_txt_list:
+            first = titre_txt_list[0]
+            if isinstance(first, dict) and first.get("titre") is not None:
+                return first["titre"]
+        if context.get("titreCode") is not None:
+            return context["titreCode"]
+        if context.get("titre") is not None:
+            return context["titre"]
+
+    # 5. top-level contexte fallback
+    contexte = raw_data.get("contexte")
+    if isinstance(contexte, dict):
+        if contexte.get("titreCode") is not None:
+            return contexte["titreCode"]
+        if contexte.get("titre") is not None:
+            return contexte["titre"]
+
+    # 6. direct top-level keys
+    for key in ("titreCode", "codeTitle", "nomCode"):
+        if raw_data.get(key) is not None:
+            return raw_data[key]
+
+    # 7. top-level context.titreTxt
+    top_context = raw_data.get("context")
+    if isinstance(top_context, dict):
+        titre_txt_list = top_context.get("titreTxt")
+        if isinstance(titre_txt_list, list) and titre_txt_list:
+            first = titre_txt_list[0]
+            if isinstance(first, dict) and first.get("titre") is not None:
+                return first["titre"]
+
+    # 8. search: titles list with nature == "CODE"
+    titles = raw_data.get("titles")
+    if isinstance(titles, list):
+        for t in titles:
+            if (
+                isinstance(t, dict)
+                and t.get("nature") == "CODE"
+                and t.get("title") is not None
+            ):
+                return t["title"]
+
+    return None
+
+
 class Code(PyLegifranceBaseModel):
     """Code juridique français avec contenu complet et métadonnées.
 
@@ -289,271 +395,81 @@ class Article(PyLegifranceBaseModel):
     def from_orm(cls, data: Any) -> "Article":
         """Crée une instance d'Article à partir d'un dictionnaire ou d'une réponse API.
 
-        Cette méthode permet de convertir les données brutes de l'API en objet Article
-        en gérant les différences de nommage entre l'API et le modèle, ainsi que les
-        différentes structures de réponse possibles.
+        Gère les réponses de consultation (clé ``article`` imbriquée) et les
+        réponses de recherche (dict plat) de manière transparente.
 
         Args:
-            data: Dictionnaire, objet Pydantic ou réponse API contenant les données de l'article.
+            data: Dictionnaire, modèle Pydantic ou réponse API.
 
         Returns:
-            Article: Une nouvelle instance d'Article.
+            Une nouvelle instance d'Article.
         """
-        # Convert to dictionary if needed
-        if hasattr(data, "model_dump"):
-            data_dict = data.model_dump()
-        elif isinstance(data, dict):
-            data_dict = data
+        raw_data = _to_dict(data)
+
+        # Consult shape: nested "article" dict; Search shape: flat top-level
+        nested = raw_data.get("article")
+        if nested and isinstance(nested, dict):
+            article_data = nested
         else:
-            # Try to convert to dict if it's a JSON response
-            try:
-                data_dict = data.json()
-            except (AttributeError, ValueError):
-                # If all else fails, try to access attributes directly
-                data_dict = {}
-                for attr in [
-                    "id",
-                    "num",
-                    "titre",
-                    "texte",
-                    "texteHtml",
-                    "cid",
-                    "codeName",
-                    "dateVersion",
-                    "etatJuridique",
-                    "url",
-                ]:
-                    if hasattr(data, attr):
-                        data_dict[attr] = getattr(data, attr)
+            article_data = raw_data
 
-        # Extract article data from nested structures if needed
-        article_data = {}
+        # --- Declarative field extraction ---
+        num = _first_of(article_data, "num", "numero")
+        titre = _first_of(
+            article_data, "titre", "sectionParentTitre", "fullSectionsTitre"
+        )
+        texte = _first_of(article_data, "texte", "contenu", "content")
+        if texte is None:
+            values = article_data.get("values") or raw_data.get("values")
+            if isinstance(values, list) and values:
+                texte = " ".join(values)
 
-        # Check if we have a response with an 'article' field
-        if "article" in data_dict and data_dict["article"]:
-            article_obj = data_dict["article"]
+        texte_html = article_data.get("texteHtml")
+        cid = article_data.get("cid") or raw_data.get("cid")
 
-            # Extract article number
-            if "num" in article_obj:
-                article_data["num"] = article_obj["num"]
-            elif "numero" in article_obj:
-                article_data["num"] = article_obj["numero"]
+        etat = _first_of(
+            article_data,
+            "etatJuridique",
+            "etatText",
+            "etat",
+            "legalStatus",
+        ) or _first_of(raw_data, "etatJuridique", "etatText", "etat", "legalStatus")
 
-            # Extract article title
-            if "titre" in article_obj:
-                article_data["titre"] = article_obj["titre"]
-            elif (
-                "sectionParentTitre" in article_obj
-                and article_obj["sectionParentTitre"]
-            ):
-                article_data["titre"] = article_obj["sectionParentTitre"]
-            elif (
-                "fullSectionsTitre" in article_obj and article_obj["fullSectionsTitre"]
-            ):
-                article_data["titre"] = article_obj["fullSectionsTitre"]
+        date_version = _first_of(
+            article_data, "dateVersion", "dateDebut", "date"
+        ) or _first_of(raw_data, "dateVersion", "date")
 
-            # Extract article content
-            if "texte" in article_obj:
-                article_data["texte"] = article_obj["texte"]
-            elif "contenu" in article_obj:
-                article_data["texte"] = article_obj["contenu"]
-            elif "content" in article_obj:
-                article_data["texte"] = article_obj["content"]
+        code_name = _extract_code_name(article_data, raw_data)
 
-            # Extract HTML content
-            if "texteHtml" in article_obj:
-                article_data["texteHtml"] = article_obj["texteHtml"]
+        # --- Build mapped dict using model field names ---
+        article_id = article_data.get("id") or raw_data.get("id") or "unknown"
 
-            # Extract code information
-            if "cid" in article_obj:
-                article_data["cid"] = article_obj["cid"]
-
-            # Extract legal status
-            if "etatJuridique" in article_obj:
-                article_data["etatJuridique"] = article_obj["etatJuridique"]
-            elif "etatText" in article_obj:
-                article_data["etatJuridique"] = article_obj["etatText"]
-            elif "etat" in article_obj:
-                article_data["etatJuridique"] = article_obj["etat"]
-
-            # Extract version date
-            if "dateVersion" in article_obj:
-                article_data["dateVersion"] = article_obj["dateVersion"]
-            elif "date" in article_obj:
-                article_data["dateVersion"] = article_obj["date"]
-
-            # Check for textTitles field to extract code name
-            if "textTitles" in article_obj and article_obj["textTitles"]:
-                text_titles = article_obj["textTitles"]
-                if isinstance(text_titles, list) and len(text_titles) > 0:
-                    for title in text_titles:
-                        # Handle both dictionary and Pydantic model access
-                        if hasattr(title, "titre"):
-                            article_data["codeName"] = title.titre
-                            break
-                        elif isinstance(title, dict) and "titre" in title:
-                            article_data["codeName"] = title["titre"]
-                            break
-
-            # Check for context field in article to extract code name
-            if "context" in article_obj and article_obj["context"]:
-                context = article_obj["context"]
-                # Handle both dictionary and Pydantic model access
-                if hasattr(context, "titreCode") and context.titreCode is not None:
-                    article_data["codeName"] = context.titreCode
-                elif (
-                    isinstance(context, dict)
-                    and "titreCode" in context
-                    and context["titreCode"] is not None
-                ):
-                    article_data["codeName"] = context["titreCode"]
-                elif (
-                    hasattr(context, "titre")
-                    and getattr(context, "titre", None) is not None
-                ):
-                    article_data["codeName"] = context.titre
-                elif (
-                    isinstance(context, dict)
-                    and "titre" in context
-                    and context["titre"] is not None
-                ):
-                    article_data["codeName"] = context["titre"]
-        else:
-            # Use the top-level data if no 'article' field
-            article_data = data_dict
-
-        # Extract code name from context if available
-        if (
-            "codeName" not in article_data
-            and "contexte" in data_dict
-            and data_dict["contexte"]
-        ):
-            context = data_dict["contexte"]
-
-            # Extract code name from title - handle both dictionary and Pydantic model access
-            if hasattr(context, "titreCode") and context.titreCode is not None:
-                article_data["codeName"] = context.titreCode
-            elif (
-                isinstance(context, dict)
-                and "titreCode" in context
-                and context["titreCode"] is not None
-            ):
-                article_data["codeName"] = context["titreCode"]
-            elif (
-                hasattr(context, "titre")
-                and getattr(context, "titre", None) is not None
-            ):
-                article_data["codeName"] = context.titre
-            elif (
-                isinstance(context, dict)
-                and "titre" in context
-                and context["titre"] is not None
-            ):
-                article_data["codeName"] = context["titre"]
-
-        if "codeName" not in article_data:
-            if "titreCode" in data_dict:
-                article_data["codeName"] = data_dict["titreCode"]
-            elif "codeTitle" in data_dict:
-                article_data["codeName"] = data_dict["codeTitle"]
-            elif "nomCode" in data_dict:
-                article_data["codeName"] = data_dict["nomCode"]
-
-        # Extract code_name from context.titreTxt if available (original logic)
-        if (
-            "codeName" not in article_data
-            and "context" in data_dict
-            and data_dict["context"] is not None
-        ):
-            context = data_dict["context"]
-            # Handle both dictionary and Pydantic model access for titreTxt
-            titre_txt_list = None
-            if hasattr(context, "titreTxt") and context.titreTxt:
-                titre_txt_list = context.titreTxt
-            elif (
-                isinstance(context, dict)
-                and "titreTxt" in context
-                and context["titreTxt"]
-            ):
-                titre_txt_list = context["titreTxt"]
-
-            if titre_txt_list and len(titre_txt_list) > 0:
-                titre_txt = titre_txt_list[0]
-                # Handle both dictionary and Pydantic model access
-                if hasattr(titre_txt, "titre") and titre_txt.titre is not None:
-                    article_data["codeName"] = titre_txt.titre
-                elif (
-                    isinstance(titre_txt, dict)
-                    and "titre" in titre_txt
-                    and titre_txt["titre"] is not None
-                ):
-                    article_data["codeName"] = titre_txt["titre"]
-
-        # Extract legal status from top-level if not found in article
-        if "etatJuridique" not in article_data:
-            if "etatJuridique" in data_dict:
-                article_data["etatJuridique"] = data_dict["etatJuridique"]
-            elif "etatText" in data_dict:
-                article_data["etatJuridique"] = data_dict["etatText"]
-            elif "etat" in data_dict:
-                article_data["etatJuridique"] = data_dict["etat"]
-
-        # Extract version date from top-level if not found in article
-        if "dateVersion" not in article_data:
-            if "dateVersion" in data_dict:
-                article_data["dateVersion"] = data_dict["dateVersion"]
-            elif "date" in data_dict:
-                article_data["dateVersion"] = data_dict["date"]
-
-        # Map API field names to model field names
-        field_mapping = {
-            "id": "id",
-            "num": "number",
-            "titre": "title",
-            "texte": "content",
-            "texteHtml": "content_html",
-            "cid": "cid",
-            "codeName": "code_name",
-            "dateVersion": "version_date",
-            "etatJuridique": "legal_status",
-            "url": "url",
-            "etat": "legal_status",  # Some API responses use etat instead of etatJuridique
-            "legalStatus": "legal_status",  # Some API responses use legalStatus instead of etatJuridique
-            "numero": "number",  # Some API responses use numero instead of num
-            "sectionParentTitre": "title",  # Use section title if article title is missing
+        mapped_data: dict[str, Any] = {
+            "id": article_id,
+            "number": num or "unknown",
         }
+        if titre is not None:
+            mapped_data["title"] = titre
+        if texte is not None:
+            mapped_data["content"] = texte
+        if texte_html is not None:
+            mapped_data["content_html"] = texte_html
+        if cid is not None:
+            mapped_data["cid"] = cid
+        if code_name is not None:
+            mapped_data["code_name"] = code_name
+        if date_version is not None:
+            mapped_data["version_date"] = date_version
+        if etat is not None:
+            mapped_data["legal_status"] = etat
 
-        # Create a new dict with mapped field names
-        mapped_data = {}
-        for api_field, model_field in field_mapping.items():
-            if api_field in article_data and article_data[api_field] is not None:
-                mapped_data[model_field] = article_data[api_field]
+        # --- URL generation ---
+        url = article_data.get("url") or raw_data.get("url")
+        if url is None and article_id != "unknown":
+            url = f"https://www.legifrance.gouv.fr/codes/article_lc/{article_id}"
+        elif url is None and cid is not None:
+            url = f"https://www.legifrance.gouv.fr/codes/section_lc/{cid}"
+        if url is not None:
+            mapped_data["url"] = url
 
-        # Add URL if we have an ID but no URL
-        if (
-            "id" in mapped_data
-            and "url" not in mapped_data
-            and mapped_data["id"] != "unknown"
-        ):
-            mapped_data["url"] = (
-                f"https://www.legifrance.gouv.fr/codes/article_lc/{mapped_data['id']}"
-            )
-
-        # Add URL based on CID if we have a CID but no URL
-        elif (
-            "cid" in mapped_data
-            and "url" not in mapped_data
-            and mapped_data["cid"] is not None
-        ):
-            mapped_data["url"] = (
-                f"https://www.legifrance.gouv.fr/codes/section_lc/{mapped_data['cid']}"
-            )
-
-        # Ensure required fields have default values if missing
-        if "id" not in mapped_data:
-            mapped_data["id"] = "unknown"
-        if "number" not in mapped_data:
-            mapped_data["number"] = "unknown"
-
-        # Create and return the Article instance
         return cls(**mapped_data)
