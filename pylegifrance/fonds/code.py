@@ -46,12 +46,6 @@ def _extract_articles_from_response(
                 for extract in section.get("extracts") or []:
                     if extract.get("type") != "articles":
                         continue
-                    # Skip old article versions (MODIFIE, ABROGE, etc.)
-                    # The search filters request VIGUEUR articles, but the
-                    # API may return historical versions in other sections.
-                    legal = extract.get("legalStatus")
-                    if legal and legal != "VIGUEUR":
-                        continue
                     if section_cid:
                         extract["cid"] = section_cid
                     yield {**item, **extract}

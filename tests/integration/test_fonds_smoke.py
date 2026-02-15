@@ -1,4 +1,4 @@
-"""Search test matrix — validates all search approaches an LLM might use.
+"""Smoke tests — validates search and fetch across all fonds (Code, Loda, Juri).
 
 Each test case validates:
 - Results are non-empty

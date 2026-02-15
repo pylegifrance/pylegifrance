@@ -393,16 +393,16 @@ class Article(PyLegifranceBaseModel):
 
     @classmethod
     def from_orm(cls, data: Any) -> "Article":
-        """Create an Article from a dict or API response object.
+        """Crée une instance d'Article à partir d'un dictionnaire ou d'une réponse API.
 
-        Handles both consult responses (nested ``article`` key) and search
-        responses (flat top-level dict) transparently.
+        Gère les réponses de consultation (clé ``article`` imbriquée) et les
+        réponses de recherche (dict plat) de manière transparente.
 
         Args:
-            data: Dictionary, Pydantic model, or API response object.
+            data: Dictionnaire, modèle Pydantic ou réponse API.
 
         Returns:
-            A new Article instance.
+            Une nouvelle instance d'Article.
         """
         raw_data = _to_dict(data)
 
