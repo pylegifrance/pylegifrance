@@ -1,6 +1,8 @@
-import pytest
-from pylegifrance.fonds.loda import Loda
 from unittest.mock import MagicMock
+
+import pytest
+
+from pylegifrance.fonds.loda import Loda
 
 
 @pytest.fixture

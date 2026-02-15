@@ -3,10 +3,12 @@
 This module provides utility functions used across the package.
 """
 
-import json
 import enum
-import requests
+import json
 from datetime import datetime
+
+import requests
+
 from pylegifrance.config import ApiConfig
 
 

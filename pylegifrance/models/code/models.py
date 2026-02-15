@@ -1,11 +1,12 @@
-from typing import Optional, Any, List
 from datetime import datetime
-from pydantic import Field, field_validator, ConfigDict, BaseModel
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from pylegifrance.models.generated.model import (
-    ConsultTextResponse,
-    ConsultSection,
     ConsultArticle,
+    ConsultSection,
+    ConsultTextResponse,
 )
 
 
@@ -42,31 +43,31 @@ class Code(BaseModel):
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
-    id: Optional[str] = Field(
+    id: str | None = Field(
         default=None,
         description="Identifiant unique LEGITEXT du code",
         examples=["LEGITEXT000006070721"],
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         default=None,
         description="Identifiant chronologique du code",
         examples=["LEGITEXT000006070721"],
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         default=None,
         description="Titre officiel du code",
         examples=["Code civil", "Code pénal"],
     )
-    etat: Optional[str] = Field(
+    etat: str | None = Field(
         default=None,
         description="Statut juridique actuel du code",
         examples=["VIGUEUR", "ABROGE"],
     )
-    sections: Optional[List[ConsultSection]] = Field(
+    sections: list[ConsultSection] | None = Field(
         default=None,
         description="Liste des sections de premier niveau du code",
     )
-    articles: Optional[List[ConsultArticle]] = Field(
+    articles: list[ConsultArticle] | None = Field(
         default=None,
         description="Liste des articles racine du code",
     )
@@ -111,7 +112,7 @@ class Code(BaseModel):
         }
 
         if "titles" in data_dict and getattr(data_dict, "titles", None):
-            for title in getattr(data_dict, "titles"):
+            for title in data_dict.titles:
                 title_cid = (
                     getattr(title, "cid", None)
                     if hasattr(title, "cid")
@@ -196,42 +197,42 @@ class Article(BaseModel):
         description="Numéro officiel de l'article",
         examples=["1", "L36-11", "R123-4"],
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         alias="titre",
         description="Titre ou intitulé de l'article",
         examples=["Des lois en général"],
     )
-    content: Optional[str] = Field(
+    content: str | None = Field(
         None, alias="texte", description="Contenu textuel brut de l'article"
     )
-    content_html: Optional[str] = Field(
+    content_html: str | None = Field(
         None, alias="texteHtml", description="Contenu HTML formaté avec balises légales"
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None,
         alias="cid",
         description="Identifiant LEGITEXT du code parent",
         examples=["LEGITEXT000006070721"],
     )
-    code_name: Optional[str] = Field(
+    code_name: str | None = Field(
         None,
         alias="codeName",
         description="Nom officiel du code juridique parent",
         examples=["Code civil", "Code pénal"],
     )
-    version_date: Optional[datetime] = Field(
+    version_date: datetime | None = Field(
         None,
         alias="dateVersion",
         description="Date de version de l'article (auto-parsée depuis timestamp ou ISO)",
     )
-    legal_status: Optional[str] = Field(
+    legal_status: str | None = Field(
         None,
         alias="etatJuridique",
         description="Statut juridique actuel de l'article",
         examples=["VIGUEUR", "ABROGE", "TRANSFERE"],
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         description="URL de consultation officielle sur Légifrance",
         examples=[
@@ -411,7 +412,7 @@ class Article(BaseModel):
                     hasattr(context, "titre")
                     and getattr(context, "titre", None) is not None
                 ):
-                    article_data["codeName"] = getattr(context, "titre")
+                    article_data["codeName"] = context.titre
                 elif (
                     isinstance(context, dict)
                     and "titre" in context
@@ -443,7 +444,7 @@ class Article(BaseModel):
                 hasattr(context, "titre")
                 and getattr(context, "titre", None) is not None
             ):
-                article_data["codeName"] = getattr(context, "titre")
+                article_data["codeName"] = context.titre
             elif (
                 isinstance(context, dict)
                 and "titre" in context

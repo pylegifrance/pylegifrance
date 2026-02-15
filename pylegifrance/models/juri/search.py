@@ -1,27 +1,27 @@
 """Search models and functionality for JURI."""
 
-from typing import List, Optional
-from pydantic import Field, validator
 from datetime import datetime
 
+from pydantic import Field, validator
+
 from pylegifrance.models.base import PyLegifranceBaseModel
-from pylegifrance.models.juri.constants import (
-    SortOptions,
-    PublicationStatus,
-    FacettesJURI,
-)
 from pylegifrance.models.generated.model import (
-    SearchRequestDTO,
-    RechercheSpecifiqueDTO,
     ChampDTO,
     CritereDTO,
+    DatePeriod,
     FiltreDTO,
-    TypePagination,
-    Operateur,
-    TypeChamp,
-    TypeRecherche,
     Fond,
-    DatePeriod
+    Operateur,
+    RechercheSpecifiqueDTO,
+    SearchRequestDTO,
+    TypeChamp,
+    TypePagination,
+    TypeRecherche,
+)
+from pylegifrance.models.juri.constants import (
+    FacettesJURI,
+    PublicationStatus,
+    SortOptions,
 )
 
 
@@ -29,7 +29,7 @@ class SearchRequest(PyLegifranceBaseModel):
     """JURI search request model."""
 
     search: str = Field("", description="Search text or keywords")
-    publication_bulletin: Optional[List[PublicationStatus]] = Field(
+    publication_bulletin: list[PublicationStatus] | None = Field(
         default=None, description="Publication status filter"
     )
     sort: SortOptions = Field(default=SortOptions.RELEVANCE)
@@ -41,49 +41,53 @@ class SearchRequest(PyLegifranceBaseModel):
     # Advanced options
     formatter: bool = Field(default=True, description="Extract only specific fields")
     fetch_all: bool = Field(default=False, description="Fetch all results")
-    keys: Optional[List[str]] = Field(
+    keys: list[str] | None = Field(
         default=None, description="Specific field extraction keys"
     )
-    juridiction_judiciaire: Optional[List[str]] = Field(default=None)
-    
-    date_start: Optional[str] = Field(
-        default=None, 
-        description="Start date for decision filtering (ISO format: YYYY-MM-DD)"
+    juridiction_judiciaire: list[str] | None = Field(default=None)
+
+    date_start: str | None = Field(
+        default=None,
+        description="Start date for decision filtering (ISO format: YYYY-MM-DD)",
     )
-    date_end: Optional[str] = Field(
-        default=None, 
-        description="End date for decision filtering (ISO format: YYYY-MM-DD)"
+    date_end: str | None = Field(
+        default=None,
+        description="End date for decision filtering (ISO format: YYYY-MM-DD)",
     )
     date_facet: str = Field(
-        default="DATE_DECISION", 
-        description="Date facet to filter on (DATE_DECISION, DATE_PUBLI, etc.)"
+        default="DATE_DECISION",
+        description="Date facet to filter on (DATE_DECISION, DATE_PUBLI, etc.)",
     )
-    
-    formation: Optional[List[str]] = Field(
-        default=None, 
-        description="Formation filter (e.g., 'Chambre sociale', 'Première chambre civile', 'Chambre criminelle')"
+
+    formation: list[str] | None = Field(
+        default=None,
+        description="Formation filter (e.g., 'Chambre sociale', 'Première chambre civile', 'Chambre criminelle')",
     )
-    
-    cour_appel: Optional[List[str]] = Field(
-        default=None, 
-        description="Court of appeal location filter (only for 'Juridictions d'appel')"
+
+    cour_appel: list[str] | None = Field(
+        default=None,
+        description="Court of appeal location filter (only for 'Juridictions d'appel')",
     )
-    
-    @validator('date_start', 'date_end')
+
+    @validator("date_start", "date_end")
     def validate_date_format(cls, v):
         """Validate date format is ISO YYYY-MM-DD."""
         if v is not None:
             try:
                 datetime.fromisoformat(v)
             except ValueError:
-                raise ValueError(f"Date must be in ISO format (YYYY-MM-DD), got: {v}")
+                raise ValueError(f"Date must be in ISO format (YYYY-MM-DD), got: {v}") from None
         return v
 
-    @validator('date_end')
+    @validator("date_end")
     def validate_date_range(cls, v, values):
         """Validate that end date is after start date."""
-        if v is not None and 'date_start' in values and values['date_start'] is not None:
-            start_date = datetime.fromisoformat(values['date_start'])
+        if (
+            v is not None
+            and "date_start" in values
+            and values["date_start"] is not None
+        ):
+            start_date = datetime.fromisoformat(values["date_start"])
             end_date = datetime.fromisoformat(v)
             if end_date < start_date:
                 raise ValueError("End date must be after start date")
@@ -114,7 +118,7 @@ class SearchRequest(PyLegifranceBaseModel):
             criteres=[criteria], operateur=Operateur.et, typeChamp=self.field
         )
 
-    def _create_filters(self) -> List[FiltreDTO]:
+    def _create_filters(self) -> list[FiltreDTO]:
         """Create filters based on search parameters."""
         filters = []
 
@@ -125,17 +129,21 @@ class SearchRequest(PyLegifranceBaseModel):
         # Add jurisdiction judiciaire filter if specified
         if self.juridiction_judiciaire:
             filters.append(self._create_jurisdiction_filter())
-            
+
         # Add date filter if specified
         if self.date_start and self.date_end:
             filters.append(self._create_date_filter())
-            
+
         # Add formation filter if specified
         if self.formation:
             filters.append(self._create_formation_filter())
-        
-        # Add court of appeal filter if specified  
-        if self.cour_appel and self.juridiction_judiciaire and "Juridictions d'appel" in self.juridiction_judiciaire:
+
+        # Add court of appeal filter if specified
+        if (
+            self.cour_appel
+            and self.juridiction_judiciaire
+            and "Juridictions d'appel" in self.juridiction_judiciaire
+        ):
             filters.append(self._create_cour_appel_filter())
 
         return filters
@@ -164,7 +172,7 @@ class SearchRequest(PyLegifranceBaseModel):
             singleDate=None,
             multiValeurs=None,
         )
-    
+
     def _create_date_filter(self) -> FiltreDTO:
         """Create date range filter."""
         return FiltreDTO(
@@ -172,12 +180,12 @@ class SearchRequest(PyLegifranceBaseModel):
             valeurs=None,
             dates=DatePeriod(
                 start=datetime.fromisoformat(self.date_start),
-                end=datetime.fromisoformat(self.date_end)
+                end=datetime.fromisoformat(self.date_end),
             ),
             singleDate=None,
             multiValeurs=None,
         )
-    
+
     def _create_formation_filter(self) -> FiltreDTO:
         """Create formation filter."""
         return FiltreDTO(
@@ -187,7 +195,7 @@ class SearchRequest(PyLegifranceBaseModel):
             singleDate=None,
             multiValeurs=None,
         )
-    
+
     def _create_cour_appel_filter(self) -> FiltreDTO:
         return FiltreDTO(
             facette=FacettesJURI.APPEL_SIEGE_APPEL.value,
@@ -198,7 +206,7 @@ class SearchRequest(PyLegifranceBaseModel):
         )
 
     def _create_search_specification(
-        self, field: ChampDTO, filters: List[FiltreDTO]
+        self, field: ChampDTO, filters: list[FiltreDTO]
     ) -> RechercheSpecifiqueDTO:
         """Create search specification with fields and filters."""
         return RechercheSpecifiqueDTO(
@@ -219,6 +227,6 @@ class SearchResponse(PyLegifranceBaseModel):
 
     total_results: int = Field(alias="totalNbResult")
     execution_time: int = Field(alias="executionTime")
-    results: List[dict] = Field(default=[])
+    results: list[dict] = Field(default=[])
     page_number: int = Field(alias="pageNumber")
     page_size: int = Field(alias="pageSize")

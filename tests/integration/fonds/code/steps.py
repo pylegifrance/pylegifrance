@@ -1,12 +1,12 @@
 import logging
-
-import pytest
-from pytest_bdd import given, when, then, parsers
 from datetime import datetime
 
+import pytest
+from pytest_bdd import given, parsers, then, when
+
 from pylegifrance.fonds.code import Code
-from pylegifrance.models.code.models import Article
 from pylegifrance.models.code.enum import TypeChampCode
+from pylegifrance.models.code.models import Article
 
 logger = logging.getLogger(__name__)
 

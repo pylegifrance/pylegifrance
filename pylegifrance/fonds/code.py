@@ -1,22 +1,23 @@
 import json
 import logging
 from datetime import datetime
-from typing import List, Union, Self
+from typing import Self
+
+from pylegifrance import LegifranceClient
 from pylegifrance.models.code import models
+from pylegifrance.models.code.consult import CodeConsultRequest
+from pylegifrance.models.code.enum import NomCode, TypeChampCode
 from pylegifrance.models.code.search import (
-    CodeSearchCriteria,
+    ChampCode,
     CodeDateSearchRequest,
     CodeEtatSearchRequest,
-    DateVersionFiltre,
-    TextLegalStatusFiltre,
-    ChampCode,
+    CodeSearchCriteria,
     CritereCode,
+    DateVersionFiltre,
     NomCodeFiltre,
+    TextLegalStatusFiltre,
 )
-from pylegifrance.models.code.consult import CodeConsultRequest
-from pylegifrance.models.code.enum import TypeChampCode, NomCode
-from pylegifrance.models.constants import TypeRecherche, EtatJuridique
-from pylegifrance import LegifranceClient
+from pylegifrance.models.constants import EtatJuridique, TypeRecherche
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class CodeSearchBuilder:
         self._filtres.append(NomCodeFiltre(valeurs=[code_name]))
         return self
 
-    def in_codes(self, code_names: List[Union[str, NomCode]]) -> Self:
+    def in_codes(self, code_names: list[str | NomCode]) -> Self:
         """Filtre la recherche à plusieurs codes juridiques.
 
         Args:
@@ -83,7 +84,7 @@ class CodeSearchBuilder:
                     if code in valid_codes:
                         validated_codes.append(code)
                     else:
-                        raise ValueError(f"Nom de code invalide: {code}")
+                        raise ValueError(f"Nom de code invalide: {code}") from None
             else:
                 validated_codes.append(code)
 
@@ -163,14 +164,14 @@ class CodeSearchBuilder:
         except ValueError:
             raise ValueError(
                 f"Format de date invalide: {date_str}. Utilisez YYYY-MM-DD"
-            )
+            ) from None
 
         # Ajouter le filtre de date
         self._filtres.append(DateVersionFiltre(singleDate=date_obj))
         return self
 
     def with_legal_status(
-        self, status: List[EtatJuridique] = [EtatJuridique.VIGUEUR]
+        self, status: list[EtatJuridique] | None = None
     ) -> Self:
         """Filtre la recherche par statut juridique.
 
@@ -188,6 +189,8 @@ class CodeSearchBuilder:
                 "Le filtre d'état juridique n'est utilisable qu'avec le fond CODE_ETAT"
             )
 
+        if status is None:
+            status = [EtatJuridique.VIGUEUR]
         self._filtres.append(TextLegalStatusFiltre(valeurs=status))
         return self
 
@@ -219,7 +222,7 @@ class CodeSearchBuilder:
         self._formatter = True
         return self
 
-    def execute(self) -> List[models.Article]:
+    def execute(self) -> list[models.Article]:
         """Exécute la recherche et retourne les résultats.
 
         Returns:
@@ -281,8 +284,10 @@ class CodeSearchBuilder:
 
         # Exécuter la requête
         request_dict = request.model_dump(by_alias=True, mode="json")
-        if hasattr(request.recherche, 'to_generated'):
-            request_dict["recherche"] = request.recherche.to_generated(self.fond).model_dump(by_alias=True, mode="json")
+        if hasattr(request.recherche, "to_generated"):
+            request_dict["recherche"] = request.recherche.to_generated(
+                self.fond
+            ).model_dump(by_alias=True, mode="json")
 
         response = self.api.call_api("search", request_dict)
 
@@ -414,7 +419,7 @@ class CodeConsultFetcher:
         except ValueError:
             raise ValueError(
                 f"Format de date invalide: {date}. Utilisez YYYY-MM-DD ou un timestamp Unix en millisecondes"
-            )
+            ) from None
 
     def include_abrogated(self, include: bool = True) -> Self:
         """Configure l'inclusion des textes abrogés.
@@ -480,7 +485,7 @@ class ArticleFetcher:
         self.date = None
         self.searched_string = None
 
-    def at(self, date: Union[str, datetime, int]) -> models.Article:
+    def at(self, date: str | datetime | int) -> models.Article:
         """Récupère un article à une date spécifique.
 
         Args:

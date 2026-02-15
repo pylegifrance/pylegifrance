@@ -1,6 +1,6 @@
-from dataclasses import dataclass
-import os
 import logging
+import os
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
 

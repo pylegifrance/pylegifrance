@@ -1,11 +1,12 @@
-import logging
-import requests
 import json
-from typing import Optional, Any, Self
+import logging
 from contextlib import contextmanager
+from typing import Any, Self
 
-from pylegifrance.config import ApiConfig
+import requests
+
 from pylegifrance.auth import AuthenticationManager
+from pylegifrance.config import ApiConfig
 from pylegifrance.utils import configure_session_timeouts
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class LegifranceClient:
         session: The requests session used for making API calls.
     """
 
-    def __init__(self, config: Optional[ApiConfig] = None):
+    def __init__(self, config: ApiConfig | None = None):
         """
         Initialize a new LegifranceClient instance.
 
@@ -54,7 +55,7 @@ class LegifranceClient:
         configure_session_timeouts(self.session, config)
 
     def update_api_keys(
-        self, client_id: Optional[str] = None, client_secret: Optional[str] = None
+        self, client_id: str | None = None, client_secret: str | None = None
     ) -> None:
         """
         Update the API keys for the client.
@@ -217,10 +218,10 @@ class LegifranceClient:
                 return False
         except requests.exceptions.RequestException as e:
             logger.error(f"Error during Legifrance API ping: {str(e)}")
-            raise Exception(f"API ping failed: {e}")
+            raise Exception(f"API ping failed: {e}") from e
 
     @classmethod
-    def create(cls, config: Optional[ApiConfig] = None) -> Self:
+    def create(cls, config: ApiConfig | None = None) -> Self:
         """
         Factory method to create a new LegifranceClient instance.
 

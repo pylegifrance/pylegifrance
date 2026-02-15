@@ -1,10 +1,11 @@
-import pytest
-from datetime import datetime
-from pytest_bdd import when, then, parsers
+from datetime import UTC, datetime
 
+import pytest
+from pytest_bdd import parsers, then, when
+
+from pylegifrance.fonds.loda import Loda, TexteLoda
 from pylegifrance.models.constants import Fond, Nature
 from pylegifrance.models.generated.model import DatePeriod
-from pylegifrance.fonds.loda import Loda, TexteLoda
 from pylegifrance.models.loda.search import SearchRequest
 
 
@@ -397,9 +398,8 @@ def verifier_date_fin(recherche_avec_date_fin, date_str: str):
                 date_publication = texte.date_publication
                 if date_publication.tzinfo is not None and date_fin_dt.tzinfo is None:
                     # Make date_fin_dt timezone-aware (UTC)
-                    from datetime import timezone
 
-                    date_fin_dt_aware = date_fin_dt.replace(tzinfo=timezone.utc)
+                    date_fin_dt_aware = date_fin_dt.replace(tzinfo=UTC)
                     assert date_publication <= date_fin_dt_aware, (
                         f"La date de publication {date_publication} doit être <= {date_fin_dt_aware}"
                     )

@@ -1,7 +1,7 @@
 import pytest
 
-from pylegifrance.config import ApiConfig
 from pylegifrance.client import LegifranceClient
+from pylegifrance.config import ApiConfig
 
 
 @pytest.fixture(scope="module")

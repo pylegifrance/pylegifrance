@@ -1,20 +1,19 @@
 """API wrapper models for JURI."""
 
-from typing import Optional
 from pydantic import Field
 
+from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     JuriConsultRequest,
     JuriConsultWithAncienId,
     TexteSimple,
 )
-from pylegifrance.models.base import PyLegifranceBaseModel
 
 
 class ConsultRequest(PyLegifranceBaseModel):
     """Request to consult a JURI text."""
 
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None, alias="searchedString", description="Search text that led to consultation"
     )
     text_id: str = Field(..., alias="textId", description="Text identifier")
@@ -27,7 +26,7 @@ class ConsultRequest(PyLegifranceBaseModel):
 class ConsultByAncienIdRequest(PyLegifranceBaseModel):
     """Request to consult by ancien ID."""
 
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None, alias="ancienId", description="Legacy ID for JURI text consultation"
     )
 
@@ -39,9 +38,9 @@ class ConsultByAncienIdRequest(PyLegifranceBaseModel):
 class ConsultResponse(PyLegifranceBaseModel):
     """Response from text consultation."""
 
-    text: Optional[TexteSimple] = Field(None, description="Text content")
-    execution_time: Optional[int] = Field(None, alias="executionTime")
-    dereferenced: Optional[bool] = Field(None, description="Indexable by robots")
+    text: TexteSimple | None = Field(None, description="Text content")
+    execution_time: int | None = Field(None, alias="executionTime")
+    dereferenced: bool | None = Field(None, description="Indexable by robots")
 
     @classmethod
     def from_api_model(cls, model) -> "ConsultResponse":

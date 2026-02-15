@@ -1,9 +1,0 @@
-{
-  "include": ["pylegifrance"],
-  "exclude": ["**/node_modules", "**/__pycache__"],
-  "reportMissingImports": false,
-  "reportMissingTypeStubs": false,
-  "pythonVersion": "3.12",
-  "typeCheckingMode": "basic",
-  "useLibraryCodeForTypes": true
-}

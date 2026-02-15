@@ -1,5 +1,5 @@
 import pytest
-from pytest_bdd import when, then
+from pytest_bdd import then, when
 
 from pylegifrance.fonds.juri import JuriAPI, JuriDecision, SearchRequest
 from pylegifrance.models.juri.constants import JuridictionJudiciaire

@@ -24,7 +24,7 @@ class KaliTextConsultArticleRequest(BaseModel):
 
 
 class SuggestRequest(BaseModel):
-    search_text: Optional[str] = Field(
+    search_text: str | None = Field(
         None, alias="searchText", description="Texte à rechercher", examples=["mariage"]
     )
 
@@ -38,22 +38,22 @@ class Nature(Enum):
 
 
 class ModificateurDTO(BaseModel):
-    id_text: Optional[str] = Field(
+    id_text: str | None = Field(
         None,
         alias="idText",
         description="Identifiant du texte du modificateur",
         examples=["LEGITEXT000006072665"],
     )
-    nature: Optional[Nature] = Field(None, description="Nature", examples=["CODE"])
-    id_parent: Optional[str] = Field(
+    nature: Nature | None = Field(None, description="Nature", examples=["CODE"])
+    id_parent: str | None = Field(
         None,
         alias="idParent",
         description="Identifiant de l'élément parent du modificateur (texte/section ...)",
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant", examples=["LEGIARTI000006687518"]
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         description="Titre du modificateur",
         examples=["Code de la santé publique - art. L2211-1 (V)"],
@@ -61,13 +61,13 @@ class ModificateurDTO(BaseModel):
 
 
 class DossierResult(BaseModel):
-    libelle_texte: Optional[str] = Field(
+    libelle_texte: str | None = Field(
         None,
         alias="libelleTexte",
         description="Titre du texte",
         examples=["LOI n° 2018-1317 du 28 décembre 2018 de finances pour 2019"],
     )
-    id_texte: Optional[str] = Field(
+    id_texte: str | None = Field(
         None,
         alias="idTexte",
         description="Identifiant du texte",
@@ -76,14 +76,14 @@ class DossierResult(BaseModel):
 
 
 class Legislature(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début", examples=["1340668800000"]
     )
-    id: Optional[str] = Field(None, description="Identifiant", examples=["14"])
-    libelle: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant", examples=["14"])
+    libelle: str | None = Field(
         None, description="libellé", examples=["XIVème législature"]
     )
-    date_fin: Optional[datetime] = Field(
+    date_fin: datetime | None = Field(
         None, alias="dateFin", description="Date de fin", examples=["1498435200000"]
     )
 
@@ -94,10 +94,10 @@ class TypePagination(Enum):
 
 
 class DebatsParlementairesListRequest(BaseModel):
-    second_sort_value: Optional[str] = Field(
+    second_sort_value: str | None = Field(
         None, alias="secondSortValue", examples=["ID_DESC"]
     )
-    date_parution: Optional[str] = Field(
+    date_parution: str | None = Field(
         None, alias="dateParution", examples=["01/01/2020 > 31/01/2020"]
     )
     page_number: int = Field(
@@ -106,7 +106,7 @@ class DebatsParlementairesListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    sort_value: Optional[str] = Field(
+    sort_value: str | None = Field(
         None, alias="sortValue", examples=["DEBAT_PARLEMENTAIRE_DESC"]
     )
     page_size: int = Field(
@@ -115,7 +115,7 @@ class DebatsParlementairesListRequest(BaseModel):
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    types_publication: Optional[list[str]] = Field(
+    types_publication: list[str] | None = Field(
         None, alias="typesPublication", examples=["AN"]
     )
 
@@ -130,10 +130,10 @@ class RelatedLinksArticleRequest(BaseModel):
 
 
 class HasChronolegiResponse(BaseModel):
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    chronolegi_exists: Optional[bool] = Field(
+    chronolegi_exists: bool | None = Field(
         None,
         alias="chronolegiExists",
         description="Indique si un versionning existe",
@@ -142,17 +142,17 @@ class HasChronolegiResponse(BaseModel):
 
 
 class EsQuestionsEcritesParlementaires(BaseModel):
-    url: Optional[str] = None
-    date_parution: Optional[datetime] = Field(None, alias="dateParution")
-    ref_injection: Optional[str] = Field(None, alias="refInjection")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    id: Optional[str] = None
-    origine: Optional[str] = None
-    numero_parution: Optional[str] = Field(None, alias="numeroParution")
-    id_tech_injection: Optional[str] = Field(None, alias="idTechInjection")
-    emetteur: Optional[str] = None
-    pdf_name: Optional[str] = Field(None, alias="pdfName")
-    path_to_file: Optional[str] = Field(None, alias="pathToFile")
+    url: str | None = None
+    date_parution: datetime | None = Field(None, alias="dateParution")
+    ref_injection: str | None = Field(None, alias="refInjection")
+    display_size: str | None = Field(None, alias="displaySize")
+    id: str | None = None
+    origine: str | None = None
+    numero_parution: str | None = Field(None, alias="numeroParution")
+    id_tech_injection: str | None = Field(None, alias="idTechInjection")
+    emetteur: str | None = None
+    pdf_name: str | None = Field(None, alias="pdfName")
+    path_to_file: str | None = Field(None, alias="pathToFile")
 
 
 class TypeTexte(Enum):
@@ -163,35 +163,35 @@ class TypeTexte(Enum):
 
 
 class Titrage(BaseModel):
-    id: Optional[str] = Field(None, description="Identifiant")
+    id: str | None = Field(None, description="Identifiant")
 
 
 class ArticleVersion(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début de la version"
     )
-    etat: Optional[str] = Field(None, description="Etat juridique")
-    id: Optional[str] = Field(None, description="Identifiant de l'article")
-    version: Optional[str] = Field(None, description="Version")
-    numero: Optional[str] = Field(None, description="Numéro de l'article")
-    date_fin: Optional[datetime] = Field(
+    etat: str | None = Field(None, description="Etat juridique")
+    id: str | None = Field(None, description="Identifiant de l'article")
+    version: str | None = Field(None, description="Version")
+    numero: str | None = Field(None, description="Numéro de l'article")
+    date_fin: datetime | None = Field(
         None, alias="dateFin", description="Date de fin de la version"
     )
-    ordre: Optional[int] = Field(
+    ordre: int | None = Field(
         None,
         description="Numéro d'ordre de l'article. Sert au tri des articles au sein de leur élément parent (section ou texte)",
     )
 
 
 class Lien(BaseModel):
-    libelle: Optional[str] = Field(
+    libelle: str | None = Field(
         None, description="Libellé", examples=["Dossier législatif du Sénat"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant du lien", examples=["1415810924079"]
     )
-    data: Optional[str] = Field(None, description="Texte associé")
-    lien: Optional[str] = Field(
+    data: str | None = Field(None, description="Texte associé")
+    lien: str | None = Field(
         None,
         description="Lien vers le dossier législatif",
         examples=["http://www.senat.fr/dossier-legislatif/pjl14-096.html"],
@@ -199,70 +199,64 @@ class Lien(BaseModel):
 
 
 class DossierLegislatifResult(BaseModel):
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant", examples=["JORFDOLE000037460423"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre",
         examples=[
             "LOI n° 2019-30 du 20 janvier 2019 habilitant le Gouvernement à prendre par ordonnance les mesures de préparation au retrait du Royaume-Uni de l'Union européenne"
         ],
     )
-    date_creation: Optional[str] = Field(
+    date_creation: str | None = Field(
         None,
         alias="dateCreation",
         description="Date de création",
         examples=["2019-01-21"],
     )
-    date_derniere_modification: Optional[str] = Field(
+    date_derniere_modification: str | None = Field(
         None,
         alias="dateDerniereModification",
         description="Date de dernière modification",
         examples=["2019-01-21"],
     )
-    type: Optional[str] = Field(None, description="Type", examples=["LOI_PUBLIEE"])
-    dossiers: Optional[list[DossierResult]] = Field(
-        None, description="Liste des dossiers"
-    )
+    type: str | None = Field(None, description="Type", examples=["LOI_PUBLIEE"])
+    dossiers: list[DossierResult] | None = Field(None, description="Liste des dossiers")
 
 
 class BodmrTexts(BaseModel):
-    date_bodmr: Optional[datetime] = Field(
+    date_bodmr: datetime | None = Field(
         None, alias="dateBodmr", description="Date de publication du bodmr"
     )
-    path_to_file: Optional[str] = Field(None, alias="pathToFile")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    pdf_name: Optional[str] = Field(None, alias="pdfName", description="Nom du pdf")
-    number: Optional[str] = Field(None, description="Numéro du bodmr")
-    type_of_bodmr: Optional[str] = Field(
+    path_to_file: str | None = Field(None, alias="pathToFile")
+    display_size: str | None = Field(None, alias="displaySize")
+    pdf_name: str | None = Field(None, alias="pdfName", description="Nom du pdf")
+    number: str | None = Field(None, description="Numéro du bodmr")
+    type_of_bodmr: str | None = Field(
         None, alias="typeOfBodmr", description="Type du document"
     )
 
 
 class AdressePostale(BaseModel):
-    ville: Optional[str] = Field(None, description="Ville", examples=["PARIS"])
-    code_postal: Optional[str] = Field(
+    ville: str | None = Field(None, description="Ville", examples=["PARIS"])
+    code_postal: str | None = Field(
         None, alias="codePostal", description="Code postal", examples=["75005"]
     )
 
 
 class BoccListRequest(BaseModel):
-    idccs: Optional[list[str]] = Field(None, examples=[1880])
-    search_for_global_bocc: Optional[bool] = Field(None, alias="searchForGlobalBocc")
-    sort_value: Optional[str] = Field(
-        None, alias="sortValue", examples=["BOCC_SORT_DESC"]
-    )
+    idccs: list[str] | None = Field(None, examples=[1880])
+    search_for_global_bocc: bool | None = Field(None, alias="searchForGlobalBocc")
+    sort_value: str | None = Field(None, alias="sortValue", examples=["BOCC_SORT_DESC"])
     page_number: int = Field(
         ...,
         alias="pageNumber",
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    id_main_bocc: Optional[str] = Field(
-        None, alias="idMainBocc", examples=["CCO20190051"]
-    )
-    interval_publication: Optional[str] = Field(
+    id_main_bocc: str | None = Field(None, alias="idMainBocc", examples=["CCO20190051"])
+    interval_publication: str | None = Field(
         None, alias="intervalPublication", examples=["01/01/2020 > 31/01/2020"]
     )
     page_size: int = Field(
@@ -271,27 +265,27 @@ class BoccListRequest(BaseModel):
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    departments: Optional[list[str]] = Field(
+    departments: list[str] | None = Field(
         None, examples=["Ministère chargé du travail"]
     )
-    titre: Optional[str] = None
-    search_for_texts_bocc: Optional[bool] = Field(None, alias="searchForTextsBocc")
+    titre: str | None = None
+    search_for_texts_bocc: bool | None = Field(None, alias="searchForTextsBocc")
 
 
 class SignataireKali(BaseModel):
-    fait_a: Optional[str] = Field(None, alias="faitA", description="Fait A")
-    denonciation: Optional[str] = Field(None, description="Dénonciation")
-    execution: Optional[str] = Field(None, description="Exécution")
-    syndic: Optional[str] = Field(None, description="Syndicat")
-    adhesion: Optional[str] = Field(None, description="Adhésion")
-    patron: Optional[str] = Field(None, description="Patronat")
-    sign_ext: Optional[str] = Field(
+    fait_a: str | None = Field(None, alias="faitA", description="Fait A")
+    denonciation: str | None = Field(None, description="Dénonciation")
+    execution: str | None = Field(None, description="Exécution")
+    syndic: str | None = Field(None, description="Syndicat")
+    adhesion: str | None = Field(None, description="Adhésion")
+    patron: str | None = Field(None, description="Patronat")
+    sign_ext: str | None = Field(
         None, alias="signExt", description="Signataire extérieur"
     )
 
 
 class JuriConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -306,16 +300,16 @@ class JuriConsultRequest(BaseModel):
 
 
 class EsGlobalBocc(BaseModel):
-    date_parution: Optional[datetime] = Field(None, alias="dateParution")
-    file_name: Optional[str] = Field(None, alias="fileName")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    path_file: Optional[str] = Field(None, alias="pathFile")
-    num_parution: Optional[str] = Field(None, alias="numParution")
+    date_parution: datetime | None = Field(None, alias="dateParution")
+    file_name: str | None = Field(None, alias="fileName")
+    display_size: str | None = Field(None, alias="displaySize")
+    path_file: str | None = Field(None, alias="pathFile")
+    num_parution: str | None = Field(None, alias="numParution")
 
 
 class SearchAdditionalResult(BaseModel):
-    properties: Optional[dict[str, str]] = None
-    id: Optional[str] = None
+    properties: dict[str, str] | None = None
+    id: str | None = None
 
 
 class TextesBaseEnum(Enum):
@@ -353,11 +347,11 @@ class LegalStatu(Enum):
 
 
 class ConventionsListRequest(BaseModel):
-    textes_base: Optional[list[TextesBaseEnum]] = Field(None, alias="textesBase")
-    sort: Optional[Sort] = Field(
+    textes_base: list[TextesBaseEnum] | None = Field(None, alias="textesBase")
+    sort: Sort | None = Field(
         None, description="Ordre de tri", examples=["DATE_PUBLI_ASC"]
     )
-    legal_status: Optional[list[LegalStatu]] = Field(
+    legal_status: list[LegalStatu] | None = Field(
         None,
         alias="legalStatus",
         description="Liste des états juridique à filtrer",
@@ -369,13 +363,13 @@ class ConventionsListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    key_words: Optional[list[str]] = Field(
+    key_words: list[str] | None = Field(
         None,
         alias="keyWords",
         description="Liste des mots clés à filtrer",
         examples=[["ABATTOIRS", "CHAUX HYDRAULIQUES"]],
     )
-    second_sort: Optional[Sort] = Field(
+    second_sort: Sort | None = Field(
         None, alias="secondSort", description="Ordre de tri", examples=["ID_ASC"]
     )
     page_size: int = Field(
@@ -384,10 +378,10 @@ class ConventionsListRequest(BaseModel):
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    idcc: Optional[str] = Field(
+    idcc: str | None = Field(
         None, description="IDCC permettant de filtrer le résultat", examples=["489"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Texte à rechercher dans les titres permettant de filtrer le résultat",
         examples=["Industrie"],
@@ -421,11 +415,11 @@ class Supply(Enum):
 
 
 class SuggestSupplyRequest(BaseModel):
-    documents_dits: Optional[bool] = Field(None, alias="documentsDits")
-    search_text: Optional[str] = Field(
+    documents_dits: bool | None = Field(None, alias="documentsDits")
+    search_text: str | None = Field(
         None, alias="searchText", description="Texte à rechercher", examples=["mariage"]
     )
-    supplies: Optional[list[Supply]] = Field(
+    supplies: list[Supply] | None = Field(
         None,
         description="Liste des fonds dans lesquels exécuter la recherche pour la suggestion",
         examples=[["JORF", "JURI"]],
@@ -433,7 +427,7 @@ class SuggestSupplyRequest(BaseModel):
 
 
 class SearchNearestVersionRequest(BaseModel):
-    cid_section: Optional[str] = Field(
+    cid_section: str | None = Field(
         None,
         alias="cidSection",
         description="Chronical ID de la section",
@@ -451,19 +445,19 @@ class SearchNearestVersionRequest(BaseModel):
 
 
 class ElasticData(BaseModel):
-    index_name: Optional[str] = Field(
+    index_name: str | None = Field(
         None,
         alias="indexName",
         description="Nom de l'index",
         examples=["data_next_juri"],
     )
-    usage: Optional[str] = Field(
+    usage: str | None = Field(
         None, description="Description de l'usage de l'index", examples=[""]
     )
-    nb_doc: Optional[int] = Field(
+    nb_doc: int | None = Field(
         None, alias="nbDoc", description="Nombre de documents", examples=[992978]
     )
-    last_index: Optional[str] = Field(
+    last_index: str | None = Field(
         None,
         alias="lastIndex",
         description="Date du dernier document indexé",
@@ -472,22 +466,22 @@ class ElasticData(BaseModel):
 
 
 class CodeConsultRequest(BaseModel):
-    abrogated: Optional[bool] = None
+    abrogated: bool | None = None
     text_id: str = Field(
         ...,
         alias="textId",
         description="Chronical ID du texte",
         examples=["LEGITEXT000006075116"],
     )
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
         examples=["constitution 1958"],
     )
     date: str = Field(..., description="Date de consultation", examples=["2021-04-15"])
-    from_suggest: Optional[bool] = Field(None, alias="fromSuggest")
-    sct_cid: Optional[str] = Field(
+    from_suggest: bool | None = Field(None, alias="fromSuggest")
+    sct_cid: str | None = Field(
         None,
         alias="sctCid",
         description="Chronical ID de la section a consulter (Non requis pour la consultation de la table des matières sinon obligatoire)",
@@ -502,48 +496,48 @@ class BoccAndTextListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    sort_value: Optional[str] = Field(None, alias="sortValue")
-    interval_publication: Optional[str] = Field(None, alias="intervalPublication")
+    sort_value: str | None = Field(None, alias="sortValue")
+    interval_publication: str | None = Field(None, alias="intervalPublication")
     page_size: int = Field(
         ...,
         alias="pageSize",
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    idcc: Optional[str] = None
-    titre: Optional[str] = None
+    idcc: str | None = None
+    titre: str | None = None
 
 
 class SuggestValue(BaseModel):
-    appellations: Optional[list[str]] = Field(
+    appellations: list[str] | None = Field(
         None, description="Appellations", examples=["Loi Macron"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant du texte/section/article",
         examples=["JORFTEXT000000320201"],
     )
-    label: Optional[str] = Field(
+    label: str | None = Field(
         None,
         description="Titre à afficher",
         examples=[
             "Ordonnance du 18 juillet 1944 FORCES BRITANNIQUES : MARIAGE SUR LE TERRITOIRE FRANCAIS"
         ],
     )
-    date_version: Optional[str] = Field(
+    date_version: str | None = Field(
         None,
         alias="dateVersion",
         description="Date de la version retournée par la suggestion",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    origin: Optional[str] = Field(None, description="Origine", examples=["JORF"])
-    nature: Optional[str] = Field(
+    origin: str | None = Field(None, description="Origine", examples=["JORF"])
+    nature: str | None = Field(
         None, description="Nature de l'élément lié", examples=["ordonnance"]
     )
-    id_texte: Optional[str] = Field(
+    id_texte: str | None = Field(
         None, alias="idTexte", description="idTexte", examples=["LEGITEXT000006075116"]
     )
-    section: Optional[str] = Field(
+    section: str | None = Field(
         None, description="Section", examples=["LEGISCTA000006138259"]
     )
 
@@ -583,7 +577,7 @@ class ChronoLegiTextRequest(BaseModel):
 
 class LegiSommaireConsultRequest(BaseModel):
     date: str = Field(..., description="Date de consultation", examples=["2021-04-15"])
-    nature: Optional[str] = Field(
+    nature: str | None = Field(
         None,
         description="Nature du texte recherché : CODE, DECRET, ARRETE, LOI, ORDONNANCE...",
         examples=["CODE"],
@@ -606,57 +600,53 @@ class JorfConsultWithIdEliAliasRequest(BaseModel):
 
 
 class Conteneur(BaseModel):
-    etat: Optional[str] = Field(
+    etat: str | None = Field(
         None, description="Etat juridique", examples=["VIGUEUR_ETEN"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant du conteneur", examples=["JORFCONT000038052140"]
     )
-    titre: Optional[str] = Field(None, description="Titre du conteneur")
-    date_publi: Optional[datetime] = Field(
+    titre: str | None = Field(None, description="Titre du conteneur")
+    date_publi: datetime | None = Field(
         None,
         alias="datePubli",
         description="Date de publication",
         examples=["423532800000"],
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["JORF"])
-    nature: Optional[str] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["JORF"])
+    nature: str | None = Field(
         None, description="Nature du conteneur", examples=["IDCC"]
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["KALICONT000005635384"]
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         description="chemin vers le conteneur",
         examples=["conteneur/JORF/CONT/00/00/38/05/21/JORFCONT000038052140.xml"],
     )
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None, alias="ancienId", description="Ancien Identifiant"
     )
-    id_eli: Optional[str] = Field(
+    id_eli: str | None = Field(
         None,
         alias="idEli",
         description="Identifiant ELI",
         examples=["/eli/jo/2019/1/25/0021"],
     )
-    numero: Optional[str] = Field(
-        None, description="Numéro conteneur", examples=["1261"]
-    )
-    ref_injection: Optional[str] = Field(
+    numero: str | None = Field(None, description="Numéro conteneur", examples=["1261"])
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    num: Optional[str] = Field(
-        None, description="Numéro", examples=["0000000000001261"]
-    )
-    relevant_date: Optional[datetime] = Field(None, alias="relevantDate")
+    num: str | None = Field(None, description="Numéro", examples=["0000000000001261"])
+    relevant_date: datetime | None = Field(None, alias="relevantDate")
 
 
 class Type(Enum):
@@ -682,13 +672,13 @@ class TableRequest(BaseModel):
     end_year: int = Field(
         ..., alias="endYear", description="Année de fin", examples=[2017]
     )
-    start_year: Optional[int] = Field(
+    start_year: int | None = Field(
         None, alias="startYear", description="Année de début", examples=[2012]
     )
 
 
 class YearsWithNoTableResponse(BaseModel):
-    lst_year_disabled: Optional[list[int]] = Field(
+    lst_year_disabled: list[int] | None = Field(
         None,
         alias="lstYearDisabled",
         description="Liste des années",
@@ -697,112 +687,110 @@ class YearsWithNoTableResponse(BaseModel):
 
 
 class DocumentAdministratif(BaseModel):
-    nor: Optional[str] = Field(
-        None, description="Numéro NOR", examples=["CCCJ1718194V"]
-    )
-    date_document: Optional[datetime] = Field(
+    nor: str | None = Field(None, description="Numéro NOR", examples=["CCCJ1718194V"])
+    date_document: datetime | None = Field(
         None,
         alias="dateDocument",
         description="Date du document",
         examples=["1498780800000"],
     )
-    display_size: Optional[str] = Field(
+    display_size: str | None = Field(
         None,
         alias="displaySize",
         description="Taille du fichier avec son unité",
         examples=["918,4 Ko"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant unique", examples=["DOCATEXT000037511083"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre",
         examples=["Publication simplifiée des comptes de campagne"],
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    attachment_url: Optional[str] = Field(
+    attachment_url: str | None = Field(
         None, alias="attachmentUrl", description="Chemin vers le fichier attaché"
     )
-    nature: Optional[str] = Field(None, description="Nature")
-    numero: Optional[str] = Field(None, description="Numéro", examples=["0003"])
-    url: Optional[str] = Field(None, description="Chemin vers le fichier xml")
-    ancien_id: Optional[str] = Field(None, alias="ancienId", description="Ancien ID")
-    attachment_name: Optional[str] = Field(
+    nature: str | None = Field(None, description="Nature")
+    numero: str | None = Field(None, description="Numéro", examples=["0003"])
+    url: str | None = Field(None, description="Chemin vers le fichier xml")
+    ancien_id: str | None = Field(None, alias="ancienId", description="Ancien ID")
+    attachment_name: str | None = Field(
         None,
         alias="attachmentName",
         description="Nom du fichier",
         examples=["dae_20170630_0003_0001.pdf.sig"],
     )
-    sous_titre: Optional[str] = Field(
+    sous_titre: str | None = Field(
         None,
         alias="sousTitre",
         description="Sous-titre",
         examples=["Élections partielles de l’année 2016"],
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["DOCA"])
-    ref_injection: Optional[str] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["DOCA"])
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    date_jo: Optional[datetime] = Field(
+    date_jo: datetime | None = Field(
         None, alias="dateJO", description="Date du JO", examples=["1498780800000"]
     )
 
 
 class PdfMetadata(BaseModel):
-    path_to_file: Optional[str] = Field(None, alias="pathToFile")
-    file_name: Optional[str] = Field(None, alias="fileName")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    id: Optional[str] = None
-    complement_number: Optional[str] = Field(None, alias="complementNumber")
-    date_publi: Optional[datetime] = Field(None, alias="datePubli")
-    origine: Optional[str] = None
-    size: Optional[int] = None
-    type: Optional[str] = None
-    num: Optional[str] = None
+    path_to_file: str | None = Field(None, alias="pathToFile")
+    file_name: str | None = Field(None, alias="fileName")
+    display_size: str | None = Field(None, alias="displaySize")
+    id: str | None = None
+    complement_number: str | None = Field(None, alias="complementNumber")
+    date_publi: datetime | None = Field(None, alias="datePubli")
+    origine: str | None = None
+    size: int | None = None
+    type: str | None = None
+    num: str | None = None
 
 
 class ConventionsListResult(BaseModel):
-    etat: Optional[str] = Field(
+    etat: str | None = Field(
         None, description="Etat juridique du texte", examples=["ABROGE"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant unique", examples=["KALITEXT000005651341"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre",
         examples=[
             "Convention collective nationale pour le personnel d'encadrement de l'industrie de la fabrication de la chaux du 27 avril 1981, mise à jour au 1er mars 1982.  Etendue par arrêté du 5 novembre 1982 JONC 21 décembre 1982."
         ],
     )
-    pdf_file_size: Optional[str] = Field(None, alias="pdfFileSize")
-    pdf_file_path: Optional[str] = Field(None, alias="pdfFilePath")
-    description_fusion: Optional[str] = Field(
+    pdf_file_size: str | None = Field(None, alias="pdfFileSize")
+    pdf_file_path: str | None = Field(None, alias="pdfFilePath")
+    description_fusion: str | None = Field(
         None, alias="descriptionFusion", description="Description de fusion"
     )
-    cid_conteneur: Optional[str] = Field(
+    cid_conteneur: str | None = Field(
         None,
         alias="cidConteneur",
         description="Chronical ID du conteneur",
         examples=["KALICONT000005635668"],
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["KALITEXT000005651341"]
     )
-    description_fusion_html: Optional[str] = Field(
+    description_fusion_html: str | None = Field(
         None,
         alias="descriptionFusionHtml",
         description="Texte HTML de la description de fusion",
     )
-    idcc: Optional[str] = Field(None, description="IDCC", examples=["1119"])
-    pdf_file_name: Optional[str] = Field(None, alias="pdfFileName")
+    idcc: str | None = Field(None, description="IDCC", examples=["1119"])
+    pdf_file_name: str | None = Field(None, alias="pdfFileName")
 
 
 class ConcordanceLinksRequest(BaseModel):
@@ -840,10 +828,10 @@ class Fond(Enum):
 
 
 class QuestionsEcritesParlementairesListRequest(BaseModel):
-    second_sort_value: Optional[str] = Field(
+    second_sort_value: str | None = Field(
         None, alias="secondSortValue", examples=["ID_DESC"]
     )
-    periode_publication: Optional[str] = Field(
+    periode_publication: str | None = Field(
         None, alias="periodePublication", examples=["01/01/2020 > 31/01/2020"]
     )
     page_number: int = Field(
@@ -852,10 +840,10 @@ class QuestionsEcritesParlementairesListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    sort_value: Optional[str] = Field(
+    sort_value: str | None = Field(
         None, alias="sortValue", examples=["QUESTION_ECRITE_PARLEMENTAIRE_DESC"]
     )
-    parlement_types: Optional[list[str]] = Field(
+    parlement_types: list[str] | None = Field(
         None, alias="parlementTypes", examples=["AN"]
     )
     page_size: int = Field(
@@ -875,34 +863,34 @@ class SectionCidRequest(BaseModel):
 
 
 class LienConcorde(BaseModel):
-    nature_text: Optional[str] = Field(
+    nature_text: str | None = Field(
         None, alias="natureText", description="Nature du texte lié", examples=["LOI"]
     )
-    link_type: Optional[str] = Field(
+    link_type: str | None = Field(
         None, alias="linkType", description="Type de lien", examples=["MODIFIE"]
     )
-    article_num: Optional[str] = Field(
+    article_num: str | None = Field(
         None, alias="articleNum", description="Numéro de l'article lié", examples=["53"]
     )
-    link_orientation: Optional[str] = Field(
+    link_orientation: str | None = Field(
         None,
         alias="linkOrientation",
         description="Sens de la modification",
         examples=["cible"],
     )
-    text_title: Optional[str] = Field(
+    text_title: str | None = Field(
         None,
         alias="textTitle",
         description="Titre du texte lié",
         examples=["LOI n°2015-990 du 6 août 2015 - art. 53 (V)"],
     )
-    article_id: Optional[str] = Field(
+    article_id: str | None = Field(
         None,
         alias="articleId",
         description="Identifiant de l'article lié",
         examples=["LEGIARTI000032930490"],
     )
-    text_cid: Optional[str] = Field(
+    text_cid: str | None = Field(
         None,
         alias="textCid",
         description="Chronical ID du texte lié",
@@ -911,55 +899,51 @@ class LienConcorde(BaseModel):
 
 
 class TexteLien(BaseModel):
-    title: Optional[str] = Field(None, description="Titre")
-    date_publi_texte: Optional[str] = Field(
+    title: str | None = Field(None, description="Titre")
+    date_publi_texte: str | None = Field(
         None, alias="datePubliTexte", description="Date de publication"
     )
-    id: Optional[str] = Field(None, description="Identifiant")
-    type_lien: Optional[str] = Field(None, alias="typeLien", description="Type de lien")
-    cid_texte: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant")
+    type_lien: str | None = Field(None, alias="typeLien", description="Type de lien")
+    cid_texte: str | None = Field(
         None, alias="cidTexte", description="Chronical ID du texte"
     )
-    nature_texte: Optional[str] = Field(
+    nature_texte: str | None = Field(
         None, alias="natureTexte", description="Nature du texte"
     )
-    sens: Optional[str] = Field(None, description="Sens du type de lien")
-    num_texte: Optional[str] = Field(
-        None, alias="numTexte", description="Numéro du texte"
-    )
-    date_signa_texte: Optional[str] = Field(
+    sens: str | None = Field(None, description="Sens du type de lien")
+    num_texte: str | None = Field(None, alias="numTexte", description="Numéro du texte")
+    date_signa_texte: str | None = Field(
         None, alias="dateSignaTexte", description="Date de signature"
     )
-    num: Optional[str] = Field(None, description="Numéro")
-    nor_texte: Optional[str] = Field(None, alias="norTexte", description="NOR")
+    num: str | None = Field(None, description="Numéro")
+    nor_texte: str | None = Field(None, alias="norTexte", description="NOR")
 
 
 class Niveau(BaseModel):
-    libelle: Optional[str] = Field(None, description="Libellé", examples=["Sénat"])
-    id: Optional[str] = Field(
+    libelle: str | None = Field(None, description="Libellé", examples=["Sénat"])
+    id: str | None = Field(
         None, description="Identifiant du niveau", examples=["1415810580974"]
     )
-    liens: Optional[list[Lien]] = Field(None, description="Liste des liens du niveau")
-    niveaux: Optional[list[Niveau]] = Field(
-        None, description="liste des niveaux enfants"
-    )
+    liens: list[Lien] | None = Field(None, description="Liste des liens du niveau")
+    niveaux: list[Niveau] | None = Field(None, description="liste des niveaux enfants")
 
 
 class ElasticDataResponse(BaseModel):
-    lst_data: Optional[list[ElasticData]] = Field(
+    lst_data: list[ElasticData] | None = Field(
         None, alias="lstData", description="Liste des informations par index"
     )
 
 
 class DecisionAttaquee(BaseModel):
-    date: Optional[datetime] = Field(
+    date: datetime | None = Field(
         None, description="Date de la décision", examples=["32472144000000"]
     )
-    formation: Optional[str] = Field(None, description="formation")
+    formation: str | None = Field(None, description="formation")
 
 
 class BodmrListRequest(BaseModel):
-    sort: Optional[str] = Field(
+    sort: str | None = Field(
         None, description="Ordre de tri", examples=["PUBLICATION_DATE_ASC"]
     )
     page_size: int = Field(
@@ -974,7 +958,7 @@ class BodmrListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    years: Optional[list[str]] = Field(
+    years: list[str] | None = Field(
         None, description="Liste des années à filtrer", examples=[[2016, 2017]]
     )
 
@@ -1020,76 +1004,76 @@ class TypeChamp(Enum):
 
 
 class CibleChronoDTO(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None,
         alias="dateDebut",
         description="Date de début de l'élément",
         examples=["1538352000000"],
     )
-    cid_text: Optional[str] = Field(
+    cid_text: str | None = Field(
         None,
         alias="cidText",
         description="Chronical ID du texte",
         examples=["LEGITEXT000006070721"],
     )
-    id_parent: Optional[str] = Field(
+    id_parent: str | None = Field(
         None,
         alias="idParent",
         description="Identifiant unique du parent de l'élément",
         examples=["LEGISCTA000032008380"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant unique de l'élément",
         examples=["LEGIARTI000036829833"],
     )
-    cid_parent: Optional[str] = Field(
+    cid_parent: str | None = Field(
         None,
         alias="cidParent",
         description="Chronical ID du parent de l'élément",
         examples=["LEGISCTA000032008380"],
     )
-    path: Optional[str] = Field(
+    path: str | None = Field(
         None,
         description="Chemin représentant l'arborescence de l'élément dans le texte",
         examples=[
             "LEGITEXT000006070721/LEGISCTA000006090271/LEGISCTA000006118032/LEGISCTA000032006712/LEGISCTA000006136341/LEGISCTA000006150237/LEGISCTA000032008378/LEGISCTA000032008380/LEGIARTI000006436355"
         ],
     )
-    nature: Optional[Nature] = Field(
+    nature: Nature | None = Field(
         None, description="Nature/type du texte", examples=["CODE"]
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID de l'élément", examples=["LEGIARTI000036829833"]
     )
-    date_fin: Optional[datetime] = Field(
+    date_fin: datetime | None = Field(
         None,
         alias="dateFin",
         description="Date de fin de l'élément",
         examples=["1538352000000"],
     )
-    sens: Optional[str] = Field(None, description="Sens du Lien", examples=["cible"])
-    name: Optional[str] = Field(
+    sens: str | None = Field(None, description="Sens du Lien", examples=["cible"])
+    name: str | None = Field(
         None, description="Nom/titre/numéro de l'élément", examples=["1145"]
     )
 
 
 class DocsAdminsListRequest(BaseModel):
-    years: Optional[list[str]] = Field(
+    years: list[str] | None = Field(
         None, description="Liste des années à filtrer", examples=[[2016, 2017]]
     )
 
 
 class Theme(BaseModel):
-    libelle: Optional[str] = Field(
+    libelle: str | None = Field(
         None, description="Libellé", examples=["Calendrier des négociations"]
     )
-    code: Optional[str] = Field(None, description="Code", examples=["123"])
-    groupe: Optional[str] = Field(None, description="Groupe", examples=["10"])
+    code: str | None = Field(None, description="Code", examples=["123"])
+    groupe: str | None = Field(None, description="Groupe", examples=["10"])
 
 
 class CodeConsultWithAncienId(BaseModel):
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None,
         alias="ancienId",
         description="Ancien Id afin de consulter un code",
@@ -1098,7 +1082,7 @@ class CodeConsultWithAncienId(BaseModel):
 
 
 class CirculaireConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -1136,8 +1120,8 @@ class Nature2(Enum):
 
 
 class BoccConsultRequest(BaseModel):
-    for_global_bocc: Optional[bool] = Field(None, alias="forGlobalBocc")
-    id: Optional[str] = Field(None, examples=["boc_20200028_0001_p000.pdf"])
+    for_global_bocc: bool | None = Field(None, alias="forGlobalBocc")
+    id: str | None = Field(None, examples=["boc_20200028_0001_p000.pdf"])
 
 
 class Action(Enum):
@@ -1164,7 +1148,7 @@ class StreamingResponseBody(BaseModel):
 
 
 class KaliTextConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -1187,81 +1171,79 @@ class ArticleIdEliOrAliasRequest(BaseModel):
 
 
 class FileMetadata(BaseModel):
-    path_to_file: Optional[str] = Field(
+    path_to_file: str | None = Field(
         None,
         alias="pathToFile",
         description="Chemin relatif vers le fichier",
         examples=["/JOEA/2016/1230/joe_20161230_0303_c000.pdf.sig"],
     )
-    file_name: Optional[str] = Field(
+    file_name: str | None = Field(
         None,
         alias="fileName",
         description="Nom du fichier",
         examples=["joe_20161230_0303_c000.pdf.sig"],
     )
-    display_size: Optional[str] = Field(
+    display_size: str | None = Field(
         None,
         alias="displaySize",
         description="Taille du fichier avec son unité",
         examples=["586 Ko"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant du fichier dans la base de données",
         examples=["joe_20161230_0303_c000.pdf.sig"],
     )
-    complement_number: Optional[str] = Field(
+    complement_number: str | None = Field(
         None,
         alias="complementNumber",
         description="Numéro complémentaire pour le fonds JORF",
     )
-    date_publi: Optional[datetime] = Field(
+    date_publi: datetime | None = Field(
         None,
         alias="datePubli",
         description="Date de publication",
         examples=["1483056000000"],
     )
-    origine: Optional[str] = Field(
+    origine: str | None = Field(
         None, description="Origine du fichier", examples=["JOE_INAP"]
     )
-    size: Optional[int] = Field(
+    size: int | None = Field(
         None, description="Taille du fichier en octets", examples=[600055]
     )
-    type: Optional[str] = Field(None, description="Type de fichier", examples=["joe"])
-    num: Optional[str] = Field(
+    type: str | None = Field(None, description="Type de fichier", examples=["joe"])
+    num: str | None = Field(
         None, description="Numéro du JO pour le fonds JORF", examples=["0303"]
     )
 
 
 class ModificationDTO(BaseModel):
-    modificateur: Optional[ModificateurDTO] = Field(
+    modificateur: ModificateurDTO | None = Field(
         None, description="Elément ayant apporté la modification"
     )
-    type: Optional[Action] = Field(
+    type: Action | None = Field(
         None, description="Type de modification", examples=["TRANSFERT"]
     )
 
 
 class SearchCanonicalArticleVersionResponse(BaseModel):
-    article_versions: Optional[list[ArticleVersion]] = Field(
+    article_versions: list[ArticleVersion] | None = Field(
         None, alias="articleVersions", description="Liste des versions d'articles"
     )
 
 
 class Attachment(BaseModel):
-    title: Optional[str] = Field(None, description="Titre")
-    name: Optional[str] = Field(None, description="Nom")
-    language: Optional[str] = Field(None, description="Langue", examples=["fr"])
-    author: Optional[str] = Field(None, description="Auteur")
-    keywords: Optional[str] = Field(None, description="Mots clés")
-    date: Optional[datetime] = Field(
-        None, description="Date", examples=["1540986060000"]
-    )
-    content: Optional[str] = Field(None, description="Contenu du fichier textuel")
-    content_length: Optional[int] = Field(
+    title: str | None = Field(None, description="Titre")
+    name: str | None = Field(None, description="Nom")
+    language: str | None = Field(None, description="Langue", examples=["fr"])
+    author: str | None = Field(None, description="Auteur")
+    keywords: str | None = Field(None, description="Mots clés")
+    date: datetime | None = Field(None, description="Date", examples=["1540986060000"])
+    content: str | None = Field(None, description="Contenu du fichier textuel")
+    content_length: int | None = Field(
         None, description="Taille du contenu", examples=[5503]
     )
-    content_type: Optional[str] = Field(
+    content_type: str | None = Field(
         None,
         description="Type de fichier",
         examples=[
@@ -1290,56 +1272,56 @@ class SameNumArticleRequest(BaseModel):
 
 
 class ServicePublicLinksArticleRequest(BaseModel):
-    article_cid: Optional[str] = Field(
+    article_cid: str | None = Field(
         None,
         alias="articleCid",
         description="Identifiant chanonical de l'article",
         examples=["LEGIARTI000006580563"],
     )
-    fond: Optional[str] = Field(
+    fond: str | None = Field(
         None, description="Fond de consultation", examples=["JORF"]
     )
 
 
 class LiensRelatifsDTO(BaseModel):
-    cid_text: Optional[str] = Field(
+    cid_text: str | None = Field(
         None,
         alias="cidText",
         description="Chronical ID du texte de l'élément lié",
         examples=["JORFTEXT000000869867"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant de l'élément lié",
         examples=["LEGIARTI000033012294"],
     )
-    cid_parent: Optional[str] = Field(
+    cid_parent: str | None = Field(
         None,
         alias="cidParent",
         description="Chronical ID du parent de l'élément lié. (Renseigné si besoin pour créer le lien vers l'élément)",
     )
-    date_vigeur: Optional[datetime] = Field(
+    date_vigeur: datetime | None = Field(
         None,
         alias="dateVigeur",
         description="Date pour création du lien",
         examples=["1470787200000"],
     )
-    nature: Optional[Nature] = Field(
+    nature: Nature | None = Field(
         None, description="Nature de texte de l'élément lié", examples=["CODE"]
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         description="Nom de l'élément lié",
         examples=["Code du travail - art. L5143-1 (V)"],
     )
 
 
-class MapStringSuggestValue(RootModel[Optional[dict[str, SuggestValue]]]):
-    root: Optional[dict[str, SuggestValue]] = None
+class MapStringSuggestValue(RootModel[dict[str, SuggestValue] | None]):
+    root: dict[str, SuggestValue] | None = None
 
 
 class KaliContConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -1353,44 +1335,42 @@ class KaliContConsultRequest(BaseModel):
 
 
 class SuggestAccoValue(BaseModel):
-    siret: Optional[str] = Field(None, description="SIRET")
-    raison_sociale: Optional[str] = Field(
+    siret: str | None = Field(None, description="SIRET")
+    raison_sociale: str | None = Field(
         None, alias="raisonSociale", description="Raison sociale"
     )
 
 
 class ArticleDTO(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None,
         alias="dateDebut",
         description="Date de début de la version de l'article",
         examples=["961632000000"],
     )
-    id_text: Optional[str] = Field(
+    id_text: str | None = Field(
         None,
         alias="idText",
         description="Identifiant du texte de l'article",
         examples=["LEGITEXT000006072665"],
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         description="Nom de l'article (concaténation titre texte + num article)",
         examples=["Code de la santé publique - art. L2211-1 (V)"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant de l'article", examples=["LEGIARTI000006687518"]
     )
-    modifications: Optional[list[ModificationDTO]] = Field(
+    modifications: list[ModificationDTO] | None = Field(
         None,
         description="Liste des modifications sur le texte (Utilisée pour les anciens textes)",
     )
-    nature: Optional[Nature] = Field(
+    nature: Nature | None = Field(
         None, description="Nature du texte de l'article", examples=["CODE"]
     )
-    cid: Optional[str] = Field(
-        None, description="Chronical ID de l'article (Non utilisé)"
-    )
-    date_fin: Optional[datetime] = Field(
+    cid: str | None = Field(None, description="Chronical ID de l'article (Non utilisé)")
+    date_fin: datetime | None = Field(
         None,
         alias="dateFin",
         description="Date de fin de la version de l'article",
@@ -1399,31 +1379,31 @@ class ArticleDTO(BaseModel):
 
 
 class SuggestPdcRequest(BaseModel):
-    search_text: Optional[str] = Field(
+    search_text: str | None = Field(
         None, alias="searchText", description="Texte à rechercher", examples=["mariage"]
     )
-    origin: Optional[str] = None
-    fond: Optional[str] = None
+    origin: str | None = None
+    fond: str | None = None
 
 
-class MapStringSuggestAccoValue(RootModel[Optional[dict[str, SuggestAccoValue]]]):
-    root: Optional[dict[str, SuggestAccoValue]] = None
+class MapStringSuggestAccoValue(RootModel[dict[str, SuggestAccoValue] | None]):
+    root: dict[str, SuggestAccoValue] | None = None
 
 
 class LegislaturesListResponse(BaseModel):
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    legislatures: Optional[list[Legislature]] = Field(
+    legislatures: list[Legislature] | None = Field(
         None, description="Liste des législatures"
     )
 
 
 class ArticleConsultWithIdAndNum(BaseModel):
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="ID du LEGITEXT cible", examples=["LEGITEXT000006075116"]
     )
-    num: Optional[str] = Field(
+    num: str | None = Field(
         None, description="Numéro de l'article cible", examples=["5-8"]
     )
 
@@ -1437,21 +1417,21 @@ class DebatParlementaireConsultRequest(BaseModel):
 
 
 class StructureLienSection(BaseModel):
-    date_debut: Optional[datetime] = Field(None, alias="dateDebut")
-    renvoi_num: Optional[str] = Field(None, alias="renvoiNum")
-    etat: Optional[str] = None
-    id: Optional[str] = None
-    titre: Optional[str] = None
-    commentaire: Optional[str] = None
-    renvoi: Optional[str] = None
-    cid: Optional[str] = None
-    date_fin: Optional[datetime] = Field(None, alias="dateFin")
-    url: Optional[str] = None
-    ordre: Optional[int] = None
+    date_debut: datetime | None = Field(None, alias="dateDebut")
+    renvoi_num: str | None = Field(None, alias="renvoiNum")
+    etat: str | None = None
+    id: str | None = None
+    titre: str | None = None
+    commentaire: str | None = None
+    renvoi: str | None = None
+    cid: str | None = None
+    date_fin: datetime | None = Field(None, alias="dateFin")
+    url: str | None = None
+    ordre: int | None = None
 
 
 class JorfConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -1466,16 +1446,14 @@ class JorfConsultRequest(BaseModel):
 
 
 class GlobalBoccListRequest(BaseModel):
-    id_global_bocc: Optional[str] = Field(
+    id_global_bocc: str | None = Field(
         None, alias="idGlobalBocc", examples=["CCO20190051"]
     )
-    sort_value: Optional[str] = Field(
-        None, alias="sortValue", examples=["BOCC_SORT_ASC"]
-    )
-    search_for_single_global_bocc: Optional[bool] = Field(
+    sort_value: str | None = Field(None, alias="sortValue", examples=["BOCC_SORT_ASC"])
+    search_for_single_global_bocc: bool | None = Field(
         None, alias="searchForSingleGlobalBocc"
     )
-    interval_publication: Optional[str] = Field(
+    interval_publication: str | None = Field(
         None, alias="intervalPublication", examples=["01/01/2020 > 31/01/2020"]
     )
     page_size: int = Field(
@@ -1493,27 +1471,27 @@ class GlobalBoccListRequest(BaseModel):
 
 
 class Facet(BaseModel):
-    field: Optional[str] = Field(
+    field: str | None = Field(
         None,
         description="Nom du champ représentant la facette",
         examples=["natureJuridiction"],
     )
-    childs: Optional[dict[str, Facet]] = Field(
+    childs: dict[str, Facet] | None = Field(
         None,
         description="Liste au format map des éléments enfants d'un élément particulier d'une facette ainsi que le nombre de résultats associés. La clé permet de déterminer le parent de cette liste dans les libellés values.",
         examples=[{"TRIBUNAL_ADMINISTATIF": {"values": {"Bordeaux": 2, "Lille": 8}}}],
     )
-    total_element: Optional[int] = Field(
+    total_element: int | None = Field(
         None, alias="totalElement", description="1560", examples=[1560]
     )
-    values: Optional[dict[str, int]] = Field(
+    values: dict[str, int] | None = Field(
         None,
         description="Liste au format map des libellés d'une facette ainsi que le nombre de résultats associés",
         examples=[
             {"COURS_COMPTES": 3295, "TRIBUNAL_ADMINISTATIF": 10, "COURS_APPEL": 35}
         ],
     )
-    facet_elem: Optional[str] = Field(
+    facet_elem: str | None = Field(
         None,
         alias="facetElem",
         description="Nom de la facette",
@@ -1522,26 +1500,24 @@ class Facet(BaseModel):
 
 
 class SearchCanonicalVersionResponse(BaseModel):
-    date_debut: Optional[str] = Field(
-        None, alias="dateDebut", description="Date de début"
-    )
-    cid: Optional[str] = Field(
+    date_debut: str | None = Field(None, alias="dateDebut", description="Date de début")
+    cid: str | None = Field(
         None, description="Chronical ID du texte", examples=["LEGITEXT000006070721"]
     )
-    date_fin: Optional[str] = Field(None, alias="dateFin", description="Date de fin")
+    date_fin: str | None = Field(None, alias="dateFin", description="Date de fin")
 
 
 class EsTextBocc(BaseModel):
-    idccs: Optional[list[str]] = None
-    texte_date: Optional[datetime] = Field(None, alias="texteDate")
-    file_name: Optional[str] = Field(None, alias="fileName")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    entete_title: Optional[str] = Field(None, alias="enteteTitle")
-    id_main_bocc: Optional[str] = Field(None, alias="idMainBocc")
-    path_file: Optional[str] = Field(None, alias="pathFile")
-    num_ann: Optional[int] = Field(None, alias="numAnn")
-    department: Optional[str] = None
-    title: Optional[str] = None
+    idccs: list[str] | None = None
+    texte_date: datetime | None = Field(None, alias="texteDate")
+    file_name: str | None = Field(None, alias="fileName")
+    display_size: str | None = Field(None, alias="displaySize")
+    entete_title: str | None = Field(None, alias="enteteTitle")
+    id_main_bocc: str | None = Field(None, alias="idMainBocc")
+    path_file: str | None = Field(None, alias="pathFile")
+    num_ann: int | None = Field(None, alias="numAnn")
+    department: str | None = None
+    title: str | None = None
 
 
 class ChronoLegiArticleRequest(BaseModel):
@@ -1560,10 +1536,10 @@ class ChronoLegiArticleRequest(BaseModel):
 
 
 class DatesWithNoJoResponse(BaseModel):
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    lst_date_disabled: Optional[list[datetime]] = Field(
+    lst_date_disabled: list[datetime] | None = Field(
         None,
         alias="lstDateDisabled",
         description="Liste des dates",
@@ -1572,72 +1548,70 @@ class DatesWithNoJoResponse(BaseModel):
 
 
 class Nomenclature(BaseModel):
-    arbo: Optional[str] = Field(None, description="arborescent")
-    parent: Optional[str] = Field(None, description="id du parent du jurinome")
-    titre_juritext: Optional[str] = Field(
+    arbo: str | None = Field(None, description="arborescent")
+    parent: str | None = Field(None, description="id du parent du jurinome")
+    titre_juritext: str | None = Field(
         None, alias="titreJuritext", description="titre du juritext"
     )
-    ref_injection: Optional[str] = Field(
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    id: Optional[str] = Field(None, description="id du jurinome")
-    niveau: Optional[int] = Field(None, description="nuveau du jurinome")
-    id_tech_injection: Optional[str] = Field(
+    id: str | None = Field(None, description="id du jurinome")
+    niveau: int | None = Field(None, description="nuveau du jurinome")
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    libelle_arbo: Optional[str] = Field(
+    libelle_arbo: str | None = Field(
         None, alias="libelleArbo", description="le libelle de l'arborescence"
     )
-    feuille: Optional[bool] = Field(None, description="feuille")
-    libelle_niveau: Optional[str] = Field(
+    feuille: bool | None = Field(None, description="feuille")
+    libelle_niveau: str | None = Field(
         None, alias="libelleNiveau", description="le libelle du jurinome"
     )
-    id_juritext: Optional[str] = Field(
+    id_juritext: str | None = Field(
         None, alias="idJuritext", description="id du juritext"
     )
 
 
 class DetailContext(BaseModel):
-    x_path: Optional[str] = Field(
+    x_path: str | None = Field(
         None,
         alias="xPath",
         description="Chemin pour arriver à l'élément dans le XML",
         examples=["/ARTICLE/CONTEXTE/TEXTE/TM/TM/TM/TM/TM/TM/TITRE_TM"],
     )
-    debut: Optional[str] = Field(
+    debut: str | None = Field(
         None, description="Date de début", examples=["1979-07-01"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant technique", examples=["LEGISCTA000006179574"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None, description="Titre", examples=["2e Sous-section : Revenu global"]
     )
-    etat: Optional[str] = Field(
-        None, description="Etat juridique", examples=["VIGUEUR"]
-    )
-    cid: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat juridique", examples=["VIGUEUR"])
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["LEGISCTA000006179574"]
     )
-    fin: Optional[str] = Field(None, description="Date de fin", examples=["2999-01-01"])
+    fin: str | None = Field(None, description="Date de fin", examples=["2999-01-01"])
 
 
 SearchCanonicalVersionRequest = SearchNearestVersionRequest
 
 
 class Bodmr(BaseModel):
-    texts: Optional[BodmrTexts] = None
-    ref_injection: Optional[str] = Field(
+    texts: BodmrTexts | None = None
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    id: Optional[str] = Field(None, description="Identifiant unique")
-    id_tech_injection: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant unique")
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
@@ -1645,180 +1619,180 @@ class Bodmr(BaseModel):
 
 
 class JuriPlanClassementRequest(BaseModel):
-    search_by_niveau: Optional[bool] = Field(
+    search_by_niveau: bool | None = Field(
         None,
         alias="searchByNiveau",
         description="recherche par niveau",
         examples=[False],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="id du JURINOME", examples=["JURINOME000007644451"]
     )
-    libelle: Optional[str] = Field(
+    libelle: str | None = Field(
         None, description="id du JURINOME", examples=["procedure civile"]
     )
-    niveau: Optional[int] = Field(
+    niveau: int | None = Field(
         None, description="niveau ou nous nous trouvons", examples=[0]
     )
-    page: Optional[int] = Field(None, description="la requete ELK", examples=[1])
-    search_suggest: Optional[bool] = Field(
+    page: int | None = Field(None, description="la requete ELK", examples=[1])
+    search_suggest: bool | None = Field(
         None,
         alias="searchSuggest",
         description="recherche par suggestion",
         examples=[False],
     )
-    fond: Optional[str] = Field(
+    fond: str | None = Field(
         None, description="le fond a rechercher", examples=["juri"]
     )
 
 
 class Syndicat(BaseModel):
-    libelle: Optional[str] = Field(None, description="Libellé", examples=["CFDT"])
-    code: Optional[str] = Field(None, description="Code", examples=["3"])
+    libelle: str | None = Field(None, description="Libellé", examples=["CFDT"])
+    code: str | None = Field(None, description="Code", examples=["3"])
 
 
 class Dossier(BaseModel):
-    libelle_texte: Optional[str] = Field(
+    libelle_texte: str | None = Field(
         None, alias="libelleTexte", description="Libellé", examples=["Projet de loi"]
     )
-    id_texte: Optional[str] = Field(None, alias="idTexte", description="Identifiant")
-    contenu_dossier: Optional[str] = Field(
+    id_texte: str | None = Field(None, alias="idTexte", description="Identifiant")
+    contenu_dossier: str | None = Field(
         None, alias="contenuDossier", description="Contenu html du dossier"
     )
 
 
 class ParentChronoDTO(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None,
         alias="dateDebut",
         description="Date de début de la version du noeud impactée",
         examples=["1475280000000"],
     )
-    cid_text: Optional[str] = Field(
+    cid_text: str | None = Field(
         None,
         alias="cidText",
         description="Chronical ID du texte",
         examples=["LEGITEXT000006070721"],
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID de l'élément", examples=["LEGISCTA000032008380"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant unique de l'élément",
         examples=["LEGISCTA000032008380"],
     )
-    nature: Optional[Nature] = Field(
+    nature: Nature | None = Field(
         None, description="Nature/type du texte", examples=["CODE"]
     )
-    articles_cibles: Optional[dict[str, CibleChronoDTO]] = Field(
+    articles_cibles: dict[str, CibleChronoDTO] | None = Field(
         None,
         alias="articlesCibles",
         description="Map listant les articles ciblés par les modifications. La clé correspond à l'ID de l'article cible.",
     )
-    texte_cible: Optional[CibleChronoDTO] = Field(
+    texte_cible: CibleChronoDTO | None = Field(
         None,
         alias="texteCible",
         description="Identifiant du texte, si la modification s'applique directement au niveau du texte (modification du titre)",
     )
-    sections_cibles: Optional[dict[str, CibleChronoDTO]] = Field(
+    sections_cibles: dict[str, CibleChronoDTO] | None = Field(
         None,
         alias="sectionsCibles",
         description="Map listant les sections ciblées par les modifications. La clé correspond à l'ID de la section cible.",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None, description="Nom/titre du parent", examples=["Paragraphe 1 : La capacité"]
     )
 
 
 class SuggestResponse(BaseModel):
-    total_result_number: Optional[int] = Field(None, alias="totalResultNumber")
-    results: Optional[dict[str, dict[str, SuggestValue]]] = Field(
+    total_result_number: int | None = Field(None, alias="totalResultNumber")
+    results: dict[str, dict[str, SuggestValue]] | None = Field(
         None,
         description="Liste des suggestions retournées. La clé représente l'id du texte/section/article",
     )
-    execution_time: Optional[int] = Field(None, alias="executionTime")
+    execution_time: int | None = Field(None, alias="executionTime")
 
 
 class DatePeriod(BaseModel):
-    start: Optional[datetime] = Field(
+    start: datetime | None = Field(
         None, description="Date de début", examples=["2016-01-01"]
     )
-    end: Optional[datetime] = Field(
+    end: datetime | None = Field(
         None, description="Date de fin", examples=["2016-12-31"]
     )
 
 
 class TexteSommaire(BaseModel):
-    autre_resume: Optional[str] = Field(
+    autre_resume: str | None = Field(
         None, alias="autreResume", description="Autre résumé"
     )
-    id: Optional[str] = Field(None, description="Identifiant")
-    abstrats: Optional[str] = Field(None, description="Abstracts")
-    resume_principal: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant")
+    abstrats: str | None = Field(None, description="Abstracts")
+    resume_principal: str | None = Field(
         None, alias="resumePrincipal", description="Résumé principal"
     )
 
 
 class ConsultDateRequest(BaseModel):
-    year: Optional[int] = Field(None, description="Année", examples=[2019])
-    month: Optional[int] = Field(None, description="Mois", examples=[1])
-    day_of_month: Optional[int] = Field(
+    year: int | None = Field(None, description="Année", examples=[2019])
+    month: int | None = Field(None, description="Mois", examples=[1])
+    day_of_month: int | None = Field(
         None, alias="dayOfMonth", description="Jour", examples=[1]
     )
 
 
 class LienTxt(BaseModel):
-    autorite: Optional[str] = Field(None, description="Autorité lié au texte")
-    etat: Optional[str] = Field(None, description="Etat juridique du texte")
-    id: Optional[str] = Field(None, description="Identifiant du texte")
-    titre: Optional[str] = Field(None, description="Titre")
-    date_modif: Optional[datetime] = Field(
+    autorite: str | None = Field(None, description="Autorité lié au texte")
+    etat: str | None = Field(None, description="Etat juridique du texte")
+    id: str | None = Field(None, description="Identifiant du texte")
+    titre: str | None = Field(None, description="Titre")
+    date_modif: datetime | None = Field(
         None, alias="dateModif", description="Dernière date de modification du texte"
     )
-    ministere: Optional[str] = Field(None, description="Ministère lié au texte")
-    emetteur: Optional[str] = Field(None, description="Émetteur")
-    nature: Optional[str] = Field(None, description="Nature")
-    num_sequence: Optional[int] = Field(
+    ministere: str | None = Field(None, description="Ministère lié au texte")
+    emetteur: str | None = Field(None, description="Émetteur")
+    nature: str | None = Field(None, description="Nature")
+    num_sequence: int | None = Field(
         None, alias="numSequence", description="Numéro de séquence"
     )
-    ordre: Optional[int] = Field(None, description="Numéro d'ordre")
+    ordre: int | None = Field(None, description="Numéro d'ordre")
 
 
 class JorfContConsultRequest(BaseModel):
-    page_size: Optional[int] = Field(
+    page_size: int | None = Field(
         None,
         alias="pageSize",
         description="Nombre d'éléments par page (max 100)",
         examples=[10],
     )
-    end: Optional[ConsultDateRequest] = Field(
+    end: ConsultDateRequest | None = Field(
         None, description="Date de fin de recherche du conteneur"
     )
-    search_text: Optional[str] = Field(
+    search_text: str | None = Field(
         None, alias="searchText", description="Texte à rechercher", examples=["mariage"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="identifiant du conteneur JORF recherché",
         examples=["JORFCONT000022470431"],
     )
-    page_number: Optional[int] = Field(
+    page_number: int | None = Field(
         None,
         alias="pageNumber",
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    start: Optional[ConsultDateRequest] = Field(
+    start: ConsultDateRequest | None = Field(
         None, description="Date de début de recherche du conteneur"
     )
-    date: Optional[datetime] = Field(
+    date: datetime | None = Field(
         None, description="Date de référence", examples=["1538352000000"]
     )
-    num: Optional[str] = Field(
+    num: str | None = Field(
         None, description="numéro de JORF recherché", examples=["0022"]
     )
-    highlight_activated: Optional[bool] = Field(
+    highlight_activated: bool | None = Field(
         None,
         alias="highlightActivated",
         description="Activer/Désactiver le highlight, dans la réponse, du texte recherché",
@@ -1827,43 +1801,43 @@ class JorfContConsultRequest(BaseModel):
 
 
 class LienCitation(BaseModel):
-    date_debut: Optional[datetime] = Field(None, alias="dateDebut")
-    parent_cid: Optional[str] = Field(None, alias="parentCid")
-    nature_text: Optional[str] = Field(
+    date_debut: datetime | None = Field(None, alias="dateDebut")
+    parent_cid: str | None = Field(None, alias="parentCid")
+    nature_text: str | None = Field(
         None, alias="natureText", description="Nature du texte lié", examples=["LOI"]
     )
-    link_type: Optional[str] = Field(
+    link_type: str | None = Field(
         None, alias="linkType", description="Type de lien", examples=["MODIFIE"]
     )
-    date_publi: Optional[datetime] = Field(None, alias="datePubli")
-    article_num: Optional[str] = Field(
+    date_publi: datetime | None = Field(None, alias="datePubli")
+    article_num: str | None = Field(
         None, alias="articleNum", description="Numéro de l'article lié", examples=["53"]
     )
-    text_cid: Optional[str] = Field(
+    text_cid: str | None = Field(
         None,
         alias="textCid",
         description="Chronical ID du texte lié",
         examples=["JORFTEXT000030978561"],
     )
-    link_orientation: Optional[str] = Field(
+    link_orientation: str | None = Field(
         None,
         alias="linkOrientation",
         description="Sens de la modification",
         examples=["cible"],
     )
-    text_title: Optional[str] = Field(
+    text_title: str | None = Field(
         None,
         alias="textTitle",
         description="Titre du texte lié",
         examples=["LOI n°2015-990 du 6 août 2015 - art. 53 (V)"],
     )
-    article_id: Optional[str] = Field(
+    article_id: str | None = Field(
         None,
         alias="articleId",
         description="Identifiant de l'article lié",
         examples=["LEGIARTI000032930490"],
     )
-    num_texte: Optional[str] = Field(None, alias="numTexte")
+    num_texte: str | None = Field(None, alias="numTexte")
 
 
 class DossierLegislatifRequest(BaseModel):
@@ -1875,39 +1849,37 @@ class DossierLegislatifRequest(BaseModel):
 
 
 class CodeListResult(BaseModel):
-    date_debut: Optional[str] = Field(
+    date_debut: str | None = Field(
         None,
         alias="dateDebut",
         description="Date de début",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None, description="Titre du code", examples=["Code civil"]
     )
-    etat: Optional[str] = Field(
-        None, description="Etat juridique", examples=["VIGUEUR"]
-    )
-    id: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat juridique", examples=["VIGUEUR"])
+    id: str | None = Field(
         None, description="Identifiant unique", examples=["LEGITEXT000006070721"]
     )
-    last_update: Optional[str] = Field(
+    last_update: str | None = Field(
         None,
         alias="lastUpdate",
         description="Dernière date de mise à jour",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    pdf_file_size: Optional[str] = Field(None, alias="pdfFileSize")
-    pdf_file_path: Optional[str] = Field(None, alias="pdfFilePath")
-    cid: Optional[str] = Field(
+    pdf_file_size: str | None = Field(None, alias="pdfFileSize")
+    pdf_file_path: str | None = Field(None, alias="pdfFilePath")
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["LEGITEXT000006070721"]
     )
-    date_fin: Optional[str] = Field(
+    date_fin: str | None = Field(
         None,
         alias="dateFin",
         description="Date de fin",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    pdf_file_name: Optional[str] = Field(None, alias="pdfFileName")
+    pdf_file_name: str | None = Field(None, alias="pdfFileName")
 
 
 class TypeRecherche(Enum):
@@ -1921,7 +1893,7 @@ class TypeRecherche(Enum):
 
 
 class CritereDTO(BaseModel):
-    proximite: Optional[int] = Field(
+    proximite: int | None = Field(
         None,
         description="Proximité maximum entre les mots du champ valeur. La proximité représente la distance maximale, en mots, entre deux termes recherchés.",
         examples=[2],
@@ -1929,7 +1901,7 @@ class CritereDTO(BaseModel):
     valeur: str = Field(
         ..., description="Mot(s)/expression recherchés", examples=["dispositions"]
     )
-    criteres: Optional[list[CritereDTO]] = Field(
+    criteres: list[CritereDTO] | None = Field(
         None,
         description="Sous-critère/Sous-groupe de critères",
         examples=[
@@ -1956,7 +1928,7 @@ class CritereDTO(BaseModel):
 
 
 class CnilConsultWithAncienId(BaseModel):
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None,
         alias="ancienId",
         description="Ancien Id afin de consulter un texte du fond CNIL",
@@ -1965,31 +1937,31 @@ class CnilConsultWithAncienId(BaseModel):
 
 
 class SearchExtract(BaseModel):
-    date_debut: Optional[str] = Field(
+    date_debut: str | None = Field(
         None,
         alias="dateDebut",
         description="Date de début",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    title: Optional[str] = None
-    date_version: Optional[str] = Field(
+    title: str | None = None
+    date_version: str | None = Field(
         None,
         alias="dateVersion",
         description="Date de la version (date de début ou date de fin)",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    id: Optional[str] = None
-    values: Optional[list[str]] = None
-    search_field_name: Optional[str] = Field(None, alias="searchFieldName")
-    legal_status: Optional[LegalStatu] = Field(None, alias="legalStatus")
-    type: Optional[str] = None
-    date_fin: Optional[str] = Field(
+    id: str | None = None
+    values: list[str] | None = None
+    search_field_name: str | None = Field(None, alias="searchFieldName")
+    legal_status: LegalStatu | None = Field(None, alias="legalStatus")
+    type: str | None = None
+    date_fin: str | None = Field(
         None,
         alias="dateFin",
         description="Date de fin",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    num: Optional[str] = None
+    num: str | None = None
 
 
 class KaliContConsultIdccRequest(BaseModel):
@@ -2001,52 +1973,52 @@ class KaliContConsultIdccRequest(BaseModel):
 
 
 class LienModification(BaseModel):
-    link_type: Optional[str] = Field(
+    link_type: str | None = Field(
         None, alias="linkType", description="Type de lien", examples=["MODIFIE"]
     )
-    text_cid: Optional[str] = Field(
+    text_cid: str | None = Field(
         None,
         alias="textCid",
         description="Chronical ID du texte lié",
         examples=["JORFTEXT000030978561"],
     )
-    nature_text: Optional[str] = Field(
+    nature_text: str | None = Field(
         None, alias="natureText", description="Nature du texte lié", examples=["LOI"]
     )
-    date_publi_texte: Optional[str] = Field(
+    date_publi_texte: str | None = Field(
         None,
         alias="datePubliTexte",
         description="Date de publication du texte lié",
         examples=["2015-08-07"],
     )
-    article_num: Optional[str] = Field(
+    article_num: str | None = Field(
         None, alias="articleNum", description="Numéro de l'article lié", examples=["53"]
     )
-    text_title: Optional[str] = Field(
+    text_title: str | None = Field(
         None,
         alias="textTitle",
         description="Titre du texte lié",
         examples=["LOI n°2015-990 du 6 août 2015 - art. 53 (V)"],
     )
-    link_orientation: Optional[str] = Field(
+    link_orientation: str | None = Field(
         None,
         alias="linkOrientation",
         description="Sens de la modification",
         examples=["cible"],
     )
-    date_signa_texte: Optional[str] = Field(
+    date_signa_texte: str | None = Field(
         None,
         alias="dateSignaTexte",
         description="Date de signature du texte lié",
         examples=["2015-08-06"],
     )
-    article_id: Optional[str] = Field(
+    article_id: str | None = Field(
         None,
         alias="articleId",
         description="Identifiant de l'article lié",
         examples=["LEGIARTI000032930490"],
     )
-    date_debut_cible: Optional[str] = Field(
+    date_debut_cible: str | None = Field(
         None,
         alias="dateDebutCible",
         description="Date de début de la cible",
@@ -2055,45 +2027,45 @@ class LienModification(BaseModel):
 
 
 class SearchTitle(BaseModel):
-    title: Optional[str] = Field(None, description="Titre", examples=["Code civil"])
-    legal_status: Optional[str] = Field(
+    title: str | None = Field(None, description="Titre", examples=["Code civil"])
+    legal_status: str | None = Field(
         None, alias="legalStatus", description="Etat juridique de la version"
     )
-    id: Optional[str] = Field(None, description="Identifiant du texte")
-    start_date: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant du texte")
+    start_date: str | None = Field(
         None,
         alias="startDate",
         description="Date de début de la version",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    end_date: Optional[str] = Field(
+    end_date: str | None = Field(
         None,
         alias="endDate",
         description="Date de fin de la version",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID du texte", examples=["LEGITEXT000006070721"]
     )
-    nature: Optional[str] = Field(None, description="Nature du texte")
+    nature: str | None = Field(None, description="Nature du texte")
 
 
 class TexteReference(BaseModel):
-    url: Optional[str] = Field(None, description="Lien vers le texte")
-    texte_reference: Optional[str] = Field(
+    url: str | None = Field(None, description="Lien vers le texte")
+    texte_reference: str | None = Field(
         None, alias="texteReference", description="Texte de référence"
     )
 
 
 class LawDecreeConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
         examples=["constitution 1958"],
     )
     date: str = Field(..., description="Date de consultation", examples=["2021-04-15"])
-    from_suggest: Optional[bool] = Field(None, alias="fromSuggest")
+    from_suggest: bool | None = Field(None, alias="fromSuggest")
     text_id: str = Field(
         ...,
         alias="textId",
@@ -2103,28 +2075,26 @@ class LawDecreeConsultRequest(BaseModel):
 
 
 class SectionsRevisionArticleResponse(BaseModel):
-    new_texts: Optional[list[ArticleDTO]] = Field(
+    new_texts: list[ArticleDTO] | None = Field(
         None, alias="newTexts", description="Liste des nouveaux textes liés à l'article"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    old_texts: Optional[list[ArticleDTO]] = Field(
+    old_texts: list[ArticleDTO] | None = Field(
         None, alias="oldTexts", description="Liste des anciens textes liés à l'article"
     )
 
 
 class Arborescence(BaseModel):
-    liens: Optional[list[Lien]] = Field(
+    liens: list[Lien] | None = Field(
         None, description="Liste des liens de premier niveau"
     )
-    niveaux: Optional[list[Niveau]] = Field(
-        None, description="Liste des niveaux enfants"
-    )
+    niveaux: list[Niveau] | None = Field(None, description="Liste des niveaux enfants")
 
 
 class AccoConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -2138,11 +2108,11 @@ class AccoConsultRequest(BaseModel):
 
 
 class StructureLienArticle(BaseModel):
-    date_debut: Optional[datetime] = Field(None, alias="dateDebut")
-    id: Optional[str] = None
-    etat: Optional[str] = None
-    date_fin: Optional[datetime] = Field(None, alias="dateFin")
-    url: Optional[str] = None
+    date_debut: datetime | None = Field(None, alias="dateDebut")
+    id: str | None = None
+    etat: str | None = None
+    date_fin: datetime | None = Field(None, alias="dateFin")
+    url: str | None = None
 
 
 class Sort2(Enum):
@@ -2150,16 +2120,14 @@ class Sort2(Enum):
 
 
 class CodeListRequest(BaseModel):
-    sort: Optional[Sort2] = Field(
-        None, description="Ordre de tri", examples=["TITLE_ASC"]
-    )
+    sort: Sort2 | None = Field(None, description="Ordre de tri", examples=["TITLE_ASC"])
     page_size: int = Field(
         ...,
         alias="pageSize",
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    states: Optional[list[LegalStatu]] = Field(
+    states: list[LegalStatu] | None = Field(
         None,
         description="Liste des états juridiques à filtrer",
         examples=[["VIGUEUR", "ABROGE", "VIGUEUR_DIFF"]],
@@ -2170,7 +2138,7 @@ class CodeListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    code_name: Optional[str] = Field(
+    code_name: str | None = Field(
         None,
         alias="codeName",
         description="Titre de code à chercher",
@@ -2179,7 +2147,7 @@ class CodeListRequest(BaseModel):
 
 
 class CnilConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -2194,7 +2162,7 @@ class CnilConsultRequest(BaseModel):
 
 
 class JuriConsultWithAncienId(BaseModel):
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None,
         alias="ancienId",
         description="Ancien Id afin de consulter un texte des fonds JURI",
@@ -2203,7 +2171,7 @@ class JuriConsultWithAncienId(BaseModel):
 
 
 class LegiConsultRequest(BaseModel):
-    searched_string: Optional[str] = Field(
+    searched_string: str | None = Field(
         None,
         alias="searchedString",
         description="Texte de la recherche ayant aboutie à la consultation du texte",
@@ -2219,10 +2187,10 @@ class LegiConsultRequest(BaseModel):
 
 
 class ServicePublicLinksArticleResponse(BaseModel):
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    liens_sp: Optional[dict[str, str]] = Field(
+    liens_sp: dict[str, str] | None = Field(
         None,
         alias="liensSP",
         description="Liste des liens service public associés à notre article",
@@ -2236,19 +2204,19 @@ class LastNElementRequest(BaseModel):
 
 
 class Tms(BaseModel):
-    liens_txt: Optional[list[LienTxt]] = Field(
+    liens_txt: list[LienTxt] | None = Field(
         None,
         alias="liensTxt",
         description="Liste des liens vers les textes de la section courante",
     )
-    ordre: Optional[int] = Field(
+    ordre: int | None = Field(
         None, description="Numéro d'ordre de la section", examples=[3]
     )
-    tms: Optional[list[Tms]] = Field(
+    tms: list[Tms] | None = Field(
         None, description="Liste des sections enfants de la section courante"
     )
-    titre: Optional[str] = Field(None, description="Titre de la section")
-    niv: Optional[int] = Field(None, description="Niveau de la section", examples=[1])
+    titre: str | None = Field(None, description="Titre de la section")
+    niv: int | None = Field(None, description="Niveau de la section", examples=[1])
 
 
 class JorfConsultWithNorRequest(BaseModel):
@@ -2256,11 +2224,11 @@ class JorfConsultWithNorRequest(BaseModel):
 
 
 class DossiersLegislatifsListResponse(BaseModel):
-    legislature: Optional[Legislature] = Field(None, description="Législature associée")
-    execution_time: Optional[int] = Field(
+    legislature: Legislature | None = Field(None, description="Législature associée")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    dossiers_legislatifs: Optional[list[DossierLegislatifResult]] = Field(
+    dossiers_legislatifs: list[DossierLegislatifResult] | None = Field(
         None,
         alias="dossiersLegislatifs",
         description="Liste des dossiers législatifs répondant à la requête",
@@ -2268,134 +2236,132 @@ class DossiersLegislatifsListResponse(BaseModel):
 
 
 class QuestionsEcritesParlementairesListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre total de résultats",
         examples=[20],
     )
-    types_parlement: Optional[Facet] = Field(
+    types_parlement: Facet | None = Field(
         None,
         alias="typesParlement",
         description="Facette listant les types de parlement (Assemblée ou Sénat)",
     )
-    results: Optional[list[EsQuestionsEcritesParlementaires]] = Field(
+    results: list[EsQuestionsEcritesParlementaires] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    display_size: Optional[str] = Field(
+    display_size: str | None = Field(
         None,
         alias="displaySize",
         description="Taille du fichier avec son unité",
         examples=["45,24 Ko"],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
 
 
 class GetJorfContResponse(BaseModel):
-    total_nb_result: Optional[int] = Field(
+    total_nb_result: int | None = Field(
         None, alias="totalNbResult", description="Nombre de résultats", examples=[5]
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    containers: Optional[list[Conteneur]] = Field(
+    containers: list[Conteneur] | None = Field(
         None, description="Liste des N derniers conteneurs"
     )
 
 
 class DossierLegislatif(BaseModel):
-    legislature: Optional[Legislature] = Field(None, description="Législature")
-    url: Optional[str] = Field(None, description="chemin relatif vers le fichier xml")
-    id: Optional[str] = Field(
+    legislature: Legislature | None = Field(None, description="Législature")
+    url: str | None = Field(None, description="chemin relatif vers le fichier xml")
+    id: str | None = Field(
         None, description="Identifiant du dossier", examples=["JORFDOLE000028196681"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre du dossier legislatif",
         examples=[
             "LOI n° 2013-1279 du 29 décembre 2013 de finances rectificative pour 2013"
         ],
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    expose_motif: Optional[str] = Field(
+    expose_motif: str | None = Field(
         None, alias="exposeMotif", description="Texte html des motifs"
     )
-    nature: Optional[str] = Field(None, description="nature")
-    date_derniere_modification: Optional[datetime] = Field(
+    nature: str | None = Field(None, description="nature")
+    date_derniere_modification: datetime | None = Field(
         None,
         alias="dateDerniereModification",
         description="Date de dernière modification",
         examples=["1391990400000"],
     )
-    type: Optional[str] = Field(None, description="type", examples=["LOI_PUBLIEE"])
-    dossiers: Optional[list[Dossier]] = Field(None, description="Liste des dossiers")
-    date_maj_echeancier: Optional[datetime] = Field(
+    type: str | None = Field(None, description="type", examples=["LOI_PUBLIEE"])
+    dossiers: list[Dossier] | None = Field(None, description="Liste des dossiers")
+    date_maj_echeancier: datetime | None = Field(
         None,
         alias="dateMajEcheancier",
         description="Date de dernière modification de l'échéancier",
         examples=["1391990400000"],
     )
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None,
         alias="ancienId",
         description="Ancien ID",
         examples=["JORFDOLE000028196699"],
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["JORF"])
-    date_creation: Optional[datetime] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["JORF"])
+    date_creation: datetime | None = Field(
         None,
         alias="dateCreation",
         description="Date de création",
         examples=["1388361600000"],
     )
-    echeancier: Optional[str] = Field(None, description="Echéancier")
-    ref_injection: Optional[str] = Field(
+    echeancier: str | None = Field(None, description="Echéancier")
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    arborescence: Optional[Arborescence] = Field(None, description="Arborescence")
+    arborescence: Arborescence | None = Field(None, description="Arborescence")
 
 
 class LODAListResult(BaseModel):
-    date_debut: Optional[str] = Field(
+    date_debut: str | None = Field(
         None,
         alias="dateDebut",
         description="Date de début",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    etat: Optional[str] = Field(
-        None, description="Etat juridique", examples=["VIGUEUR"]
-    )
-    id: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat juridique", examples=["VIGUEUR"])
+    id: str | None = Field(
         None, description="Identifiant unique", examples=["LEGITEXT000033280430"]
     )
-    last_update: Optional[str] = Field(
+    last_update: str | None = Field(
         None,
         alias="lastUpdate",
         description="Date de dernière mise à jour",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre",
         examples=[
             "Ordonnance n° 2016-1406 du 20 octobre 2016 portant adaptation et simplification de la législation relative à l'Etablissement français du sang et aux activités liées à la transfusion sanguine"
         ],
     )
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers législatifs"
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["JORFTEXT000033279563"]
     )
-    date_fin: Optional[str] = Field(
+    date_fin: str | None = Field(
         None,
         alias="dateFin",
         description="Date de fin",
@@ -2404,317 +2370,315 @@ class LODAListResult(BaseModel):
 
 
 class Circulaire(BaseModel):
-    nor: Optional[str] = Field(
-        None, description="Numéro NOR", examples=["MENV1829930J"]
-    )
-    ministeres_deposants: Optional[list[str]] = Field(
+    nor: str | None = Field(None, description="Numéro NOR", examples=["MENV1829930J"])
+    ministeres_deposants: list[str] | None = Field(
         None, alias="ministeresDeposants", description="Liste des ministères déposants"
     )
-    utilisateur_deposant_ministere_code: Optional[int] = Field(
+    utilisateur_deposant_ministere_code: int | None = Field(
         None,
         alias="utilisateurDeposantMinistereCode",
         description="Code du ministère déposant",
         examples=[7],
     )
-    etat: Optional[str] = Field(None, description="Etat", examples=["V"])
-    relevant_date: Optional[datetime] = Field(None, alias="relevantDate")
-    numero_cerfa: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat", examples=["V"])
+    relevant_date: datetime | None = Field(None, alias="relevantDate")
+    numero_cerfa: str | None = Field(
         None, alias="numeroCerfa", description="Numéro CERFA"
     )
-    resume: Optional[str] = Field(None, description="Résumé")
-    taille_fichier_pdf: Optional[int] = Field(
+    resume: str | None = Field(None, description="Résumé")
+    taille_fichier_pdf: int | None = Field(
         None,
         alias="tailleFichierPdf",
         description="Taille du fichier PDF en octets",
         examples=[644810],
     )
-    date_opposabilite: Optional[datetime] = Field(
+    date_opposabilite: datetime | None = Field(
         None,
         alias="dateOpposabilite",
         description="Date de déclaration d'opposabilité",
         examples=["1543190400000"],
     )
-    date_export: Optional[datetime] = Field(
+    date_export: datetime | None = Field(
         None,
         alias="dateExport",
         description="Date d'export",
         examples=["1543536000000"],
     )
-    type_service: Optional[str] = Field(None, alias="typeService", examples=["oui"])
-    ref_injection: Optional[str] = Field(
+    type_service: str | None = Field(None, alias="typeService", examples=["oui"])
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    size_to_display: Optional[str] = Field(
+    size_to_display: str | None = Field(
         None,
         alias="sizeToDisplay",
         description="Taille du fichier PDF avec son unité",
         examples=["629,7 Ko"],
     )
-    email_deposant: Optional[str] = Field(
+    email_deposant: str | None = Field(
         None, alias="emailDeposant", description="Email déposant"
     )
-    mots_cles: Optional[list[str]] = Field(
+    mots_cles: list[str] | None = Field(
         None,
         alias="motsCles",
         description="Liste des mots clés",
         examples=[["Enseignement, Education  et Sciences et techniques"]],
     )
-    attachment: Optional[Attachment] = None
-    opposable: Optional[str] = Field(
+    attachment: Attachment | None = None
+    opposable: str | None = Field(
         None, description="Indique si la circulaire est opposable", examples=["O"]
     )
-    mots_cles_libres: Optional[str] = Field(
+    mots_cles_libres: str | None = Field(
         None,
         alias="motsClesLibres",
         description="Liste des mots clés libres",
         examples=["périscolaire ; accueils collectifs de mineurs ; Plan mercredi"],
     )
-    nota: Optional[str] = Field(None, description="Nota")
-    remplace: Optional[str] = Field(
+    nota: str | None = Field(None, description="Nota")
+    remplace: str | None = Field(
         None,
         examples=[
             "À compter du 15 décembre 2017 : Instruction n° 225/DEF/TM/T du 29 mars 1995 (BOC, p. 1661 ; BOEM 404.3.3)."
         ],
     )
-    annexes: Optional[str] = Field(None, description="Annexes", examples=["4"])
-    attachment_name: Optional[str] = Field(
+    annexes: str | None = Field(None, description="Annexes", examples=["4"])
+    attachment_name: str | None = Field(
         None,
         alias="attachmentName",
         description="Nom du fichier PDF lié",
         examples=["cir_44128.pdf"],
     )
-    id: Optional[str] = Field(None, description="Identifiant", examples=["44128"])
-    titre: Optional[str] = Field(
+    id: str | None = Field(None, description="Identifiant", examples=["44128"])
+    titre: str | None = Field(
         None,
         description="Titre de la circulaire",
         examples=["Instruction relative à la mise en oeuvre du Plan mercredi"],
     )
-    numero_interne: Optional[str] = Field(
+    numero_interne: str | None = Field(
         None, alias="numeroInterne", description="Numéro interne", examples=["2018-139"]
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["CIRC"])
-    attachment_url: Optional[str] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["CIRC"])
+    attachment_url: str | None = Field(
         None, alias="attachmentUrl", description="Chemin vers le fichier PDF"
     )
-    date_signature: Optional[datetime] = Field(
+    date_signature: datetime | None = Field(
         None,
         alias="dateSignature",
         description="Date de signature",
         examples=["1543190400000"],
     )
-    textes_references: Optional[list[TexteReference]] = Field(
+    textes_references: list[TexteReference] | None = Field(
         None, alias="textesReferences", description="Liste des textes de référence"
     )
-    signataire: Optional[str] = Field(
+    signataire: str | None = Field(
         None,
         description="Signataire",
         examples=[
             "A LAURENT, SG-MCAS, JP VINQUANT, DGCS et A BURSTIN, Directrice de la CNSA"
         ],
     )
-    date_mise_application: Optional[datetime] = Field(
+    date_mise_application: datetime | None = Field(
         None, alias="dateMiseApplication", description="Date de mise en application"
     )
-    auteur: Optional[str] = Field(
+    auteur: str | None = Field(
         None,
         description="Auteur",
         examples=["Le ministre de l'éducation nationale et de la jeunesse"],
     )
-    reference_publication_jo_bo: Optional[str] = Field(
+    reference_publication_jo_bo: str | None = Field(
         None,
         alias="referencePublicationJoBo",
         description="Référence de publication",
         examples=["7293"],
     )
-    categories: Optional[list[str]] = Field(None, description="Liste des catégories")
-    type_gouv: Optional[str] = Field(None, alias="typeGouv", examples=["oui"])
-    date_depot: Optional[datetime] = Field(
+    categories: list[str] | None = Field(None, description="Liste des catégories")
+    type_gouv: str | None = Field(None, alias="typeGouv", examples=["oui"])
+    date_depot: datetime | None = Field(
         None, alias="dateDepot", description="Date de dépôt", examples=["1543449600000"]
     )
-    destinataire: Optional[str] = Field(None, description="Destinataire")
-    domaines: Optional[list[str]] = Field(
+    destinataire: str | None = Field(None, description="Destinataire")
+    domaines: list[str] | None = Field(
         None,
         description="Liste des domaines",
         examples=[["Jeunesse, sports, vie associative"]],
     )
-    data: Optional[str] = Field(None, description="Contenu du fichier en base64")
-    utilisateur_deposant_ministere: Optional[str] = Field(
+    data: str | None = Field(None, description="Contenu du fichier en base64")
+    utilisateur_deposant_ministere: str | None = Field(
         None,
         alias="utilisateurDeposantMinistere",
         description="Nom du ministère déposant",
         examples=["MEN - Education nationale"],
     )
-    nota_html: Optional[str] = Field(
+    nota_html: str | None = Field(
         None, alias="notaHtml", description="Texte HTML des notas"
     )
 
 
 class BodmrListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    years: Optional[Facet] = Field(
+    years: Facet | None = Field(
         None, description="Facette listant les années disponibles"
     )
-    display_size: Optional[str] = Field(
+    display_size: str | None = Field(
         None,
         alias="displaySize",
         description="Taille du fichier avec son unité",
         examples=["45,24 Ko"],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    pdf_metadatas: Optional[list[PdfMetadata]] = Field(
+    pdf_metadatas: list[PdfMetadata] | None = Field(
         None, alias="pdfMetadatas", description="Liste des metadata concernant les pdfs"
     )
-    results: Optional[list[Bodmr]] = Field(
+    results: list[Bodmr] | None = Field(
         None, description="Liste des résultats de la page"
     )
 
 
 class Debat(BaseModel):
-    date_parution: Optional[datetime] = Field(None, alias="dateParution")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    id: Optional[str] = None
-    numero_parution: Optional[int] = Field(None, alias="numeroParution")
-    id_tech_injection: Optional[str] = Field(None, alias="idTechInjection")
-    origine: Optional[str] = None
-    attachment_url: Optional[str] = Field(None, alias="attachmentUrl")
-    annee_parution: Optional[int] = Field(None, alias="anneeParution")
-    type_assemblee: Optional[str] = Field(None, alias="typeAssemblee")
-    legislature: Optional[int] = None
-    id_eli: Optional[str] = Field(None, alias="idEli")
-    date_seance: Optional[datetime] = Field(None, alias="dateSeance")
-    attachment: Optional[Attachment] = None
-    session: Optional[str] = None
-    ref_injection: Optional[str] = Field(None, alias="refInjection")
-    data: Optional[str] = None
-    path_to_file: Optional[str] = Field(None, alias="pathToFile")
-    nom_session: Optional[str] = Field(None, alias="nomSession")
+    date_parution: datetime | None = Field(None, alias="dateParution")
+    display_size: str | None = Field(None, alias="displaySize")
+    id: str | None = None
+    numero_parution: int | None = Field(None, alias="numeroParution")
+    id_tech_injection: str | None = Field(None, alias="idTechInjection")
+    origine: str | None = None
+    attachment_url: str | None = Field(None, alias="attachmentUrl")
+    annee_parution: int | None = Field(None, alias="anneeParution")
+    type_assemblee: str | None = Field(None, alias="typeAssemblee")
+    legislature: int | None = None
+    id_eli: str | None = Field(None, alias="idEli")
+    date_seance: datetime | None = Field(None, alias="dateSeance")
+    attachment: Attachment | None = None
+    session: str | None = None
+    ref_injection: str | None = Field(None, alias="refInjection")
+    data: str | None = None
+    path_to_file: str | None = Field(None, alias="pathToFile")
+    nom_session: str | None = Field(None, alias="nomSession")
 
 
 class ConventionsListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    legal_status: Optional[Facet] = Field(
+    legal_status: Facet | None = Field(
         None,
         alias="legalStatus",
         description="Facette listant les différents états juridiques",
     )
-    results: Optional[list[ConventionsListResult]] = Field(
+    results: list[ConventionsListResult] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    type_texte: Optional[Facet] = Field(
+    type_texte: Facet | None = Field(
         None,
         alias="typeTexte",
         description="Facette listant les différents type de Texte",
     )
-    mote_cles: Optional[Facet] = Field(
+    mote_cles: Facet | None = Field(
         None, alias="moteCles", description="Facette listant les mots clés"
     )
 
 
 class SuggestAccoResponse(BaseModel):
-    total_result_number: Optional[int] = Field(None, alias="totalResultNumber")
-    results: Optional[dict[str, dict[str, SuggestAccoValue]]] = Field(
+    total_result_number: int | None = Field(None, alias="totalResultNumber")
+    results: dict[str, dict[str, SuggestAccoValue]] | None = Field(
         None, description="Liste des suggestions"
     )
-    execution_time: Optional[int] = Field(None, alias="executionTime")
+    execution_time: int | None = Field(None, alias="executionTime")
 
 
 class ConsultCirculaireResponse(BaseModel):
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    circulaire: Optional[Circulaire] = Field(None, description="Circulaire")
+    circulaire: Circulaire | None = Field(None, description="Circulaire")
 
 
 class EsParutionBocc(BaseModel):
-    texts: Optional[list[EsTextBocc]] = None
-    ref_injection: Optional[str] = Field(None, alias="refInjection")
-    global_bocc: Optional[EsGlobalBocc] = Field(None, alias="globalBocc")
-    id: Optional[str] = None
-    id_tech_injection: Optional[str] = Field(None, alias="idTechInjection")
+    texts: list[EsTextBocc] | None = None
+    ref_injection: str | None = Field(None, alias="refInjection")
+    global_bocc: EsGlobalBocc | None = Field(None, alias="globalBocc")
+    id: str | None = None
+    id_tech_injection: str | None = Field(None, alias="idTechInjection")
 
 
 class Context(BaseModel):
-    nombre_version_parent: Optional[int] = Field(
+    nombre_version_parent: int | None = Field(
         None,
         alias="nombreVersionParent",
         description="Nombre de versions existantes pour le parent",
         examples=[1],
     )
-    longeur_chemin: Optional[int] = Field(
+    longeur_chemin: int | None = Field(
         None, alias="longeurChemin", description="Longueur du chemin", examples=[53]
     )
-    titre_txt: Optional[list[DetailContext]] = Field(
+    titre_txt: list[DetailContext] | None = Field(
         None,
         alias="titreTxt",
         description="Liste des versions de titres pour le texte parent",
     )
-    titres_tm: Optional[list[DetailContext]] = Field(
+    titres_tm: list[DetailContext] | None = Field(
         None, alias="titresTM", description="Liste des sections parentes de l'élément"
     )
 
 
 class DocsAdminsListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    results: Optional[list[DocumentAdministratif]] = Field(
+    results: list[DocumentAdministratif] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    years: Optional[Facet] = Field(
+    years: Facet | None = Field(
         None, description="Facette listant les années disponibles"
     )
 
 
 class CodeListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    states: Optional[Facet] = Field(
+    states: Facet | None = Field(
         None, description="Facette listant les différents états juridiques"
     )
-    results: Optional[list[CodeListResult]] = Field(
+    results: list[CodeListResult] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    code_names: Optional[Facet] = Field(
+    code_names: Facet | None = Field(
         None,
         alias="codeNames",
         description="Facette listant les titres des codes disponibles",
@@ -2722,43 +2686,41 @@ class CodeListResponse(BaseModel):
 
 
 class Accord(BaseModel):
-    date_effet: Optional[datetime] = Field(
+    date_effet: datetime | None = Field(
         None,
         alias="dateEffet",
         description="Date d'effet de l'accord",
         examples=["1539820800000"],
     )
-    themes: Optional[list[Theme]] = Field(None, description="Liste des thèmes")
-    conforme_version_integrale: Optional[bool] = Field(
+    themes: list[Theme] | None = Field(None, description="Liste des thèmes")
+    conforme_version_integrale: bool | None = Field(
         None,
         alias="conformeVersionIntegrale",
         description="Indique si l'accord consulté est conforme à la version intégrale",
         examples=[True],
     )
-    date_maj: Optional[datetime] = Field(
+    date_maj: datetime | None = Field(
         None,
         alias="dateMaj",
         description="Date de mise à jour",
         examples=["1542672000000"],
     )
-    nature: Optional[str] = Field(None, description="Nature", examples=["ACCORD"])
-    signataires: Optional[list[str]] = Field(
+    nature: str | None = Field(None, description="Nature", examples=["ACCORD"])
+    signataires: list[str] | None = Field(
         None, description="Liste des signataires", examples=[["01"]]
     )
-    date_diffusion: Optional[datetime] = Field(
+    date_diffusion: datetime | None = Field(
         None,
         alias="dateDiffusion",
         description="Date de diffusion",
         examples=["1543968000000"],
     )
-    date_texte: Optional[datetime] = Field(
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date du texte", examples=["1539820800000"]
     )
-    relevant_date: Optional[datetime] = Field(None, alias="relevantDate")
-    attachment: Optional[Attachment] = Field(
-        None, description="Détail du fichier attaché"
-    )
-    titre_texte: Optional[str] = Field(
+    relevant_date: datetime | None = Field(None, alias="relevantDate")
+    attachment: Attachment | None = Field(None, description="Détail du fichier attaché")
+    titre_texte: str | None = Field(
         None,
         alias="titreTexte",
         description="Titre du texte",
@@ -2766,100 +2728,94 @@ class Accord(BaseModel):
             "Un Protocole d'Accord relatif à l'Organisation de la Négociation Annuelle Obligatoire"
         ],
     )
-    ref_injection: Optional[str] = Field(
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    url: Optional[str] = Field(None, description="Chemin vers le fichier xml")
-    secteur: Optional[str] = Field(
+    url: str | None = Field(None, description="Chemin vers le fichier xml")
+    secteur: str | None = Field(
         None,
         description="Secteur d'activité",
         examples=["Construction de véhicules automobiles"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant", examples=["ACCOTEXT000037731479"]
     )
-    code_idcc: Optional[str] = Field(None, alias="codeIdcc", description="IDCC")
-    raison_sociale: Optional[str] = Field(
+    code_idcc: str | None = Field(None, alias="codeIdcc", description="IDCC")
+    raison_sociale: str | None = Field(
         None,
         alias="raisonSociale",
         description="Raison sociale",
         examples=["SAS G.P - GROUPE PILOTE"],
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["ACCO"])
-    numero: Optional[str] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["ACCO"])
+    numero: str | None = Field(
         None, description="Numéro de l'accord", examples=["T04418002188"]
     )
-    date_fin: Optional[datetime] = Field(
+    date_fin: datetime | None = Field(
         None, alias="dateFin", description="Date de fin", examples=["1543276800000"]
     )
-    syndicats: Optional[list[Syndicat]] = Field(None, description="Liste des syndicats")
-    attachement_url: Optional[str] = Field(
+    syndicats: list[Syndicat] | None = Field(None, description="Liste des syndicats")
+    attachement_url: str | None = Field(
         None, alias="attachementUrl", description="Chemin vers le fichier attaché"
     )
-    code_ape: Optional[str] = Field(
+    code_ape: str | None = Field(
         None, alias="codeApe", description="Code APE", examples=["2910Z"]
     )
-    adresses_postales: Optional[list[AdressePostale]] = Field(
+    adresses_postales: list[AdressePostale] | None = Field(
         None, alias="adressesPostales", description="Liste des addresses postales"
     )
-    file_size: Optional[str] = Field(
+    file_size: str | None = Field(
         None,
         alias="fileSize",
         description="Taille du fichier attaché avec son unité",
         examples=["17,5 Ko"],
     )
-    date_depot: Optional[datetime] = Field(
+    date_depot: datetime | None = Field(
         None, alias="dateDepot", description="Date de dépôt", examples=["1542326400000"]
     )
-    code_unite_signataire: Optional[str] = Field(
+    code_unite_signataire: str | None = Field(
         None,
         alias="codeUniteSignataire",
         description="Code du signataire",
         examples=["05"],
     )
-    data: Optional[str] = Field(
-        None, description="Contenu du fichier attaché en base64"
-    )
-    siret: Optional[str] = Field(None, description="SIRET", examples=["87280278000025"])
+    data: str | None = Field(None, description="Contenu du fichier attaché en base64")
+    siret: str | None = Field(None, description="SIRET", examples=["87280278000025"])
 
 
 class Section(BaseModel):
-    date_debut: Optional[datetime] = Field(None, alias="dateDebut")
-    id: Optional[str] = None
-    titre: Optional[str] = None
-    liens_section: Optional[list[StructureLienSection]] = Field(
-        None, alias="liensSection"
-    )
-    liens_article: Optional[list[StructureLienArticle]] = Field(
-        None, alias="liensArticle"
-    )
-    commentaire: Optional[str] = None
-    cid: Optional[str] = None
-    date_fin: Optional[datetime] = Field(None, alias="dateFin")
-    id_tech_injection: Optional[str] = Field(None, alias="idTechInjection")
-    nota: Optional[str] = None
-    liens_modification: Optional[list[Lien]] = Field(None, alias="liensModification")
-    context: Optional[Context] = None
-    nota_html: Optional[str] = Field(None, alias="notaHtml")
-    ref_injection: Optional[str] = Field(None, alias="refInjection")
+    date_debut: datetime | None = Field(None, alias="dateDebut")
+    id: str | None = None
+    titre: str | None = None
+    liens_section: list[StructureLienSection] | None = Field(None, alias="liensSection")
+    liens_article: list[StructureLienArticle] | None = Field(None, alias="liensArticle")
+    commentaire: str | None = None
+    cid: str | None = None
+    date_fin: datetime | None = Field(None, alias="dateFin")
+    id_tech_injection: str | None = Field(None, alias="idTechInjection")
+    nota: str | None = None
+    liens_modification: list[Lien] | None = Field(None, alias="liensModification")
+    context: Context | None = None
+    nota_html: str | None = Field(None, alias="notaHtml")
+    ref_injection: str | None = Field(None, alias="refInjection")
 
 
 class ChampDTO(BaseModel):
-    criteres: Optional[list[CritereDTO]] = Field(
+    criteres: list[CritereDTO] | None = Field(
         None,
         description="Liste des critères/groupes de critères de recherche pour ce champ",
     )
-    operateur: Optional[Operateur] = Field(
+    operateur: Operateur | None = Field(
         None, description="Opérateur entre les critères de recherche", examples=["ET"]
     )
-    type_champ: Optional[TypeChamp] = Field(
+    type_champ: TypeChamp | None = Field(
         None,
         alias="typeChamp",
         description="Type de champ. Il est possible d'utiliser la valeur ALL pour rechercher dans tous les champs.",
@@ -2868,20 +2824,20 @@ class ChampDTO(BaseModel):
 
 
 class GetTableResponse(BaseModel):
-    total_nb_result: Optional[int] = Field(None, alias="totalNbResult")
-    execution_time: Optional[int] = Field(
+    total_nb_result: int | None = Field(None, alias="totalNbResult")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    tables: Optional[list[FileMetadata]] = Field(
+    tables: list[FileMetadata] | None = Field(
         None, description="Liste des tables trouvées"
     )
 
 
 class SearchNearestVersionResponse(BaseModel):
-    title: Optional[SearchTitle] = Field(
+    title: SearchTitle | None = Field(
         None, description="Données sur la version d'un texte"
     )
-    section_title: Optional[str] = Field(
+    section_title: str | None = Field(
         None,
         alias="sectionTitle",
         description="Titre de la version de la section trouvée si une section est recherchée",
@@ -2890,15 +2846,15 @@ class SearchNearestVersionResponse(BaseModel):
 
 
 class RelatedLinksArticleResponse(BaseModel):
-    liens_cite_par: Optional[list[LiensRelatifsDTO]] = Field(
+    liens_cite_par: list[LiensRelatifsDTO] | None = Field(
         None,
         alias="liensCitePar",
         description="Liste des liens vers les éléments qui citent notre article",
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    liens_cite: Optional[list[LiensRelatifsDTO]] = Field(
+    liens_cite: list[LiensRelatifsDTO] | None = Field(
         None,
         alias="liensCite",
         description="Liste des liens vers les éléments que notre article cite",
@@ -2906,44 +2862,44 @@ class RelatedLinksArticleResponse(BaseModel):
 
 
 class BoccTextsListResponse(BaseModel):
-    idccs: Optional[Facet] = Field(
+    idccs: Facet | None = Field(
         None, description="Facette listant les IDCCs relatifs aux textes BOCC"
     )
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None, alias="totalResultNumber", description="Nombre total de résultats"
     )
-    texts: Optional[list[EsTextBocc]] = Field(
+    texts: list[EsTextBocc] | None = Field(
         None, description="Liste des texts unitaires de la page"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    departments: Optional[Facet] = Field(
+    departments: Facet | None = Field(
         None, description="Facette listant les émetteurs des BOCC (AGR ou TRA)"
     )
 
 
 class FiltreDTO(BaseModel):
-    dates: Optional[DatePeriod] = Field(
+    dates: DatePeriod | None = Field(
         None, description="Période de dates dans le cas d'un filtre par période"
     )
-    valeurs: Optional[list[str]] = Field(
+    valeurs: list[str] | None = Field(
         None,
         description="Liste des valeurs du filtre dans le cas d'un filtre textuel ou d'un filtre via option textuelle",
         examples=[["TRIBUNAL_ADMINISTATIF", "COURS_APPEL"]],
     )
-    single_date: Optional[datetime] = Field(
+    single_date: datetime | None = Field(
         None,
         alias="singleDate",
         description="Date unique dans le cas d'un filtre par date",
         examples=["2016-01-01"],
     )
-    facette: Optional[str] = Field(
+    facette: str | None = Field(
         None,
         description="Nom de la facette => nom du filtre",
         examples=["JURIDICTION_NATURE"],
     )
-    multi_valeurs: Optional[dict[str, list[str]]] = Field(
+    multi_valeurs: dict[str, list[str]] | None = Field(
         None,
         alias="multiValeurs",
         description="Map des sous-valeur d'une valeur de filtre dans le cas d'un filtre par option texte. La clé doit être la valeur correspondante au parent dans la liste 'valeurs'",
@@ -2952,134 +2908,132 @@ class FiltreDTO(BaseModel):
 
 
 class SearchSection(BaseModel):
-    title: Optional[str] = None
-    date_version: Optional[str] = Field(
+    title: str | None = None
+    date_version: str | None = Field(
         None,
         alias="dateVersion",
         description="Date de version",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    id: Optional[str] = None
-    legal_status: Optional[LegalStatu] = Field(None, alias="legalStatus")
-    extracts: Optional[list[SearchExtract]] = None
+    id: str | None = None
+    legal_status: LegalStatu | None = Field(None, alias="legalStatus")
+    extracts: list[SearchExtract] | None = None
 
 
 class ConsultArticle(BaseModel):
-    modificator_title: Optional[str] = Field(
+    modificator_title: str | None = Field(
         None,
         alias="modificatorTitle",
         description="Titre de l'élément modificateur de l'article",
         examples=["LOI n°2015-990 du 6 août 2015 - art. 53 (V)"],
     )
-    condition_differe: Optional[str] = Field(
+    condition_differe: str | None = Field(
         None, alias="conditionDiffere", description="Condition differée"
     )
-    infos_complementaires: Optional[str] = Field(
+    infos_complementaires: str | None = Field(
         None, alias="infosComplementaires", description="Informations complémentaires"
     )
-    multiple_versions: Optional[bool] = Field(None, alias="multipleVersions")
-    comporte_liens_sp: Optional[bool] = Field(
+    multiple_versions: bool | None = Field(None, alias="multipleVersions")
+    comporte_liens_sp: bool | None = Field(
         None,
         alias="comporteLiensSP",
         description="Indique si l'article contient des liens du service-publique. Utiliser l'API servicePublicLinksArticle pour récupérer la liste des liens.",
         examples=[True],
     )
-    etat: Optional[str] = Field(
-        None, description="Etat juridique", examples=["VIGUEUR"]
-    )
-    dereferenced: Optional[bool] = Field(
+    etat: str | None = Field(None, description="Etat juridique", examples=["VIGUEUR"])
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    int_ordre: Optional[int] = Field(
+    int_ordre: int | None = Field(
         None,
         alias="intOrdre",
         description="Numéro indiquant l'ordre d'affichage",
         examples=[3],
     )
-    nota: Optional[str] = Field(None, description="Nota")
-    version_label: Optional[str] = Field(None, alias="versionLabel")
-    infos_restructuration_branche: Optional[str] = Field(
+    nota: str | None = Field(None, description="Nota")
+    version_label: str | None = Field(None, alias="versionLabel")
+    infos_restructuration_branche: str | None = Field(
         None,
         alias="infosRestructurationBranche",
         description="Informations restructuration de branche",
     )
-    path: Optional[str] = Field(
+    path: str | None = Field(
         None,
         description="Chemin de l'article",
         examples=["/LEGISCTA000006107964/LEGIARTI000006791830"],
     )
-    surtitre: Optional[str] = Field(None, description="Surtitre")
-    nota_sections_aafficher: Optional[list[str]] = Field(
+    surtitre: str | None = Field(None, description="Surtitre")
+    nota_sections_aafficher: list[str] | None = Field(
         None,
         alias="notaSectionsAafficher",
         description="Liste de nota section à afficher",
     )
-    num: Optional[str] = Field(None, description="Numéro de l'article", examples=["52"])
-    type: Optional[str] = Field(None, description="Type", examples=["AUTONOME"])
-    content: Optional[str] = Field(None, description="Contenu HTML de l'article")
-    date_debut: Optional[datetime] = Field(
+    num: str | None = Field(None, description="Numéro de l'article", examples=["52"])
+    type: str | None = Field(None, description="Type", examples=["AUTONOME"])
+    content: str | None = Field(None, description="Contenu HTML de l'article")
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début de l'article"
     )
-    lst_lien_citation: Optional[list[LienCitation]] = Field(
+    lst_lien_citation: list[LienCitation] | None = Field(
         None,
         alias="lstLienCitation",
         description="Liste des liens de citation. Toujours vide (voir propriété comporteLiens)",
     )
-    modificator_date: Optional[str] = Field(
+    modificator_date: str | None = Field(
         None,
         alias="modificatorDate",
         description="Date de modification par l'élément modificateur",
         examples=["2016-07-25"],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant", examples=["LEGISCTA000006092887"]
     )
-    article_version: Optional[str] = Field(
+    article_version: str | None = Field(
         None,
         alias="articleVersion",
         description="Version de l'article",
         examples=["2.0"],
     )
-    infos_restructuration_branche_html: Optional[str] = Field(
+    infos_restructuration_branche_html: str | None = Field(
         None,
         alias="infosRestructurationBrancheHtml",
         description="Texte HTML des informations restructuration de branche",
     )
-    historique: Optional[str] = Field(None, description="Historique")
-    comporte_liens: Optional[bool] = Field(
+    historique: str | None = Field(None, description="Historique")
+    comporte_liens: bool | None = Field(
         None,
         alias="comporteLiens",
         description="Indique si l'article contient des liens de citation. Utiliser l'API relatedLinksArticle pour récupérer la liste des liens.",
         examples=[True],
     )
-    date_fin: Optional[datetime] = Field(
+    date_fin: datetime | None = Field(
         None, alias="dateFin", description="Date de fin de l'article"
     )
-    modificator_cid: Optional[str] = Field(
+    modificator_cid: str | None = Field(
         None,
         alias="modificatorCid",
         description="Chronical ID de l'élément modificateur de l'article",
         examples=["JORFTEXT000030978561"],
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["LEGISCTA000006092887"]
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    renvoi: Optional[str] = None
-    path_title: Optional[list[str]] = Field(
+    renvoi: str | None = None
+    path_title: list[str] | None = Field(
         None,
         alias="pathTitle",
         description="Titre des sections du chemin de l'article",
         examples=[["Partie législative", "Livre Ier : Le contrat"]],
     )
-    lst_lien_modification: Optional[list[LienModification]] = Field(
+    lst_lien_modification: list[LienModification] | None = Field(
         None, alias="lstLienModification", description="Liste des liens de modification"
     )
-    infos_complementaires_html: Optional[str] = Field(
+    infos_complementaires_html: str | None = Field(
         None,
         alias="infosComplementairesHtml",
         description="Texte HTML des informations complémentaires",
@@ -3087,10 +3041,10 @@ class ConsultArticle(BaseModel):
 
 
 class LODAListRequest(BaseModel):
-    sort: Optional[Sort1] = Field(
+    sort: Sort1 | None = Field(
         None, description="Ordre de tri", examples=["PUBLICATION_DATE_ASC"]
     )
-    legal_status: Optional[list[LegalStatu]] = Field(
+    legal_status: list[LegalStatu] | None = Field(
         None,
         alias="legalStatus",
         description="Liste des états juridiques à filtrer",
@@ -3102,18 +3056,18 @@ class LODAListRequest(BaseModel):
         description="Numéro de la page à consulter",
         examples=[1],
     )
-    natures: Optional[list[Nature2]] = Field(
+    natures: list[Nature2] | None = Field(
         None,
         description="Liste des natures à filtrer",
         examples=[["LOI", "ORDONNANCE", "DECRET"]],
     )
-    second_sort: Optional[Sort1] = Field(
+    second_sort: Sort1 | None = Field(
         None,
         alias="secondSort",
         description="Ordre de tri",
         examples=["PUBLICATION_DATE_ASC"],
     )
-    signature_date: Optional[DatePeriod] = Field(
+    signature_date: DatePeriod | None = Field(
         None, alias="signatureDate", description="Date ou période de signature"
     )
     page_size: int = Field(
@@ -3122,38 +3076,38 @@ class LODAListRequest(BaseModel):
         description="Nombre de résultats par page (max 100)",
         examples=[10],
     )
-    publication_date: Optional[DatePeriod] = Field(
+    publication_date: DatePeriod | None = Field(
         None, alias="publicationDate", description="Date ou période de publication"
     )
 
 
 class ActionChronoDTO(BaseModel):
-    action: Optional[Action] = Field(
+    action: Action | None = Field(
         None, description="Action effectuée", examples=["MODIFICATION"]
     )
-    parents: Optional[dict[str, ParentChronoDTO]] = Field(
+    parents: dict[str, ParentChronoDTO] | None = Field(
         None,
         description="Map listant les noeuds parents sur lesquels les actions sont faites (texte, section..). La clé correspond à l'ID du parent.",
     )
 
 
 class ArticleModificateurDTO(BaseModel):
-    actions: Optional[dict[str, ActionChronoDTO]] = Field(
+    actions: dict[str, ActionChronoDTO] | None = Field(
         None,
         description="Map listant les actions effectuées par cet article sur le texte. La clé correspond au type d'action.",
     )
-    nature: Optional[Nature] = Field(
+    nature: Nature | None = Field(
         None, description="Nature/type de l'article", examples=["CODE"]
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="ID de l'article", examples=["LEGIARTI000036828112"]
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         description="Titre de l'article modificateur (titre du texte + numéro article)",
         examples=["LOI n°2018-287 du 20 avril 2018 - art. 6"],
     )
-    date_debut_cible: Optional[datetime] = Field(
+    date_debut_cible: datetime | None = Field(
         None,
         alias="dateDebutCible",
         description="Date de début de l'article",
@@ -3162,37 +3116,37 @@ class ArticleModificateurDTO(BaseModel):
 
 
 class GetListPlanClassementJuriResponse(BaseModel):
-    total_nb_result: Optional[int] = Field(
+    total_nb_result: int | None = Field(
         None, alias="totalNbResult", description="Nombre de résultats", examples=[12]
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    list_plan_classement_juri: Optional[list[Nomenclature]] = Field(
+    list_plan_classement_juri: list[Nomenclature] | None = Field(
         None, alias="listPlanClassementJuri"
     )
 
 
 class ConsultDossierLegislatifResponse(BaseModel):
-    dossier_legislatif: Optional[DossierLegislatif] = Field(
+    dossier_legislatif: DossierLegislatif | None = Field(
         None, alias="dossierLegislatif", description="Dossier législatif"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
 
 
 class ConsultAccoResponse(BaseModel):
-    acco: Optional[Accord] = Field(None, description="Accord d'entreprise")
-    execution_time: Optional[int] = Field(
+    acco: Accord | None = Field(None, description="Accord d'entreprise")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
@@ -3200,59 +3154,59 @@ class ConsultAccoResponse(BaseModel):
 
 
 class BoccGlobalListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(None, alias="totalResultNumber")
-    results: Optional[list[EsParutionBocc]] = None
-    execution_time: Optional[int] = Field(
+    total_result_number: int | None = Field(None, alias="totalResultNumber")
+    results: list[EsParutionBocc] | None = None
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    total_result_bocc: Optional[int] = Field(None, alias="totalResultBocc")
-    total_result_idcc: Optional[int] = Field(None, alias="totalResultIdcc")
+    total_result_bocc: int | None = Field(None, alias="totalResultBocc")
+    total_result_idcc: int | None = Field(None, alias="totalResultIdcc")
 
 
 class StructureTxt(BaseModel):
-    liens: Optional[list[LienTxt]] = Field(
+    liens: list[LienTxt] | None = Field(
         None,
         description="Liste des liens vers les textes de premier niveau dans le conteneur",
     )
-    tms: Optional[list[Tms]] = Field(
+    tms: list[Tms] | None = Field(
         None, description="Liste des sections de premier niveau dans le conteneur"
     )
 
 
 class GetListSectionResponse(BaseModel):
-    list_section: Optional[list[Section]] = Field(
+    list_section: list[Section] | None = Field(
         None, alias="listSection", description="Liste des sections"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
 
 
 class DebatsParlementairesListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    display_size: Optional[str] = Field(
+    display_size: str | None = Field(
         None,
         alias="displaySize",
         description="Taille du fichier avec son unité",
         examples=["918,4 Ko"],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    types_publication: Optional[Facet] = Field(
+    types_publication: Facet | None = Field(
         None,
         alias="typesPublication",
         description="Facette listant les types de publication",
     )
-    results: Optional[list[Debat]] = Field(
+    results: list[Debat] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    type_publication_facet: Optional[Facet] = Field(
+    type_publication_facet: Facet | None = Field(
         None,
         alias="typePublicationFacet",
         description="Facette listant les types de publications des débats parlementaires",
@@ -3260,18 +3214,18 @@ class DebatsParlementairesListResponse(BaseModel):
 
 
 class VersionDTO(BaseModel):
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None,
         alias="dateDebut",
         description="Date de début de la version",
         examples=["1538352000000"],
     )
-    is_end_version: Optional[bool] = Field(
+    is_end_version: bool | None = Field(
         None,
         alias="isEndVersion",
         description="Détermine s'il s'agit de la dernière version.",
     )
-    articles_modificateurs: Optional[dict[str, ArticleModificateurDTO]] = Field(
+    articles_modificateurs: dict[str, ArticleModificateurDTO] | None = Field(
         None,
         alias="articlesModificateurs",
         description="Map listant les articles ayant apportés des modifications pour cette version. La clé correspond à la date de la version au format AAAA-MM-JJ.",
@@ -3279,83 +3233,81 @@ class VersionDTO(BaseModel):
 
 
 class TextTitle(BaseModel):
-    nor: Optional[str] = Field(None, description="Numéro NOR")
-    visas: Optional[str] = Field(None, description="Visas")
-    date_texte: Optional[datetime] = Field(
+    nor: str | None = Field(None, description="Numéro NOR")
+    visas: str | None = Field(None, description="Visas")
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date du texte"
     )
-    travaux_preparatoires: Optional[str] = Field(
+    travaux_preparatoires: str | None = Field(
         None, alias="travauxPreparatoires", description="Travaux préparatoires"
     )
-    titre: Optional[str] = Field(None, description="Titre")
-    date_texte_computed: Optional[datetime] = Field(
+    titre: str | None = Field(None, description="Titre")
+    date_texte_computed: datetime | None = Field(
         None,
         alias="dateTexteComputed",
         description="Date de la version courante du texte",
     )
-    nature: Optional[str] = Field(None, description="Nature du texte")
-    signataires: Optional[str] = Field(None, description="Signataires")
-    nota: Optional[str] = Field(None, description="Nota")
-    etat: Optional[str] = Field(None, description="Etat juridique")
-    id: Optional[str] = Field(None, description="Identifiant")
-    notice: Optional[str] = Field(None, description="Notice")
-    num: Optional[str] = Field(None, description="Numéro du texte")
-    date_debut: Optional[datetime] = Field(
+    nature: str | None = Field(None, description="Nature du texte")
+    signataires: str | None = Field(None, description="Signataires")
+    nota: str | None = Field(None, description="Nota")
+    etat: str | None = Field(None, description="Etat juridique")
+    id: str | None = Field(None, description="Identifiant")
+    notice: str | None = Field(None, description="Notice")
+    num: str | None = Field(None, description="Numéro du texte")
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début"
     )
-    num_parution: Optional[str] = Field(
+    num_parution: str | None = Field(
         None, alias="numParution", description="Numéro de parution"
     )
-    titre_long: Optional[str] = Field(None, alias="titreLong", description="Titre long")
-    date_publi_computed: Optional[datetime] = Field(
+    titre_long: str | None = Field(None, alias="titreLong", description="Titre long")
+    date_publi_computed: datetime | None = Field(
         None,
         alias="datePubliComputed",
         description="Date de publication de la version courante",
     )
-    date_publi: Optional[datetime] = Field(
+    date_publi: datetime | None = Field(
         None, alias="datePubli", description="Date de publication"
     )
-    appli_geo: Optional[str] = Field(
+    appli_geo: str | None = Field(
         None, alias="appliGeo", description="Portée Géographique"
     )
-    codes_nomenclatures: Optional[list[str]] = Field(
+    codes_nomenclatures: list[str] | None = Field(
         None, alias="codesNomenclatures", description="Liste des code de nomenclature"
     )
-    cid: Optional[str] = Field(None, description="Chronical ID")
-    date_fin: Optional[datetime] = Field(
-        None, alias="dateFin", description="Date de fin"
-    )
-    origine_publi: Optional[str] = Field(
+    cid: str | None = Field(None, description="Chronical ID")
+    date_fin: datetime | None = Field(None, alias="dateFin", description="Date de fin")
+    origine_publi: str | None = Field(
         None, alias="originePubli", description="Origine de la publication"
     )
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None,
         alias="ancienId",
         description="ID référençant le code lié à l'article cible.",
     )
-    appellations: Optional[list[str]] = Field(None, description="Appellations")
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    appellations: list[str] | None = Field(None, description="Appellations")
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers législatifs"
     )
 
 
 class LODAListResponse(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[12],
     )
-    results: Optional[list[LODAListResult]] = Field(
+    results: list[LODAListResult] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    natures: Optional[Facet] = Field(
+    natures: Facet | None = Field(
         None, description="Facette listant les différentes natures de texte"
     )
-    legal_status: Optional[Facet] = Field(
+    legal_status: Facet | None = Field(
         None,
         alias="legalStatus",
         description="Facette listant les différents états juridiques",
@@ -3363,13 +3315,13 @@ class LODAListResponse(BaseModel):
 
 
 class TexteSimple(BaseModel):
-    travaux_preparatoires_html: Optional[str] = Field(
+    travaux_preparatoires_html: str | None = Field(
         None,
         alias="travauxPreparatoiresHtml",
         description="Texte HTML des travaux préparatoires",
     )
-    visas: Optional[str] = Field(None, description="Visas")
-    condition_differe: Optional[str] = Field(
+    visas: str | None = Field(None, description="Visas")
+    condition_differe: str | None = Field(
         None,
         alias="conditionDiffere",
         description="Condition de différé",
@@ -3377,592 +3329,570 @@ class TexteSimple(BaseModel):
             "Le présent avenant entrera en vigueur le premier jour du mois suivant la date de parution du Journal officiel de son arrêté d'extension."
         ],
     )
-    infos_complementaires: Optional[str] = Field(
+    infos_complementaires: str | None = Field(
         None, alias="infosComplementaires", description="Informations complémentaires"
     )
-    titre_loi_def: Optional[str] = Field(
+    titre_loi_def: str | None = Field(
         None, alias="titreLoiDef", description="Titre de la loi déférée"
     )
-    lien_jo: Optional[str] = Field(None, alias="lienJo", description="Lien vers le JO")
-    origine_publi: Optional[str] = Field(
+    lien_jo: str | None = Field(None, alias="lienJo", description="Lien vers le JO")
+    origine_publi: str | None = Field(
         None, alias="originePubli", description="Origine de la publication"
     )
-    texte_html: Optional[str] = Field(
+    texte_html: str | None = Field(
         None, alias="texteHtml", description="Texte au format HTML"
     )
-    citation_jp_html: Optional[str] = Field(
+    citation_jp_html: str | None = Field(
         None,
         alias="citationJpHtml",
         description="Texte HTML des citations jurisprudentielles",
     )
-    nota_sections_aafficher: Optional[list[str]] = Field(
+    nota_sections_aafficher: list[str] | None = Field(
         None,
         alias="notaSectionsAafficher",
         description="Texte HTML des informations complémentaires",
     )
-    observations: Optional[str] = Field(
+    observations: str | None = Field(
         None, description="Observations d'une directive européenne"
     )
-    page_pdf: Optional[str] = Field(None, alias="pagePdf", description="Numéro de pdf")
-    date_debut: Optional[datetime] = Field(
+    page_pdf: str | None = Field(None, alias="pagePdf", description="Numéro de pdf")
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début"
     )
-    titre_long: Optional[str] = Field(
+    titre_long: str | None = Field(
         None, alias="titreLong", description="Titre long du texte"
     )
-    date_publi_computed: Optional[datetime] = Field(
+    date_publi_computed: datetime | None = Field(
         None,
         alias="datePubliComputed",
         description="Date de publication si la date est valide, vide autrement (elle vaut null si la date du texte est null ou >= 2222-01-01)",
         examples=["1546819200000"],
     )
-    numero_affaire: Optional[list[str]] = Field(
+    numero_affaire: list[str] | None = Field(
         None,
         alias="numeroAffaire",
         description="Liste des numéros d'affaire",
         examples=[["17/030701", "17/030702"]],
     )
-    origine: Optional[str] = Field(
-        None, description="Origine du texte", examples=["JURI"]
-    )
-    rapporteur: Optional[str] = Field(None, description="Rapporteur")
-    date_loi_def: Optional[datetime] = Field(
+    origine: str | None = Field(None, description="Origine du texte", examples=["JURI"])
+    rapporteur: str | None = Field(None, description="Rapporteur")
+    date_loi_def: datetime | None = Field(
         None, alias="dateLoiDef", description="Date de signature de la loi déférée"
     )
-    date_fin: Optional[datetime] = Field(
-        None, alias="dateFin", description="Date de fin"
-    )
-    decision_attaquee: Optional[DecisionAttaquee] = Field(
+    date_fin: datetime | None = Field(None, alias="dateFin", description="Date de fin")
+    decision_attaquee: DecisionAttaquee | None = Field(
         None, alias="decisionAttaquee", description="Décision attaquée"
     )
-    ecli: Optional[str] = Field(None, description="ECLI")
-    version: Optional[str] = Field(None, description="Version")
-    avocats: Optional[str] = Field(None, description="Avocats")
-    ministere: Optional[str] = Field(None, description="Ministere")
-    type_decision: Optional[str] = Field(
+    ecli: str | None = Field(None, description="ECLI")
+    version: str | None = Field(None, description="Version")
+    avocats: str | None = Field(None, description="Avocats")
+    ministere: str | None = Field(None, description="Ministere")
+    type_decision: str | None = Field(
         None, alias="typeDecision", description="Type de décision"
     )
-    anne_publication_bulletin: Optional[str] = Field(
+    anne_publication_bulletin: str | None = Field(
         None,
         alias="annePublicationBulletin",
         description="Année de publication au bulletin",
     )
-    url_cc: Optional[str] = Field(
+    url_cc: str | None = Field(
         None, alias="urlCC", description="Chemin vers la convention collective"
     )
-    nor: Optional[str] = Field(None, description="Numéro NOR")
-    president: Optional[str] = Field(None, description="Président")
-    date_texte: Optional[datetime] = Field(
+    nor: str | None = Field(None, description="Numéro NOR")
+    president: str | None = Field(None, description="Président")
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date du texte", examples=["1546819200000"]
     )
-    num_loi_def: Optional[str] = Field(
+    num_loi_def: str | None = Field(
         None,
         alias="numLoiDef",
         description="Numéro de la loi déférée",
         examples=["2001-419"],
     )
-    signataires_html: Optional[str] = Field(
+    signataires_html: str | None = Field(
         None, alias="signatairesHtml", description="Texte HTML des signataires"
     )
-    solution: Optional[str] = Field(None, description="Solution")
-    signataires: Optional[str] = Field(None, description="Signataires")
-    signataire_kali: Optional[SignataireKali] = Field(
+    solution: str | None = Field(None, description="Solution")
+    signataires: str | None = Field(None, description="Signataires")
+    signataire_kali: SignataireKali | None = Field(
         None, alias="signataireKali", description="Signataire convention collective"
     )
-    infos_restructuration_branche: Optional[str] = Field(
+    infos_restructuration_branche: str | None = Field(
         None,
         alias="infosRestructurationBranche",
         description="Informations restructuration de branche",
     )
-    id_eli: Optional[str] = Field(None, alias="idEli", description="Lien ELI")
-    id_texte_jo: Optional[str] = Field(
+    id_eli: str | None = Field(None, alias="idEli", description="Lien ELI")
+    id_texte_jo: str | None = Field(
         None, alias="idTexteJo", description="Identifiant du JO"
     )
-    ref_injection: Optional[str] = Field(
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="référence permettant le suivi d'injection du mode delta",
     )
-    numsequence: Optional[str] = Field(None, description="Numéro de séquence")
-    texte: Optional[str] = Field(None, description="Contenu du texte")
-    formation: Optional[str] = Field(None, description="formation", examples=["JX"])
-    id: Optional[str] = Field(
+    numsequence: str | None = Field(None, description="Numéro de séquence")
+    texte: str | None = Field(None, description="Contenu du texte")
+    formation: str | None = Field(None, description="formation", examples=["JX"])
+    id: str | None = Field(
         None, description="Identifiant du texte", examples=["JURITEXT000037999394"]
     )
-    type_publication_bulletin: Optional[str] = Field(
+    type_publication_bulletin: str | None = Field(
         None, alias="typePublicationBulletin", description="Type de publication"
     )
-    date_publi: Optional[datetime] = Field(
+    date_publi: datetime | None = Field(
         None,
         alias="datePubli",
         description="Date de publication",
         examples=["1546819200000"],
     )
-    infos_restructuration_branche_html: Optional[str] = Field(
+    infos_restructuration_branche_html: str | None = Field(
         None,
         alias="infosRestructurationBrancheHtml",
         description="Texte HTML des informations restructuration de branche",
     )
-    juridiction_judiciaire: Optional[str] = Field(
+    juridiction_judiciaire: str | None = Field(
         None,
         alias="juridictionJudiciaire",
         description="Juridiction judiciaire",
         examples=["Juridictions d'appel"],
     )
-    ancien_id: Optional[str] = Field(None, alias="ancienId")
-    date_jo: Optional[datetime] = Field(None, alias="dateJo", description="Date du JO")
-    renvoi: Optional[str] = Field(None, description="Renvoi")
-    visas_html: Optional[str] = Field(
+    ancien_id: str | None = Field(None, alias="ancienId")
+    date_jo: datetime | None = Field(None, alias="dateJo", description="Date du JO")
+    renvoi: str | None = Field(None, description="Renvoi")
+    visas_html: str | None = Field(
         None, alias="visasHtml", description="Texte HTML des visas"
     )
-    nota_html: Optional[str] = Field(
+    nota_html: str | None = Field(
         None, alias="notaHtml", description="Texte HTML des notas"
     )
-    type_texte: Optional[TypeTexte] = Field(
+    type_texte: TypeTexte | None = Field(
         None, alias="typeTexte", description="Type de texte", examples=["TEXTE_BASE"]
     )
-    description_fusion_html: Optional[str] = Field(
+    description_fusion_html: str | None = Field(
         None,
         alias="descriptionFusionHtml",
         description="Texte HTML de la description de fusion",
     )
-    numero_publication_bulletin: Optional[str] = Field(
+    numero_publication_bulletin: str | None = Field(
         None,
         alias="numeroPublicationBulletin",
         description="Numéro de publication au bulletin",
     )
-    num_texte_jo: Optional[str] = Field(
+    num_texte_jo: str | None = Field(
         None, alias="numTexteJo", description="Numéro du texte JO"
     )
-    resume_html: Optional[str] = Field(
+    resume_html: str | None = Field(
         None,
         alias="resumeHtml",
         description="Texte HTML des résumés de directive européenne",
     )
-    titre: Optional[str] = Field(None, description="Titre du texte")
-    description_fusion: Optional[str] = Field(
+    titre: str | None = Field(None, description="Titre du texte")
+    description_fusion: str | None = Field(
         None, alias="descriptionFusion", description="Description de fusion"
     )
-    nature: Optional[str] = Field(
-        None, description="Nature du texte", examples=["ARRET"]
-    )
-    commissaire: Optional[str] = Field(None, description="Commissaire")
-    titrages: Optional[list[str]] = Field(
+    nature: str | None = Field(None, description="Nature du texte", examples=["ARRET"])
+    commissaire: str | None = Field(None, description="Commissaire")
+    titrages: list[str] | None = Field(
         None, description="Liste des éléments de titrage"
     )
-    etat: Optional[str] = Field(None, description="Etat juridique")
-    autorite: Optional[str] = Field(None, description="Autorité")
-    relevant_date: Optional[datetime] = Field(
+    etat: str | None = Field(None, description="Etat juridique")
+    autorite: str | None = Field(None, description="Autorité")
+    relevant_date: datetime | None = Field(
         None,
         alias="relevantDate",
         description="Contient la date du texte si elle existe (!= null && != 2999-01-01) sinon contient la date de publication  pour les texte",
         examples=["1546819200000"],
     )
-    mots_cles: Optional[list[str]] = Field(
+    mots_cles: list[str] | None = Field(
         None, alias="motsCles", description="Liste des mots clés"
     )
-    citation_jp: Optional[str] = Field(
+    citation_jp: str | None = Field(
         None, alias="citationJp", description="Citations jurisprudentielles"
     )
-    emetteur: Optional[str] = Field(None, description="Emetteur")
-    codes_nomenclatures: Optional[list[str]] = Field(
+    emetteur: str | None = Field(None, description="Emetteur")
+    codes_nomenclatures: list[str] | None = Field(
         None, alias="codesNomenclatures", description="Liste des codes de nomenclature"
     )
-    id_eli_alias: Optional[str] = Field(
-        None, alias="idEliAlias", description="Alias ELI"
-    )
-    id_conteneur: Optional[str] = Field(
+    id_eli_alias: str | None = Field(None, alias="idEliAlias", description="Alias ELI")
+    id_conteneur: str | None = Field(
         None, alias="idConteneur", description="Identifiant du conteneur"
     )
-    type_controle_normes: Optional[str] = Field(
+    type_controle_normes: str | None = Field(
         None,
         alias="typeControleNormes",
         description="Type de contrôle",
         examples=["Contrôle de constitutionnalité"],
     )
-    travaux_preparatoires: Optional[str] = Field(
+    travaux_preparatoires: str | None = Field(
         None, alias="travauxPreparatoires", description="Travaux préparatoires"
     )
-    date_derniere_modif: Optional[datetime] = Field(
+    date_derniere_modif: datetime | None = Field(
         None,
         alias="dateDerniereModif",
         description="Date de dernière modification",
         examples=["1546819200000"],
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique permettant le suivi d'injection du mode delta",
     )
-    appli_geo: Optional[str] = Field(
+    appli_geo: str | None = Field(
         None, alias="appliGeo", description="Portée géographique", examples=["NATIONAL"]
     )
-    demandeur: Optional[str] = Field(None, description="Demandeur du texte")
-    inap: Optional[bool] = Field(None, description="INAP")
-    juridiction: Optional[str] = Field(
+    demandeur: str | None = Field(None, description="Demandeur du texte")
+    inap: bool | None = Field(None, description="INAP")
+    juridiction: str | None = Field(
         None, description="Juridiction", examples=["Cour d'appel de Nancy"]
     )
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers législatifs"
     )
-    nature_juridiction: Optional[str] = Field(
+    nature_juridiction: str | None = Field(
         None,
         alias="natureJuridiction",
         description="Nature de la juridiction",
         examples=["Cour d'appel"],
     )
-    provenance: Optional[str] = Field(None, description="provenance", examples=["CAPP"])
-    sommaire: Optional[list[TexteSommaire]] = Field(
+    provenance: str | None = Field(None, description="provenance", examples=["CAPP"])
+    sommaire: list[TexteSommaire] | None = Field(
         None, description="Liste des éléments de sommaire"
     )
-    num_parution: Optional[str] = Field(
+    num_parution: str | None = Field(
         None, alias="numParution", description="Numéro de parution"
     )
-    date_texte_computed: Optional[datetime] = Field(
+    date_texte_computed: datetime | None = Field(
         None,
         alias="dateTexteComputed",
         description="Date du texte si la date est valide, vide autrement (elle vaut null si la date du texte est null ou >= 2222-01-01)",
         examples=["1546819200000"],
     )
-    nature_delib: Optional[str] = Field(
+    nature_delib: str | None = Field(
         None,
         alias="natureDelib",
         description="Nature de la délibération",
         examples=["AUTORISATION DE TRANSFERTS"],
     )
-    nota: Optional[str] = Field(None, description="Notas")
-    rectificatif: Optional[str] = Field(
+    nota: str | None = Field(None, description="Notas")
+    rectificatif: str | None = Field(
         None, description="Rectificatif d'une directive européenne"
     )
-    nature_qualifiee: Optional[str] = Field(
+    nature_qualifiee: str | None = Field(
         None, alias="natureQualifiee", description="Nature qualifiée"
     )
-    appellations: Optional[list[str]] = Field(
+    appellations: list[str] | None = Field(
         None, description="Liste des appellations non officielles"
     )
-    resume: Optional[str] = Field(None, description="Résumé d'une directive européenne")
-    num_jo: Optional[str] = Field(None, alias="numJo", description="Numéro du JO")
-    notice: Optional[str] = Field(None, description="Notice")
-    conteneurs: Optional[list[Conteneur]] = Field(
-        None, description="Liste des conteneurs"
-    )
-    num: Optional[str] = Field(None, description="Numéro du texte")
-    publication_recueil: Optional[str] = Field(
+    resume: str | None = Field(None, description="Résumé d'une directive européenne")
+    num_jo: str | None = Field(None, alias="numJo", description="Numéro du JO")
+    notice: str | None = Field(None, description="Notice")
+    conteneurs: list[Conteneur] | None = Field(None, description="Liste des conteneurs")
+    num: str | None = Field(None, description="Numéro du texte")
+    publication_recueil: str | None = Field(
         None,
         alias="publicationRecueil",
         description="Indique la publication au recueil Lebon",
         examples=["C"],
     )
-    numero_bo: Optional[str] = Field(None, alias="numeroBo", description="Numéro BO")
-    nature_numero: Optional[str] = Field(None, alias="natureNumero")
-    cid: Optional[str] = Field(None, description="Chronical ID du texte")
-    liens: Optional[list[TexteLien]] = Field(
+    numero_bo: str | None = Field(None, alias="numeroBo", description="Numéro BO")
+    nature_numero: str | None = Field(None, alias="natureNumero")
+    cid: str | None = Field(None, description="Chronical ID du texte")
+    liens: list[TexteLien] | None = Field(
         None, description="Liste de liens vers d'autres textes"
     )
-    notice_html: Optional[str] = Field(
+    notice_html: str | None = Field(
         None, alias="noticeHtml", description="Texte HTML de la notice"
     )
-    siege_appel: Optional[str] = Field(
+    siege_appel: str | None = Field(
         None, alias="siegeAppel", description="Siège d'appel", examples=["NANCY"]
     )
-    date_versement: Optional[datetime] = Field(
+    date_versement: datetime | None = Field(
         None, alias="dateVersement", description="Date de versement"
     )
-    avocat_gl: Optional[str] = Field(
-        None, alias="avocatGl", description="Avocat général"
-    )
-    titre_jo: Optional[str] = Field(
-        None, alias="titreJo", description="Titre du JO lié"
-    )
-    infos_complementaires_html: Optional[str] = Field(
+    avocat_gl: str | None = Field(None, alias="avocatGl", description="Avocat général")
+    titre_jo: str | None = Field(None, alias="titreJo", description="Titre du JO lié")
+    infos_complementaires_html: str | None = Field(
         None,
         alias="infosComplementairesHtml",
         description="Texte HTML des informations complémentaires",
     )
-    titrages_key: Optional[list[Titrage]] = Field(
+    titrages_key: list[Titrage] | None = Field(
         None, alias="titragesKey", description="Liste des éléments de titrage"
     )
 
 
 class ConsultDebatResponse(BaseModel):
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    debat: Optional[Debat] = Field(None, description="Débat parlementaire")
+    debat: Debat | None = Field(None, description="Débat parlementaire")
 
 
 class FullConteneur(BaseModel):
-    structure: Optional[StructureTxt] = Field(
-        None, description="Structure du conteneur"
-    )
-    etat: Optional[str] = Field(None, description="Etat juridique du conteneur")
-    id: Optional[str] = Field(
+    structure: StructureTxt | None = Field(None, description="Structure du conteneur")
+    etat: str | None = Field(None, description="Etat juridique du conteneur")
+    id: str | None = Field(
         None, description="Identifiant du conteneur", examples=["JORFCONT000038052140"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None, description="Titre", examples=["JORF n°0021 du 25 janvier 2019"]
     )
-    date_publi: Optional[datetime] = Field(
+    date_publi: datetime | None = Field(
         None,
         alias="datePubli",
         description="Date de publication",
         examples=["1548374400000"],
     )
-    origine: Optional[str] = Field(None, description="Origine", examples=["JORF"])
-    nature: Optional[str] = Field(
-        None, description="Nature du conteneur", examples=["JO"]
-    )
-    id_tech_injection: Optional[str] = Field(
+    origine: str | None = Field(None, description="Origine", examples=["JORF"])
+    nature: str | None = Field(None, description="Nature du conteneur", examples=["JO"])
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         description="chemin vers le conteneur",
         examples=["conteneur/JORF/CONT/00/00/38/05/21/JORFCONT000038052140.xml"],
     )
-    ancien_id: Optional[str] = Field(
+    ancien_id: str | None = Field(
         None, alias="ancienId", description="Ancien Identifiant"
     )
-    id_eli: Optional[str] = Field(
+    id_eli: str | None = Field(
         None,
         alias="idEli",
         description="Identifiant ELI",
         examples=["/eli/jo/2019/1/25/0021"],
     )
-    numero: Optional[str] = None
-    ref_injection: Optional[str] = Field(
+    numero: str | None = None
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    num: Optional[str] = Field(None, description="Numéro de JO", examples=["0021"])
-    relevant_date: Optional[datetime] = Field(None, alias="relevantDate")
+    num: str | None = Field(None, description="Numéro de JO", examples=["0021"])
+    relevant_date: datetime | None = Field(None, alias="relevantDate")
 
 
 class ConsultBoccResponse(BaseModel):
-    date_parution: Optional[str] = Field(
+    date_parution: str | None = Field(
         None,
         alias="dateParution",
         description="Date de parution",
         examples=["2021-04-15"],
     )
-    file_name: Optional[str] = Field(None, alias="fileName")
-    display_size: Optional[str] = Field(None, alias="displaySize")
-    title: Optional[str] = None
-    num_parution: Optional[str] = Field(None, alias="numParution")
-    bocc: Optional[EsParutionBocc] = None
-    for_global_bocc: Optional[bool] = Field(None, alias="forGlobalBocc")
-    path_to_file: Optional[str] = Field(None, alias="pathToFile")
+    file_name: str | None = Field(None, alias="fileName")
+    display_size: str | None = Field(None, alias="displaySize")
+    title: str | None = None
+    num_parution: str | None = Field(None, alias="numParution")
+    bocc: EsParutionBocc | None = None
+    for_global_bocc: bool | None = Field(None, alias="forGlobalBocc")
+    path_to_file: str | None = Field(None, alias="pathToFile")
 
 
 class Article(BaseModel):
-    condition_differe: Optional[str] = Field(
+    condition_differe: str | None = Field(
         None,
         alias="conditionDiffere",
         description="Condition différée => Spécifique conventions collectives",
     )
-    infos_complementaires: Optional[str] = Field(
+    infos_complementaires: str | None = Field(
         None, alias="infosComplementaires", description="Informations complémentaires"
     )
-    surtitre: Optional[str] = Field(
+    surtitre: str | None = Field(
         None, description="Surtitre => Spécifique conventions collectives"
     )
-    nature: Optional[str] = Field(None, description="Nature", examples=["Article"])
-    texte_html: Optional[str] = Field(
+    nature: str | None = Field(None, description="Nature", examples=["Article"])
+    texte_html: str | None = Field(
         None, alias="texteHtml", description="Contenu HTML de l'article"
     )
-    type: Optional[str] = Field(None, description="Type", examples=["AUTONOME"])
-    article_versions: Optional[list[ArticleVersion]] = Field(
+    type: str | None = Field(None, description="Type", examples=["AUTONOME"])
+    article_versions: list[ArticleVersion] | None = Field(
         None, alias="articleVersions", description="Liste des versions de l'article"
     )
-    activite_pro: Optional[list[str]] = Field(
+    activite_pro: list[str] | None = Field(
         None, alias="activitePro", description="Liste des activités"
     )
-    lien_autres: Optional[list[Lien]] = Field(
+    lien_autres: list[Lien] | None = Field(
         None, alias="lienAutres", description="Autres liens de l'article"
     )
-    computed_nums: Optional[list[str]] = Field(
+    computed_nums: list[str] | None = Field(
         None, alias="computedNums", description="Liste des numéros de l'article"
     )
-    date_fin_extension: Optional[datetime] = Field(
+    date_fin_extension: datetime | None = Field(
         None,
         alias="dateFinExtension",
         description="Date de fin si extension",
         examples=["32472144000000"],
     )
-    version_precedente: Optional[str] = Field(
+    version_precedente: str | None = Field(
         None, alias="versionPrecedente", description="Version précédente"
     )
-    date_debut: Optional[datetime] = Field(
+    date_debut: datetime | None = Field(
         None, alias="dateDebut", description="Date de début", examples=["1104537600000"]
     )
-    numero_brochure: Optional[list[str]] = Field(
+    numero_brochure: list[str] | None = Field(
         None, alias="numeroBrochure", description="Liste des numéros de brochure"
     )
-    ref_injection: Optional[str] = Field(
+    ref_injection: str | None = Field(
         None,
         alias="refInjection",
         description="Référence technique permettant d'identifier la date d'injection",
     )
-    lien_modifications: Optional[list[LienModification]] = Field(
+    lien_modifications: list[LienModification] | None = Field(
         None,
         alias="lienModifications",
         description="Liste des liens de modification de l'article",
     )
-    id_texte: Optional[str] = Field(
+    id_texte: str | None = Field(
         None, alias="idTexte", description="Identifiant du texte"
     )
-    id_tech_injection: Optional[str] = Field(
+    id_tech_injection: str | None = Field(
         None,
         alias="idTechInjection",
         description="Identifiant technique de l'élément injecté",
     )
-    calipsos: Optional[list[str]] = Field(None, description="Liste des calipsos")
-    origine: Optional[str] = Field(None, description="Origine", examples=["LEGI"])
-    conteneurs: Optional[list[Conteneur]] = Field(
+    calipsos: list[str] | None = Field(None, description="Liste des calipsos")
+    origine: str | None = Field(None, description="Origine", examples=["LEGI"])
+    conteneurs: list[Conteneur] | None = Field(
         None, description="Liste d'id de conteneurs"
     )
-    date_debut_extension: Optional[datetime] = Field(
+    date_debut_extension: datetime | None = Field(
         None,
         alias="dateDebutExtension",
         description="Date de début si extension",
         examples=["32472144000000"],
     )
-    date_fin: Optional[datetime] = Field(
+    date_fin: datetime | None = Field(
         None, alias="dateFin", description="Date de fin", examples=["1104451200000"]
     )
-    id_eli_alias: Optional[str] = Field(
-        None, alias="idEliAlias", description="Alias ELI"
-    )
-    cid_texte: Optional[str] = Field(
+    id_eli_alias: str | None = Field(None, alias="idEliAlias", description="Alias ELI")
+    cid_texte: str | None = Field(
         None, alias="cidTexte", description="Chronical ID du texte"
     )
-    section_parent_id: Optional[str] = Field(
+    section_parent_id: str | None = Field(
         None,
         alias="sectionParentId",
         description="Identifiant technique de la section parente",
         examples=["LEGISCTA000006191588"],
     )
-    text_titles: Optional[list[TextTitle]] = Field(
+    text_titles: list[TextTitle] | None = Field(
         None,
         alias="textTitles",
         description="Liste des versions du texte contenant l'article",
     )
-    multiple_versions: Optional[bool] = Field(None, alias="multipleVersions")
-    etat: Optional[str] = Field(
+    multiple_versions: bool | None = Field(None, alias="multipleVersions")
+    etat: str | None = Field(
         None, description="Etat juridique", examples=["MODIFIE_MORT_NE"]
     )
-    version_article: Optional[str] = Field(
+    version_article: str | None = Field(
         None, alias="versionArticle", description="Version", examples=["28.0"]
     )
-    comporte_liens_sp: Optional[bool] = Field(
+    comporte_liens_sp: bool | None = Field(
         None,
         alias="comporteLiensSP",
         description="Determine si l'article possède des liens Service Public à afficher",
     )
-    section_parent_titre: Optional[str] = Field(
+    section_parent_titre: str | None = Field(
         None,
         alias="sectionParentTitre",
         description="Titre de la section parente",
         examples=["I : Revenu imposable"],
     )
-    ordre: Optional[int] = Field(
+    ordre: int | None = Field(
         None,
         description="Numéro d'ordre permettant le tri des articles dans leur élément parent.",
         examples=[644235],
     )
-    infos_restructuration_branche: Optional[str] = Field(
+    infos_restructuration_branche: str | None = Field(
         None,
         alias="infosRestructurationBranche",
         description="Informations restructuration de branche",
     )
-    id_eli: Optional[str] = Field(None, alias="idEli", description="Identifiant ELI")
-    section_parent_cid: Optional[str] = Field(
+    id_eli: str | None = Field(None, alias="idEli", description="Identifiant ELI")
+    section_parent_cid: str | None = Field(
         None,
         alias="sectionParentCid",
         description="Chronical ID de la section parente",
         examples=["LEGISCTA000006191588"],
     )
-    nota: Optional[str] = Field(None, description="Contenu nota")
-    num: Optional[str] = Field(
-        None, description="Numéro de l'article", examples=["156"]
-    )
-    numero_bo: Optional[str] = Field(
+    nota: str | None = Field(None, description="Contenu nota")
+    num: str | None = Field(None, description="Numéro de l'article", examples=["156"])
+    numero_bo: str | None = Field(
         None, alias="numeroBo", description="Numéro du bulletin officiel"
     )
-    texte: Optional[str] = Field(None, description="Contenu textuel de l'article")
-    id: Optional[str] = Field(
+    texte: str | None = Field(None, description="Contenu textuel de l'article")
+    id: str | None = Field(
         None, description="Identifiant de l'article", examples=["LEGIARTI000006307920"]
     )
-    lien_citations: Optional[list[LienCitation]] = Field(
+    lien_citations: list[LienCitation] | None = Field(
         None,
         alias="lienCitations",
         description="Liste des liens de citation de l'article",
     )
-    infos_restructuration_branche_html: Optional[str] = Field(
+    infos_restructuration_branche_html: str | None = Field(
         None,
         alias="infosRestructurationBrancheHtml",
         description="Texte HTML des informations restructuration de branche",
     )
-    historique: Optional[str] = Field(
+    historique: str | None = Field(
         None, description="Historique => Spécifique conventions collectives"
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["LEGIARTI000006307893"]
     )
-    lien_concordes: Optional[list[LienConcorde]] = Field(
+    lien_concordes: list[LienConcorde] | None = Field(
         None,
         alias="lienConcordes",
         description="Liste des liens de concordance de l'article",
     )
-    infos_complementaires_html: Optional[str] = Field(
+    infos_complementaires_html: str | None = Field(
         None,
         alias="infosComplementairesHtml",
         description="Texte HTML des informations complémentaires",
     )
-    renvoi: Optional[str] = Field(
+    renvoi: str | None = Field(
         None, description="Renvoi sur contenu d'article (Exemple : (1))"
     )
-    full_sections_titre: Optional[str] = Field(
+    full_sections_titre: str | None = Field(
         None,
         alias="fullSectionsTitre",
         description="Concaténation de l'ensemble des titres de la chaine parente",
     )
-    context: Optional[Context] = Field(None, description="Contexte de l'article")
-    nota_html: Optional[str] = Field(
+    context: Context | None = Field(None, description="Contexte de l'article")
+    nota_html: str | None = Field(
         None, alias="notaHtml", description="Contenu nota au format HTML"
     )
-    inap: Optional[str] = Field(None, description="INAP")
+    inap: str | None = Field(None, description="INAP")
 
 
 class GetJorfContResponseItem(BaseModel):
-    jo_inap: Optional[FileMetadata] = Field(
+    jo_inap: FileMetadata | None = Field(
         None, alias="joInap", description="Métadonnées du JOINAP s'il en existe un"
     )
-    jo_cont: Optional[FullConteneur] = Field(
+    jo_cont: FullConteneur | None = Field(
         None, alias="joCont", description="Conteneur du JO"
     )
-    jo_ea: Optional[FileMetadata] = Field(
+    jo_ea: FileMetadata | None = Field(
         None, alias="joEA", description="Métadonnées du JOEA s'il en existe un"
     )
-    jos_pat: Optional[list[FileMetadata]] = Field(
+    jos_pat: list[FileMetadata] | None = Field(
         None, alias="josPat", description="Liste des métadonnées des JO patrimoniaux"
     )
 
 
 class ConsultJuriTextResponse(BaseModel):
-    text: Optional[TexteSimple] = Field(None, description="Texte")
-    execution_time: Optional[int] = Field(
+    text: TexteSimple | None = Field(None, description="Texte")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
@@ -3970,72 +3900,72 @@ class ConsultJuriTextResponse(BaseModel):
 
 
 class RegroupementDTO(BaseModel):
-    versions: Optional[dict[str, VersionDTO]] = Field(
+    versions: dict[str, VersionDTO] | None = Field(
         None,
         description="Map listant les versions dans l'ordre antéchronologique.  La clé correspond à la date de la version",
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None, description="Titre du regroupement", examples=["2015"]
     )
-    detail_loaded: Optional[bool] = Field(None, alias="detailLoaded")
+    detail_loaded: bool | None = Field(None, alias="detailLoaded")
 
 
 class SearchResult(BaseModel):
-    nor: Optional[str] = None
-    etat: Optional[str] = None
-    themes: Optional[list[str]] = None
-    nature: Optional[str] = None
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    nor: str | None = None
+    etat: str | None = None
+    themes: list[str] | None = None
+    nature: str | None = None
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs"
     )
-    type: Optional[str] = None
-    date_publication: Optional[str] = Field(
+    type: str | None = None
+    date_publication: str | None = Field(
         None,
         alias="datePublication",
         description="Date de publication",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    id_attachment: Optional[str] = Field(None, alias="idAttachment")
-    appellations: Optional[list[str]] = None
-    reference: Optional[str] = None
-    mots_cles: Optional[list[str]] = Field(None, alias="motsCles")
-    more_article: Optional[bool] = Field(None, alias="moreArticle")
-    additional_result: Optional[dict[str, SearchAdditionalResult]] = Field(
+    id_attachment: str | None = Field(None, alias="idAttachment")
+    appellations: list[str] | None = None
+    reference: str | None = None
+    mots_cles: list[str] | None = Field(None, alias="motsCles")
+    more_article: bool | None = Field(None, alias="moreArticle")
+    additional_result: dict[str, SearchAdditionalResult] | None = Field(
         None, alias="additionalResult"
     )
-    num: Optional[str] = None
-    sections: Optional[list[SearchSection]] = None
-    autre_resume: Optional[list[str]] = Field(None, alias="autreResume")
-    num_parution: Optional[str] = Field(None, alias="numParution")
-    resume_principal: Optional[list[str]] = Field(None, alias="resumePrincipal")
-    raison_sociale: Optional[str] = Field(None, alias="raisonSociale")
-    date_signature: Optional[str] = Field(
+    num: str | None = None
+    sections: list[SearchSection] | None = None
+    autre_resume: list[str] | None = Field(None, alias="autreResume")
+    num_parution: str | None = Field(None, alias="numParution")
+    resume_principal: list[str] | None = Field(None, alias="resumePrincipal")
+    raison_sociale: str | None = Field(None, alias="raisonSociale")
+    date_signature: str | None = Field(
         None,
         alias="dateSignature",
         description="Date de signature",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    titles: Optional[list[SearchTitle]] = None
-    conforme: Optional[bool] = None
-    text: Optional[str] = None
-    origin: Optional[str] = None
-    jorf_text: Optional[str] = Field(None, alias="jorfText")
-    date_diffusion: Optional[str] = Field(
+    titles: list[SearchTitle] | None = None
+    conforme: bool | None = None
+    text: str | None = None
+    origin: str | None = None
+    jorf_text: str | None = Field(None, alias="jorfText")
+    date_diffusion: str | None = Field(
         None,
         alias="dateDiffusion",
         description="Date diffusion",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    size_attachment: Optional[str] = Field(None, alias="sizeAttachment")
-    description_fusion_html: Optional[str] = Field(None, alias="descriptionFusionHtml")
-    idcc: Optional[str] = None
-    date: Optional[str] = Field(
+    size_attachment: str | None = Field(None, alias="sizeAttachment")
+    description_fusion_html: str | None = Field(None, alias="descriptionFusionHtml")
+    idcc: str | None = None
+    date: str | None = Field(
         None, description="Date utile", examples=["2021-04-15T16:49:47.707+0000"]
     )
 
 
 class RechercheSpecifiqueDTO(BaseModel):
-    filtres: Optional[list[FiltreDTO]] = Field(
+    filtres: list[FiltreDTO] | None = Field(
         None,
         description="Liste des filtres à appliquer. La requête est effectuée automatiquement avec un opérateur ET entre les filtres listés.",
         examples=[
@@ -4053,13 +3983,13 @@ class RechercheSpecifiqueDTO(BaseModel):
         description="Tri des éléments trouvés (Les tris possibles dépendent du fonds recherché)",
         examples=["SIGNATURE_DATE_DESC"],
     )
-    from_advanced_recherche: Optional[bool] = Field(
+    from_advanced_recherche: bool | None = Field(
         None,
         alias="fromAdvancedRecherche",
         description="Déterminer s'il s'agit d'une recherche avancée",
         examples=[False],
     )
-    second_sort: Optional[str] = Field(
+    second_sort: str | None = Field(
         None,
         alias="secondSort",
         description="Tri des éléments trouvés (Les tris possibles dépendent du fonds recherché)",
@@ -4122,99 +4052,97 @@ class RechercheSpecifiqueDTO(BaseModel):
 
 
 class ConsultSection(BaseModel):
-    date_debut: Optional[str] = Field(
+    date_debut: str | None = Field(
         None, alias="dateDebut", description="Date de début de la version de la section"
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         description="Titre de la section",
         examples=["Titre II : Régime du notariat"],
     )
-    etat: Optional[str] = Field(
-        None, description="Etat juridique", examples=["VIGUEUR"]
-    )
-    id: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat juridique", examples=["VIGUEUR"])
+    id: str | None = Field(
         None, description="Identifiant", examples=["LEGISCTA000006092887"]
     )
-    commentaire: Optional[str] = Field(
+    commentaire: str | None = Field(
         None,
         examples=["Le présent chapitre ne comporte pas de dispositions réglementaires"],
     )
-    date_fin: Optional[str] = Field(
+    date_fin: str | None = Field(
         None, alias="dateFin", description="Date de fin de la version de la section"
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID", examples=["LEGISCTA000006092887"]
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    int_ordre: Optional[int] = Field(
+    int_ordre: int | None = Field(
         None,
         alias="intOrdre",
         description="Numéro indiquant l'ordre d'affichage",
         examples=[3],
     )
-    section_consultee: Optional[bool] = Field(
+    section_consultee: bool | None = Field(
         None,
         alias="sectionConsultee",
         description="Indique si la section est celle demandée en consultation",
         examples=[True],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    renvoi: Optional[str] = Field(
+    renvoi: str | None = Field(
         None, examples=["Le présent chapitre contient un renvoi"]
     )
-    articles: Optional[list[ConsultArticle]] = Field(
+    articles: list[ConsultArticle] | None = Field(
         None,
         description="Liste des articles enfants de la section. La liste est ordonnée",
     )
-    date_modif: Optional[str] = Field(
+    date_modif: str | None = Field(
         None, alias="dateModif", description="Date de dernière modification"
     )
-    renvoi_num: Optional[str] = Field(
+    renvoi_num: str | None = Field(
         None,
         alias="renvoiNum",
         examples=["Le présent chapitre contient un renvoi numerote"],
     )
-    nota_html: Optional[str] = Field(
+    nota_html: str | None = Field(
         None, alias="notaHtml", examples=["Nota html de la section"]
     )
-    nota_sections_aafficher: Optional[list[str]] = Field(
+    nota_sections_aafficher: list[str] | None = Field(
         None,
         alias="notaSectionsAafficher",
         examples=["Nota html de section pouvant être affichés"],
     )
-    sections: Optional[list[ConsultSection]] = Field(
+    sections: list[ConsultSection] | None = Field(
         None,
         description="Liste des sections enfants de la section (peut être un texte dans le cas des conventions collectives). La liste est ordonnée",
     )
 
 
 class ChronolegiResponse(BaseModel):
-    date_publication: Optional[str] = Field(
+    date_publication: str | None = Field(
         None,
         alias="datePublication",
         description="Date de publication",
         examples=["2021-04-15T16:49:47.707+0000"],
     )
-    regroupements: Optional[list[RegroupementDTO]] = Field(
+    regroupements: list[RegroupementDTO] | None = Field(
         None, description="Liste des regroupements d'années"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
 
 
 class GetListArticleResponse(BaseModel):
-    list_article: Optional[list[Article]] = Field(
+    list_article: list[Article] | None = Field(
         None, alias="listArticle", description="Liste des versions de l'article"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
 
@@ -4223,64 +4151,62 @@ ConsultCnilTextResponse = ConsultJuriTextResponse
 
 
 class ConsultKaliContResponse(BaseModel):
-    activite_pro: Optional[list[str]] = Field(
+    activite_pro: list[str] | None = Field(
         None, alias="activitePro", description="Liste des activités professionelles"
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None, description="Identifiant", examples=["KALICONT000005635384"]
     )
-    titre: Optional[str] = Field(
+    titre: str | None = Field(
         None,
         description="Titre",
         examples=[
             "Convention collective nationale des acteurs du lien social et familial : centres sociaux et socioculturels, associations d'accueil de jeunes enfants, associations de développement social local  du 4 juin 1983.  Etendue par arrêté du 22 janvier 1987 JORF 12 février 1987. (1)"
         ],
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    numero_texte: Optional[str] = Field(
+    numero_texte: str | None = Field(
         None, alias="numeroTexte", description="numéro du texte", examples=["IDCC 1261"]
     )
-    texte_base_id: Optional[list[str]] = Field(
+    texte_base_id: list[str] | None = Field(
         None,
         alias="texteBaseId",
         description="Liste des identifiants des textes de base",
         examples=[["KALITEXT000005677408"]],
     )
-    categorisation: Optional[list[str]] = Field(
-        None, description="Liste des catégories"
-    )
-    nature: Optional[str] = Field(None, description="Nature", examples=["IDCC"])
-    description_fusion_html: Optional[str] = Field(
+    categorisation: list[str] | None = Field(None, description="Liste des catégories")
+    nature: str | None = Field(None, description="Nature", examples=["IDCC"])
+    description_fusion_html: str | None = Field(
         None,
         alias="descriptionFusionHtml",
         description="Texte HTML de la description de fusion",
     )
-    num: Optional[str] = Field(None, description="Numéro", examples=["1261"])
-    sections: Optional[list[ConsultSection]] = Field(
+    num: str | None = Field(None, description="Numéro", examples=["1261"])
+    sections: list[ConsultSection] | None = Field(
         None, description="Liste des conventions collectives"
     )
 
 
 class GetJosResponse(BaseModel):
-    total_nb_result: Optional[int] = Field(
+    total_nb_result: int | None = Field(
         None, alias="totalNbResult", description="Nombre de résultats", examples=[12]
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    items: Optional[list[GetJorfContResponseItem]] = Field(
+    items: list[GetJorfContResponseItem] | None = Field(
         None, description="Liste des éléments trouvés"
     )
 
 
 class GetArticleResponse(BaseModel):
-    article: Optional[Article] = Field(None, description="Détail de l'article")
-    execution_time: Optional[int] = Field(
+    article: Article | None = Field(None, description="Détail de l'article")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
@@ -4288,26 +4214,26 @@ class GetArticleResponse(BaseModel):
 
 
 class SearchResponseDTO(BaseModel):
-    total_result_number: Optional[int] = Field(
+    total_result_number: int | None = Field(
         None,
         alias="totalResultNumber",
         description="Nombre de résultats",
         examples=[1560],
     )
-    facets: Optional[list[Facet]] = Field(None, description="Liste des facettes liées")
-    execution_time: Optional[int] = Field(
+    facets: list[Facet] | None = Field(None, description="Liste des facettes liées")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    total_article_result_number: Optional[int] = Field(
+    total_article_result_number: int | None = Field(
         None, alias="totalArticleResultNumber"
     )
-    results: Optional[list[SearchResult]] = Field(
+    results: list[SearchResult] | None = Field(
         None, description="Liste des résultats de la page"
     )
-    description_fusion_html: Optional[str] = Field(
+    description_fusion_html: str | None = Field(
         None, alias="descriptionFusionHtml", description="Description fusion"
     )
-    type_pagination: Optional[TypePagination] = Field(
+    type_pagination: TypePagination | None = Field(
         None,
         alias="typePagination",
         description="Type de pagination. Spécifique pour les recherches dans les articles d'un texte spécifique, dans les autres cas la valeur sera toujours DEFAULT.",
@@ -4316,275 +4242,269 @@ class SearchResponseDTO(BaseModel):
 
 
 class ConsultKaliTextResponse(BaseModel):
-    text_number: Optional[str] = Field(
+    text_number: str | None = Field(
         None, alias="textNumber", description="Numéro de texte"
     )
-    visas_html: Optional[str] = Field(
+    visas_html: str | None = Field(
         None, alias="visasHtml", description="Texte HTML des visas"
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         description="Titre du texte",
         examples=["Loi contenant organisation du notariat (loi 25 ventôse an XI)"],
     )
-    condition_differe: Optional[str] = Field(
+    condition_differe: str | None = Field(
         None, alias="conditionDiffere", description="Condition différée"
     )
-    resume: Optional[str] = Field(None, description="Résumé")
-    signataires: Optional[SignataireKali] = Field(None, description="Signataire")
-    nature: Optional[str] = Field(None, description="Nature")
-    libelle_extension: Optional[str] = Field(None, alias="libelleExtension")
-    visas: Optional[str] = Field(None, description="Visas")
-    juris_date: Optional[str] = Field(
+    resume: str | None = Field(None, description="Résumé")
+    signataires: SignataireKali | None = Field(None, description="Signataire")
+    nature: str | None = Field(None, description="Nature")
+    libelle_extension: str | None = Field(None, alias="libelleExtension")
+    visas: str | None = Field(None, description="Visas")
+    juris_date: str | None = Field(
         None, alias="jurisDate", description="Date d'état juridique"
     )
-    date_texte: Optional[datetime] = Field(
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date de signature"
     )
-    articles: Optional[list[ConsultArticle]] = Field(
+    articles: list[ConsultArticle] | None = Field(
         None, description="Liste des articles racine du texte. La liste est ordonnée"
     )
-    signers: Optional[str] = Field(None, description="Signataires")
-    notice: Optional[str] = Field(None, description="Notice")
-    alias: Optional[str] = Field(None, description="Alias")
-    observations: Optional[str] = Field(None, description="Observations")
-    page_pdf: Optional[str] = Field(
+    signers: str | None = Field(None, description="Signataires")
+    notice: str | None = Field(None, description="Notice")
+    alias: str | None = Field(None, description="Alias")
+    observations: str | None = Field(None, description="Observations")
+    page_pdf: str | None = Field(
         None,
         alias="pagePdf",
         description="Le numéro de la page de l'article dans le journal officiel",
         examples=["14"],
     )
-    num_parution: Optional[str] = Field(
+    num_parution: str | None = Field(
         None, alias="numParution", description="Numéro de parution"
     )
-    file_name: Optional[str] = Field(None, alias="fileName")
-    version_label: Optional[str] = Field(None, alias="versionLabel")
-    execution_time: Optional[int] = Field(
+    file_name: str | None = Field(None, alias="fileName")
+    version_label: str | None = Field(None, alias="versionLabel")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    inap: Optional[bool] = Field(None, description="INAP")
-    origine_publi: Optional[str] = Field(
+    inap: bool | None = Field(None, description="INAP")
+    origine_publi: str | None = Field(
         None, alias="originePubli", description="Origine de la publication"
     )
-    date_fin_version: Optional[str] = Field(
+    date_fin_version: str | None = Field(
         None, alias="dateFinVersion", description="Date de fin de la version"
     )
-    sections: Optional[list[ConsultSection]] = Field(
+    sections: list[ConsultSection] | None = Field(
         None,
         description="Liste des sections de premier niveau du texte. La liste est ordonnée",
     )
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers legislatifs"
     )
-    juris_state: Optional[str] = Field(
+    juris_state: str | None = Field(
         None, alias="jurisState", description="Etat juridique du texte"
     )
-    nor: Optional[str] = Field(
-        None, description="Numéro NOR", examples=["NCCX8900064L"]
-    )
-    date_parution: Optional[datetime] = Field(
+    nor: str | None = Field(None, description="Numéro NOR", examples=["NCCX8900064L"])
+    date_parution: datetime | None = Field(
         None, alias="dateParution", description="Date de parution"
     )
-    etat: Optional[str] = Field(None, description="Etat du texte")
-    type_texte: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat du texte")
+    type_texte: str | None = Field(
         None, alias="typeTexte", description="Type de texte", examples=["TEXTE_BASE"]
     )
-    modif_date: Optional[str] = Field(
+    modif_date: str | None = Field(
         None, alias="modifDate", description="Date de modification"
     )
-    id_conteneur: Optional[str] = Field(
+    id_conteneur: str | None = Field(
         None,
         alias="idConteneur",
         description="Identifiant du conteneur du texte lorsqu'il en existe un.",
     )
-    libelle_elargissement: Optional[str] = Field(None, alias="libelleElargissement")
-    dereferenced: Optional[bool] = Field(
+    libelle_elargissement: str | None = Field(None, alias="libelleElargissement")
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    nota: Optional[str] = Field(None, description="Nota")
-    rectificatif: Optional[str] = Field(None, description="Rectificatif")
-    appellations: Optional[list[str]] = Field(None, description="Appellations")
-    mots_cles: Optional[list[str]] = Field(
+    nota: str | None = Field(None, description="Nota")
+    rectificatif: str | None = Field(None, description="Rectificatif")
+    appellations: list[str] | None = Field(None, description="Appellations")
+    mots_cles: list[str] | None = Field(
         None,
         alias="motsCles",
         description="Liste des mots clés",
         examples=[["LIEN FAMILIAL", "CENTRES SOCIAUX"]],
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant du texte",
         examples=["LEGITEXT000006070994_01-08-2016"],
     )
-    conteneurs: Optional[list[Conteneur]] = Field(
+    conteneurs: list[Conteneur] | None = Field(
         None, description="Liste des conteneurs du texte"
     )
-    numero_bo: Optional[str] = Field(
+    numero_bo: str | None = Field(
         None, alias="numeroBo", description="Numéro Bulletin Officiel"
     )
-    date_debut_version: Optional[str] = Field(
+    date_debut_version: str | None = Field(
         None, alias="dateDebutVersion", description="Date de début de la version"
     )
-    eli: Optional[str] = Field(
+    eli: str | None = Field(
         None,
         description="identifiant européen de la \u200elégislation ou European Legislation Identifier",
         examples=["/eli/arrete/2019/1/18/TREK1901124A/jo/texte"],
     )
-    infos_restructuration_branche_html: Optional[str] = Field(
+    infos_restructuration_branche_html: str | None = Field(
         None,
         alias="infosRestructurationBrancheHtml",
         description="Texte HTML des informations restructuration de branche",
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID du texte", examples=["JORFTEXT000000882738"]
     )
-    liens: Optional[list[TexteLien]] = Field(None, description="Liens")
-    codes_nomenclature: Optional[list[str]] = Field(
+    liens: list[TexteLien] | None = Field(None, description="Liens")
+    codes_nomenclature: list[str] | None = Field(
         None, alias="codesNomenclature", description="Liste des codes de nomenclature"
     )
-    renvoi: Optional[str] = Field(None, description="Numero renvoi")
-    file_size: Optional[str] = Field(None, alias="fileSize")
-    jorf_text: Optional[str] = Field(
+    renvoi: str | None = Field(None, description="Numero renvoi")
+    file_size: str | None = Field(None, alias="fileSize")
+    jorf_text: str | None = Field(
         None, alias="jorfText", description="Titre du texte correspondant"
     )
-    prep_work: Optional[str] = Field(
+    prep_work: str | None = Field(
         None, alias="prepWork", description="Travaux préparatoires"
     )
-    visa: Optional[str] = Field(None, description="Visas")
-    file_path: Optional[str] = Field(None, alias="filePath")
-    description_fusion_html: Optional[str] = Field(
+    visa: str | None = Field(None, description="Visas")
+    file_path: str | None = Field(None, alias="filePath")
+    description_fusion_html: str | None = Field(
         None, alias="descriptionFusionHtml", description="Description fusion"
     )
-    infos_complementaires_html: Optional[str] = Field(
+    infos_complementaires_html: str | None = Field(
         None,
         alias="infosComplementairesHtml",
         description="Texte HTML des informations complémentaires",
     )
-    text_abroge: Optional[bool] = Field(
+    text_abroge: bool | None = Field(
         None, alias="textAbroge", description="Indique si le texte est abrogé"
     )
 
 
 class ConsultJorfResponse(BaseModel):
-    text_number: Optional[str] = Field(
+    text_number: str | None = Field(
         None, alias="textNumber", description="Numéro de texte"
     )
-    id: Optional[str] = Field(
+    id: str | None = Field(
         None,
         description="Identifiant du texte",
         examples=["LEGITEXT000006070994_01-08-2016"],
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         description="Titre du texte",
         examples=["Loi contenant organisation du notariat (loi 25 ventôse an XI)"],
     )
-    file_path: Optional[str] = Field(None, alias="filePath")
-    resume: Optional[str] = Field(None, description="Résumé")
-    nature: Optional[str] = Field(None, description="Nature")
-    dereferenced: Optional[bool] = Field(
+    file_path: str | None = Field(None, alias="filePath")
+    resume: str | None = Field(None, description="Résumé")
+    nature: str | None = Field(None, description="Nature")
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    juris_date: Optional[str] = Field(
+    juris_date: str | None = Field(
         None, alias="jurisDate", description="Date d'état juridique"
     )
-    date_texte: Optional[datetime] = Field(
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date de signature"
     )
-    articles: Optional[list[ConsultArticle]] = Field(
+    articles: list[ConsultArticle] | None = Field(
         None, description="Liste des articles racine du texte. La liste est ordonnée"
     )
-    has_single_pdf: Optional[bool] = Field(
+    has_single_pdf: bool | None = Field(
         None,
         alias="hasSinglePdf",
         description="Indique si la requête a remonté un seul pdf",
     )
-    notice: Optional[str] = Field(None, description="Notice")
-    alias: Optional[str] = Field(None, description="Alias")
-    sections: Optional[list[ConsultSection]] = Field(
+    notice: str | None = Field(None, description="Notice")
+    alias: str | None = Field(None, description="Alias")
+    sections: list[ConsultSection] | None = Field(
         None,
         description="Liste des sections de premier niveau du texte. La liste est ordonnée",
     )
-    page_pdf: Optional[str] = Field(
+    page_pdf: str | None = Field(
         None,
         alias="pagePdf",
         description="Le numéro de la page de l'article dans le journal officiel",
         examples=["14"],
     )
-    num_parution: Optional[str] = Field(
+    num_parution: str | None = Field(
         None, alias="numParution", description="Numéro de parution"
     )
-    file_name: Optional[str] = Field(None, alias="fileName")
-    inap: Optional[bool] = Field(None, description="INAP")
-    date_fin_version: Optional[str] = Field(
+    file_name: str | None = Field(None, alias="fileName")
+    inap: bool | None = Field(None, description="INAP")
+    date_fin_version: str | None = Field(
         None, alias="dateFinVersion", description="Date de fin de la version"
     )
-    observations: Optional[str] = Field(None, description="Observations")
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    observations: str | None = Field(None, description="Observations")
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers legislatifs"
     )
-    juris_state: Optional[str] = Field(
+    juris_state: str | None = Field(
         None, alias="jurisState", description="Etat juridique du texte"
     )
-    nor: Optional[str] = Field(
-        None, description="Numéro NOR", examples=["NCCX8900064L"]
-    )
-    date_parution: Optional[datetime] = Field(
+    nor: str | None = Field(None, description="Numéro NOR", examples=["NCCX8900064L"])
+    date_parution: datetime | None = Field(
         None, alias="dateParution", description="Date de parution"
     )
-    etat: Optional[str] = Field(None, description="Etat du texte")
-    modif_date: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat du texte")
+    modif_date: str | None = Field(
         None, alias="modifDate", description="Date de modification"
     )
-    id_conteneur: Optional[str] = Field(
+    id_conteneur: str | None = Field(
         None,
         alias="idConteneur",
         description="Identifiant du conteneur du texte lorsqu'il en existe un.",
     )
-    jorf_file_metadata: Optional[list[FileMetadata]] = Field(
+    jorf_file_metadata: list[FileMetadata] | None = Field(
         None,
         alias="jorfFileMetadata",
         description="Liste des métadonnées des fichiers attachés au document",
     )
-    nota: Optional[str] = Field(None, description="Nota")
-    rectificatif: Optional[str] = Field(None, description="Rectificatif")
-    appellations: Optional[list[str]] = Field(None, description="Appellations")
-    mots_cles: Optional[list[str]] = Field(
-        None, alias="motsCles", description="Mots-clés"
-    )
-    signers: Optional[str] = Field(None, description="Signataires")
-    date_debut_version: Optional[str] = Field(
+    nota: str | None = Field(None, description="Nota")
+    rectificatif: str | None = Field(None, description="Rectificatif")
+    appellations: list[str] | None = Field(None, description="Appellations")
+    mots_cles: list[str] | None = Field(None, alias="motsCles", description="Mots-clés")
+    signers: str | None = Field(None, description="Signataires")
+    date_debut_version: str | None = Field(
         None, alias="dateDebutVersion", description="Date de début de la version"
     )
-    eli: Optional[str] = Field(
+    eli: str | None = Field(
         None,
         description="identifiant européen de la \u200elégislation ou European Legislation Identifier",
         examples=["/eli/arrete/2019/1/18/TREK1901124A/jo/texte"],
     )
-    has_loda: Optional[bool] = Field(
+    has_loda: bool | None = Field(
         None,
         alias="hasLoda",
         description="Indique si le texte a une version consolidée",
     )
-    cid: Optional[str] = Field(
+    cid: str | None = Field(
         None, description="Chronical ID du texte", examples=["JORFTEXT000000882738"]
     )
-    liens: Optional[list[TexteLien]] = Field(None, description="Liens")
-    execution_time: Optional[int] = Field(
+    liens: list[TexteLien] | None = Field(None, description="Liens")
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    file_size: Optional[str] = Field(None, alias="fileSize")
-    jorf_text: Optional[str] = Field(
+    file_size: str | None = Field(None, alias="fileSize")
+    jorf_text: str | None = Field(
         None, alias="jorfText", description="Titre du texte correspondant"
     )
-    prep_work: Optional[str] = Field(
+    prep_work: str | None = Field(
         None, alias="prepWork", description="Travaux préparatoires"
     )
-    visa: Optional[str] = Field(None, description="Visas")
-    text_abroge: Optional[bool] = Field(
+    visa: str | None = Field(None, description="Visas")
+    text_abroge: bool | None = Field(
         None, alias="textAbroge", description="Indique si le texte est abrogé"
     )
 
@@ -4601,109 +4521,105 @@ class SearchRequestDTO(BaseModel):
 
 
 class ConsultTextResponse(BaseModel):
-    mots_cles: Optional[list[str]] = Field(
-        None, alias="motsCles", description="Mots-clés"
-    )
-    date_parution: Optional[datetime] = Field(
+    mots_cles: list[str] | None = Field(None, alias="motsCles", description="Mots-clés")
+    date_parution: datetime | None = Field(
         None, alias="dateParution", description="Date de parution"
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         description="Titre du texte",
         examples=["Loi contenant organisation du notariat (loi 25 ventôse an XI)"],
     )
-    etat: Optional[str] = Field(None, description="Etat du texte")
-    eli: Optional[str] = Field(
+    etat: str | None = Field(None, description="Etat du texte")
+    eli: str | None = Field(
         None,
         description="identifiant européen de la \u200elégislation ou European Legislation Identifier",
         examples=["/eli/arrete/2019/1/18/TREK1901124A/jo/texte"],
     )
-    modif_date: Optional[str] = Field(
+    modif_date: str | None = Field(
         None, alias="modifDate", description="Date de modification"
     )
-    num_parution: Optional[str] = Field(
+    num_parution: str | None = Field(
         None, alias="numParution", description="Numéro de parution"
     )
-    resume: Optional[str] = Field(None, description="Résumé")
-    nature: Optional[str] = Field(None, description="Nature")
-    dossiers_legislatifs: Optional[list[DossierLegislatif]] = Field(
+    resume: str | None = Field(None, description="Résumé")
+    nature: str | None = Field(None, description="Nature")
+    dossiers_legislatifs: list[DossierLegislatif] | None = Field(
         None, alias="dossiersLegislatifs", description="Liste des dossiers legislatifs"
     )
-    dereferenced: Optional[bool] = Field(
+    dereferenced: bool | None = Field(
         None,
         description="Identifie si le contenu est référençable par les robots d'indexation",
         examples=[True],
     )
-    juris_date: Optional[str] = Field(
+    juris_date: str | None = Field(
         None, alias="jurisDate", description="Date d'état juridique"
     )
-    prep_work: Optional[str] = Field(
+    prep_work: str | None = Field(
         None, alias="prepWork", description="Travaux préparatoires"
     )
-    appellations: Optional[list[str]] = Field(None, description="Appellations")
-    articles: Optional[list[ConsultArticle]] = Field(
+    appellations: list[str] | None = Field(None, description="Appellations")
+    articles: list[ConsultArticle] | None = Field(
         None, description="Liste des articles racine du texte. La liste est ordonnée"
     )
-    signers: Optional[str] = Field(None, description="Signataires")
-    nor: Optional[str] = Field(
-        None, description="Numéro NOR", examples=["NCCX8900064L"]
-    )
-    id: Optional[str] = Field(
+    signers: str | None = Field(None, description="Signataires")
+    nor: str | None = Field(None, description="Numéro NOR", examples=["NCCX8900064L"])
+    id: str | None = Field(
         None,
         description="Identifiant du texte",
         examples=["LEGITEXT000006070994_01-08-2016"],
     )
-    nota: Optional[str] = Field(None, description="Nota")
-    notice: Optional[str] = Field(None, description="Notice")
-    observations: Optional[str] = Field(None, description="Observations")
-    page_pdf: Optional[str] = Field(
+    nota: str | None = Field(None, description="Nota")
+    notice: str | None = Field(None, description="Notice")
+    observations: str | None = Field(None, description="Observations")
+    page_pdf: str | None = Field(
         None,
         alias="pagePdf",
         description="Le numéro de la page de l'article dans le journal officiel",
         examples=["14"],
     )
-    text_number: Optional[str] = Field(
+    text_number: str | None = Field(
         None, alias="textNumber", description="Numéro de texte"
     )
-    id_conteneur: Optional[str] = Field(
+    id_conteneur: str | None = Field(
         None,
         alias="idConteneur",
         description="Identifiant du conteneur du texte lorsqu'il en existe un.",
     )
-    file_name: Optional[str] = Field(None, alias="fileName")
-    date_debut_version: Optional[str] = Field(
+    file_name: str | None = Field(None, alias="fileName")
+    date_debut_version: str | None = Field(
         None, alias="dateDebutVersion", description="Date de début de la version"
     )
-    alias: Optional[str] = Field(None, description="Alias")
-    rectificatif: Optional[str] = Field(None, description="Rectificatif")
-    inap: Optional[bool] = Field(None, description="INAP")
-    cid: Optional[str] = Field(
+    alias: str | None = Field(None, description="Alias")
+    rectificatif: str | None = Field(None, description="Rectificatif")
+    inap: bool | None = Field(None, description="INAP")
+    cid: str | None = Field(
         None, description="Chronical ID du texte", examples=["JORFTEXT000000882738"]
     )
-    sections: Optional[list[ConsultSection]] = Field(
+    sections: list[ConsultSection] | None = Field(
         None,
         description="Liste des sections de premier niveau du texte. La liste est ordonnée",
     )
-    liens: Optional[list[TexteLien]] = Field(None, description="Liens")
-    date_fin_version: Optional[str] = Field(
+    liens: list[TexteLien] | None = Field(None, description="Liens")
+    date_fin_version: str | None = Field(
         None, alias="dateFinVersion", description="Date de fin de la version"
     )
-    execution_time: Optional[int] = Field(
+    execution_time: int | None = Field(
         None, alias="executionTime", description="Temps d'exécution"
     )
-    file_size: Optional[str] = Field(None, alias="fileSize")
-    visa: Optional[str] = Field(None, description="Visas")
-    jorf_text: Optional[str] = Field(
+    file_size: str | None = Field(None, alias="fileSize")
+    visa: str | None = Field(None, description="Visas")
+    jorf_text: str | None = Field(
         None, alias="jorfText", description="Titre du texte correspondant"
     )
-    juris_state: Optional[str] = Field(
+    juris_state: str | None = Field(
         None, alias="jurisState", description="Etat juridique du texte"
     )
-    date_texte: Optional[datetime] = Field(
+    date_texte: datetime | None = Field(
         None, alias="dateTexte", description="Date de signature"
     )
-    file_path: Optional[str] = Field(None, alias="filePath")
-    text_abroge: Optional[bool] = Field(
+    file_path: str | None = Field(None, alias="filePath")
+    text_abroge: bool | None = Field(
         None, alias="textAbroge", description="Indique si le texte est abrogé"
     )
 
