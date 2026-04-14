@@ -87,11 +87,40 @@ class TestFetchById:
         assert body == {"textId": "JURITEXT000037999394"}
 
     def test_returns_none_when_text_field_empty(self):
-        """Legifrance answers 200 but with an empty text → decision absent."""
+        """Legifrance answers 200 but with an empty text → decision absent.
+
+        This is a defensive path: in practice the live ``/consult/juri``
+        endpoint returns HTTP 400 for unknown ids rather than an empty 200,
+        but if DILA ever changes that behaviour (or an intermediate cache
+        serves an empty body), the method must still degrade to ``None``
+        instead of raising.
+        """
         client = MagicMock()
         client.call_api.return_value = _mock_response(200, _consult_payload(None))
 
         decision = JuriAPI(client).fetch_by_id("JURITEXT000000000000")
+
+        assert decision is None
+
+    def test_returns_none_on_unknown_text_id_400(self):
+        """Legifrance's HTTP 400 "unknown textId" signature maps to ``None``.
+
+        The live ``/consult/juri`` endpoint answers HTTP 400 with the body
+        ``"L'expression à valider est fausse"`` for well-formed-but-unknown
+        JURITEXT/CETATEXT ids. ``fetch_by_id`` MUST recognise that specific
+        signature and return ``None`` instead of propagating the wrapped
+        ``Exception`` — otherwise callers cannot distinguish "does not
+        exist" from "could not verify".
+        """
+        client = MagicMock()
+        client.call_api.side_effect = Exception(
+            "API client error 400 - "
+            '{"timestamp":1776183476285,"error":400,"status":"Bad Request",'
+            '"message":"L\'expression à valider est fausse.",'
+            '"errorCode":null,"exceptionDetails":null}'
+        )
+
+        decision = JuriAPI(client).fetch_by_id("JURITEXT099999999999")
 
         assert decision is None
 
@@ -107,6 +136,47 @@ class TestFetchById:
 
         client.call_api.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "bad_id",
+        [
+            "FOO",
+            "JURITEXT",
+            "JURITEXT12345",
+            "JURITEXT0000000000000",  # 13 digits
+            "JURITEXT00000000000",  # 11 digits
+            "juritext000037999394",  # lowercase prefix
+            "JURITEXT00003799939A",  # non-numeric suffix
+            "FOOTEXT000037999394",
+            "JURITEXT 000037999394",  # internal whitespace
+        ],
+    )
+    def test_raises_value_error_on_malformed_format(self, bad_id):
+        """Client-side format validation rejects malformed ids up front.
+
+        The canonical Legifrance case-law textId is either ``JURITEXT`` or
+        ``CETATEXT`` followed by exactly 12 numeric digits. Anything else
+        is rejected BEFORE any network round-trip so the caller gets a
+        precise :class:`ValueError` instead of a cryptic server-side 400.
+        """
+        client = MagicMock()
+
+        with pytest.raises(ValueError, match="Invalid text_id format"):
+            JuriAPI(client).fetch_by_id(bad_id)
+
+        client.call_api.assert_not_called()
+
+    def test_accepts_cetat_text_id(self):
+        """CETATEXT ids (Conseil d'État) are just as valid as JURITEXT."""
+        client = MagicMock()
+        client.call_api.return_value = _mock_response(
+            200, _consult_payload("CETATEXT000007422435")
+        )
+
+        decision = JuriAPI(client).fetch_by_id("CETATEXT000007422435")
+
+        assert isinstance(decision, JuriDecision)
+        assert decision.id == "CETATEXT000007422435"
+
     def test_transport_error_propagates(self):
         """Transport/auth/5xx failures must NOT be swallowed as 'not found'.
 
@@ -119,6 +189,21 @@ class TestFetchById:
         client.call_api.side_effect = Exception("API client error 500 - boom")
 
         with pytest.raises(Exception, match="API client error 500"):
+            JuriAPI(client).fetch_by_id("JURITEXT000037999394")
+
+    def test_unrelated_400_propagates(self):
+        """A 400 that is NOT the "unknown textId" signature still propagates.
+
+        We only translate the specific ``"L'expression à valider est
+        fausse"`` marker to ``None``; any other 400 (schema error, missing
+        field, auth envelope issue, ...) is still a caller-visible failure.
+        """
+        client = MagicMock()
+        client.call_api.side_effect = Exception(
+            "API client error 400 - Bad Request: malformed JSON body"
+        )
+
+        with pytest.raises(Exception, match="400"):
             JuriAPI(client).fetch_by_id("JURITEXT000037999394")
 
 

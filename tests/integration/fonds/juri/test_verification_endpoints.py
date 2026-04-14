@@ -47,9 +47,16 @@ def test_fetch_by_id_returns_none_for_unknown_identifier(
 ) -> None:
     """A well-formed but non-existent JURITEXT yields ``None``.
 
-    The final ``000`` suffix is intentionally picked to not collide with
-    any real identifier while keeping the expected 20-char JURITEXT
-    shape — Legifrance should answer 200 with an empty ``text`` payload.
+    The canonical ``JURITEXT`` + 12-digit shape passes client-side format
+    validation but does not resolve to any real decision on Legifrance.
+
+    The live ``/consult/juri`` endpoint answers HTTP 400 with the body
+    ``"L'expression à valider est fausse"`` in this case (rather than a
+    200 with an empty payload), so ``fetch_by_id`` must recognise that
+    signature and degrade to ``None`` instead of propagating the wrapped
+    :class:`Exception`. Probed against the live API on 2026-04-13 with
+    ``JURITEXT000000000000`` and ``JURITEXT999999999999`` to confirm both
+    trigger the exact same marker.
     """
     decision = juri_api.fetch_by_id("JURITEXT099999999999")
 

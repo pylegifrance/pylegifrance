@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import date, datetime
 from typing import Any, Optional
 
@@ -97,6 +98,26 @@ def _normalize_formation(formation: str) -> str:
 # legifrance.gouv.fr.
 JURI_URL_ID_PREFIXES: tuple[str, ...] = ("JURITEXT", "CETATEXT")
 JURI_URL_TEMPLATE = "https://www.legifrance.gouv.fr/juri/id/{decision_id}"
+
+# Canonical Legifrance case-law textId format. A valid JURITEXT or CETATEXT
+# identifier is the literal prefix followed by exactly 12 numeric digits
+# (for example ``JURITEXT000037999394``). This regex is used by
+# :meth:`JuriAPI.fetch_by_id` to reject obviously malformed identifiers
+# client-side so callers receive a precise :class:`ValueError` before any
+# network round-trip.
+JURI_TEXT_ID_PATTERN: re.Pattern[str] = re.compile(r"^(?:JURITEXT|CETATEXT)\d{12}$")
+
+# Marker substring used to recognise the distinctive HTTP 400 response that
+# Legifrance's ``/consult/juri`` endpoint returns when asked about a
+# well-formed textId that does not resolve to an existing decision. Probed
+# against the live API on 2026-04-13: both all-zero and all-nine JURITEXT ids
+# (e.g. ``JURITEXT000000000000``, ``JURITEXT999999999999``) trigger this
+# exact message, while valid ids (e.g. ``JURITEXT000037999394``) return 200
+# with a populated ``text`` payload. The endpoint does NOT return 200 with
+# an empty text for unknown ids — it returns 400, so we have to interpret
+# this specific error as "decision does not exist" rather than as a real
+# transport failure.
+_UNKNOWN_TEXT_ID_MARKER: str = "L'expression à valider est fausse"
 
 logger = logging.getLogger(__name__)
 
@@ -567,28 +588,43 @@ class JuriAPI:
         JURITEXT/CETATEXT identifiers.
 
         Unlike :meth:`fetch`, this method is documented as a verification
-        primitive: transport failures (network, authentication, 5xx) must
-        propagate so callers can distinguish "decision does not exist"
-        (``None``) from "we could not check" (exception). The underlying
-        :class:`LegifranceClient.call_api` already raises on 4xx/5xx, so we
-        deliberately do not catch those errors here.
+        primitive. The resolution order is:
+
+        1. Validate the identifier format client-side against
+           :data:`JURI_TEXT_ID_PATTERN` (``^(JURITEXT|CETATEXT)\\d{12}$``).
+           Malformed inputs raise :class:`ValueError` with no network
+           round-trip.
+        2. Call ``POST /consult/juri``. A populated 200 response is wrapped
+           in a :class:`JuriDecision`.
+        3. The Legifrance ``/consult/juri`` endpoint does NOT return an
+           empty 200 response for unknown well-formed ids — it answers HTTP
+           400 with the body ``"L'expression à valider est fausse"``
+           (probed live on 2026-04-13 against ``JURITEXT000000000000``,
+           ``JURITEXT999999999999``, and ``JURITEXT000037999394``). When we
+           observe that exact signature AFTER passing client-side format
+           validation, we interpret it as "decision does not exist" and
+           return ``None``. Every other error (transport, auth, other 4xx,
+           5xx) propagates so callers can distinguish "decision does not
+           exist" from "we could not check".
 
         Args:
             text_id: The Legifrance text identifier (e.g.
                 ``"JURITEXT000037999394"`` for a Cour de cassation decision
                 or ``"CETATEXT000007422435"`` for a Conseil d'État decision).
+                Must match ``^(JURITEXT|CETATEXT)\\d{12}$``.
 
         Returns:
             A :class:`JuriDecision` if Legifrance returns a populated text
-            for the given identifier, ``None`` if the API responds
-            successfully but the text body is empty (i.e. the decision does
-            not exist on Legifrance).
+            for the given identifier, ``None`` if the identifier is well
+            formed but does not resolve to any decision on Legifrance.
 
         Raises:
-            ValueError: If ``text_id`` is empty or only whitespace.
-            Exception: If the HTTP call fails (transport, auth, 4xx, 5xx).
-                The caller MUST treat these as "verification impossible",
-                not as "decision does not exist".
+            ValueError: If ``text_id`` is empty, only whitespace, or does
+                not match the canonical ``JURITEXT``/``CETATEXT`` format.
+            Exception: If the HTTP call fails for any reason other than the
+                recognised "unknown textId" 400 signature (transport, auth,
+                other 4xx, 5xx). The caller MUST treat these as
+                "verification impossible", not as "decision does not exist".
 
         Examples:
             >>> juri = JuriAPI(client)
@@ -599,16 +635,40 @@ class JuriAPI:
         if not text_id or not text_id.strip():
             raise ValueError("L'identifiant du texte ne peut pas être vide")
 
-        request = ConsultRequest(textId=text_id, searchedString=None)
+        normalized = text_id.strip()
+        if not JURI_TEXT_ID_PATTERN.match(normalized):
+            raise ValueError(
+                "Invalid text_id format: expected JURITEXT<12 digits> or "
+                f"CETATEXT<12 digits>, got {text_id!r}"
+            )
+
+        request = ConsultRequest(textId=normalized, searchedString=None)
 
         # Match the DILA API cookbook example for POST /consult/juri which
         # sends only ``{"textId": ...}``. Excluding None keeps the body
         # minimal and avoids transmitting a dangling ``"searchedString":
         # null`` that is not part of the documented contract.
-        response = self._client.call_api(
-            "consult/juri",
-            request.to_api_model().model_dump(by_alias=True, exclude_none=True),
-        )
+        try:
+            response = self._client.call_api(
+                "consult/juri",
+                request.to_api_model().model_dump(by_alias=True, exclude_none=True),
+            )
+        except Exception as exc:
+            # LegifranceClient wraps 4xx/5xx responses into plain
+            # ``Exception("API client error <code> - <body>")``. We only
+            # translate the very specific "unknown textId" 400 signature
+            # into ``None``; every other failure propagates so the caller
+            # can distinguish "not found" from "could not verify".
+            message = str(exc)
+            if "400" in message and _UNKNOWN_TEXT_ID_MARKER in message:
+                logger.debug(
+                    "fetch_by_id: Legifrance reported unknown textId %s "
+                    "(HTTP 400 'L'expression à valider est fausse'); "
+                    "returning None.",
+                    normalized,
+                )
+                return None
+            raise
 
         if response.status_code != HTTP_OK:
             return None
