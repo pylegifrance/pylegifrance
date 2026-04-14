@@ -77,6 +77,16 @@ def verify_essential_information(context):
         )
         assert decision.id is not None, "Chaque décision doit avoir un ID"
 
+        # L'URL canonique Legifrance doit être exposée lorsque l'ID
+        # porte un préfixe reconnu (JURITEXT / CETATEXT).
+        if decision.id.startswith(("JURITEXT", "CETATEXT")):
+            assert decision.url is not None, (
+                "Chaque décision avec un ID JURITEXT/CETATEXT doit exposer une URL"
+            )
+            assert decision.url == (
+                f"https://www.legifrance.gouv.fr/juri/id/{decision.id}"
+            ), "L'URL générée doit suivre le schéma canonique Legifrance"
+
         # Au moins une des informations essentielles doit être présente
         essential_info_present = any(
             [
