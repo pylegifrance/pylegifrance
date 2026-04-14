@@ -30,7 +30,7 @@ runs:
         printf "%s" "${{ inputs.env-content }}" > .env
 
     - name: Install uv package manager
-      uses: astral-sh/setup-uv@v8
+      uses: astral-sh/setup-uv@v7
 
     - name: Install project dependencies
       if: inputs.install-dependencies == 'true'
