@@ -17,6 +17,14 @@ from pylegifrance.utils import EnumEncoder
 HTTP_OK = 200
 CITATION_TYPE = "CITATION"
 
+# Supported Legifrance case law identifier prefixes. JURITEXT is used for
+# judicial decisions (Cour de cassation, cours d'appel, tribunaux judiciaires)
+# and CETATEXT for administrative case law (Conseil d'Etat, tribunaux
+# administratifs). Both resolve under the same /juri/id/ path on
+# legifrance.gouv.fr.
+JURI_URL_ID_PREFIXES: tuple[str, ...] = ("JURITEXT", "CETATEXT")
+JURI_URL_TEMPLATE = "https://www.legifrance.gouv.fr/juri/id/{decision_id}"
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,6 +50,39 @@ class JuriDecision:
     def id(self) -> str | None:
         """Récupère l'identifiant de la décision."""
         return self._decision.id
+
+    @property
+    def url(self) -> str | None:
+        """Construit l'URL Legifrance officielle de la décision.
+
+        L'URL est dérivée de l'identifiant de la décision en suivant le
+        schéma canonique ``https://www.legifrance.gouv.fr/juri/id/{id}``.
+        Ce même chemin résout les décisions judiciaires (``JURITEXT...``)
+        et les décisions administratives (``CETATEXT...``).
+
+        Reflète le comportement d'auto-génération d'URL déjà présent sur
+        :class:`pylegifrance.models.code.models.Article`, afin que les
+        consommateurs (notamment les agents LLM) disposent toujours d'une
+        URL vérifiable et puissent distinguer les citations authentiques
+        des fabrications.
+
+        Returns:
+            L'URL canonique de consultation sur legifrance.gouv.fr, ou
+            ``None`` si l'identifiant est manquant ou ne correspond pas à
+            un préfixe reconnu (JURITEXT ou CETATEXT). Retourne ``None``
+            plutôt qu'une URL malformée afin de ne pas induire les
+            consommateurs en erreur.
+
+        Examples:
+            >>> decision.url
+            'https://www.legifrance.gouv.fr/juri/id/JURITEXT000027546700'
+        """
+        decision_id = self._decision.id
+        if not decision_id:
+            return None
+        if not decision_id.startswith(JURI_URL_ID_PREFIXES):
+            return None
+        return JURI_URL_TEMPLATE.format(decision_id=decision_id)
 
     @property
     def cid(self) -> Cid | None:
