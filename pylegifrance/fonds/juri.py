@@ -1,21 +1,94 @@
 import json
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Optional
 
 from pylegifrance.client import LegifranceClient
+from pylegifrance.models.generated.model import (
+    ChampDTO,
+    CritereDTO,
+    DatePeriod,
+    FiltreDTO,
+    Fond,
+    Operateur,
+    RechercheSpecifiqueDTO,
+    SearchRequestDTO,
+    TypeChamp,
+    TypePagination,
+    TypeRecherche,
+)
 from pylegifrance.models.identifier import Cid, Eli, Nor
 from pylegifrance.models.juri.api_wrappers import (
     ConsultByAncienIdRequest,
     ConsultRequest,
     ConsultResponse,
 )
+from pylegifrance.models.juri.constants import FacettesJURI
 from pylegifrance.models.juri.models import Decision
 from pylegifrance.models.juri.search import SearchRequest
 from pylegifrance.utils import EnumEncoder
 
 HTTP_OK = 200
 CITATION_TYPE = "CITATION"
+
+# Canonical CASSATION_FORMATION filter values accepted by the Legifrance
+# search endpoint for fond JURI. These are the French human-readable labels
+# used natively by the API on the ``CASSATION_FORMATION`` facet (see
+# ``description-des-tris-et-filtres-de-l-api.xlsx``, JURI sheet). The existing
+# :class:`pylegifrance.models.juri.search.SearchRequest` documents and
+# forwards these strings verbatim, so we stay consistent with that contract.
+CASSATION_FORMATIONS: tuple[str, ...] = (
+    "Chambre sociale",
+    "Première chambre civile",
+    "Deuxième chambre civile",
+    "Troisième chambre civile",
+    "Chambre commerciale",
+    "Chambre criminelle",
+    "Chambre mixte",
+    "Assemblée plénière",
+    "Chambres réunies",
+)
+
+# Convenience aliases mapping short codes (as used in prose citations such as
+# "Cass. Soc." or "Cass. Civ. 1") to the canonical Legifrance labels above.
+# Matching is case-insensitive on keys. Unknown keys are passed through
+# unchanged so callers can always supply the canonical label directly.
+CASSATION_FORMATION_ALIASES: dict[str, str] = {
+    "soc": "Chambre sociale",
+    "soci": "Chambre sociale",
+    "social": "Chambre sociale",
+    "civ1": "Première chambre civile",
+    "civi1": "Première chambre civile",
+    "civ2": "Deuxième chambre civile",
+    "civi2": "Deuxième chambre civile",
+    "civ3": "Troisième chambre civile",
+    "civi3": "Troisième chambre civile",
+    "com": "Chambre commerciale",
+    "comm": "Chambre commerciale",
+    "crim": "Chambre criminelle",
+    "mixte": "Chambre mixte",
+    "chmixte": "Chambre mixte",
+    "pleniere": "Assemblée plénière",
+    "plen": "Assemblée plénière",
+    "ap": "Assemblée plénière",
+}
+
+
+def _normalize_formation(formation: str) -> str:
+    """Resolve a formation alias (e.g. ``"Soc"``) to its canonical label.
+
+    Args:
+        formation: The user-supplied formation string. May be a short alias
+            (``"Soc"``, ``"Civ1"``, ``"Com"``, ``"Crim"``...) or the canonical
+            Legifrance label (``"Chambre sociale"``...).
+
+    Returns:
+        The canonical Legifrance label if the alias is known, otherwise the
+        input unchanged (so callers can pass exotic formations directly).
+    """
+    key = formation.strip().lower().replace(" ", "").replace(".", "")
+    return CASSATION_FORMATION_ALIASES.get(key, formation)
+
 
 # Supported Legifrance case law identifier prefixes. JURITEXT is used for
 # judicial decisions (Cour de cassation, cours d'appel, tribunaux judiciaires)
@@ -480,6 +553,336 @@ class JuriAPI:
             except Exception as e:
                 logger.error(
                     f"Exception lors de la récupération de la décision {text_id}: {e}"
+                )
+
+        return results
+
+    def fetch_by_id(self, text_id: str) -> JuriDecision | None:
+        """Verify and fetch a decision by its canonical Legifrance identifier.
+
+        Wraps ``POST /consult/juri`` with body ``{"textId": text_id}``. This
+        is the canonical verifier for "does this decision actually exist on
+        Legifrance?" — the primary use case is hardening LLM agents that
+        fabricate case-law citations with plausible-looking but invented
+        JURITEXT/CETATEXT identifiers.
+
+        Unlike :meth:`fetch`, this method is documented as a verification
+        primitive: transport failures (network, authentication, 5xx) must
+        propagate so callers can distinguish "decision does not exist"
+        (``None``) from "we could not check" (exception). The underlying
+        :class:`LegifranceClient.call_api` already raises on 4xx/5xx, so we
+        deliberately do not catch those errors here.
+
+        Args:
+            text_id: The Legifrance text identifier (e.g.
+                ``"JURITEXT000037999394"`` for a Cour de cassation decision
+                or ``"CETATEXT000007422435"`` for a Conseil d'État decision).
+
+        Returns:
+            A :class:`JuriDecision` if Legifrance returns a populated text
+            for the given identifier, ``None`` if the API responds
+            successfully but the text body is empty (i.e. the decision does
+            not exist on Legifrance).
+
+        Raises:
+            ValueError: If ``text_id`` is empty or only whitespace.
+            Exception: If the HTTP call fails (transport, auth, 4xx, 5xx).
+                The caller MUST treat these as "verification impossible",
+                not as "decision does not exist".
+
+        Examples:
+            >>> juri = JuriAPI(client)
+            >>> decision = juri.fetch_by_id("JURITEXT000037999394")
+            >>> if decision is None:
+            ...     raise ValueError("Decision does not exist on Legifrance")
+        """
+        if not text_id or not text_id.strip():
+            raise ValueError("L'identifiant du texte ne peut pas être vide")
+
+        request = ConsultRequest(textId=text_id, searchedString=None)
+
+        # Match the DILA API cookbook example for POST /consult/juri which
+        # sends only ``{"textId": ...}``. Excluding None keeps the body
+        # minimal and avoids transmitting a dangling ``"searchedString":
+        # null`` that is not part of the documented contract.
+        response = self._client.call_api(
+            "consult/juri",
+            request.to_api_model().model_dump(by_alias=True, exclude_none=True),
+        )
+
+        if response.status_code != HTTP_OK:
+            return None
+
+        response_data = response.json()
+        decision = self._process_consult_response(response_data)
+
+        if decision is None:
+            return None
+
+        return JuriDecision(decision, self._client)
+
+    def search_by_ecli(self, ecli: str, *, fond: str = "JURI") -> list[JuriDecision]:
+        """Resolve a European Case Law Identifier (ECLI) to Legifrance decisions.
+
+        Wraps ``POST /search`` with a field search on ``typeChamp=ECLI``
+        using ``typeRecherche=EXACTE``. An ECLI typically resolves to zero
+        or one match, but a list is returned for API consistency with
+        :meth:`search`.
+
+        Args:
+            ecli: The European Case Law Identifier. Any documented format is
+                accepted (for example ``"ECLI:FR:CCASS:2018:CO00579"``,
+                ``"ECLI:FR:CC:2023:123.QPC"``, or
+                ``"ECLI:FR:CE:2024:123456.20240101"``). Only a non-empty
+                check is performed locally; format validation is delegated
+                to the Legifrance API.
+            fond: The Legifrance fond to search. Defaults to ``"JURI"``
+                (judicial case law — Cour de cassation, cours d'appel,
+                tribunaux judiciaires). Use ``"CETAT"`` to search the
+                administrative case law corpus (Conseil d'État) instead.
+
+        Returns:
+            A list of matching :class:`JuriDecision` objects. Empty list if
+            no decision matches the ECLI on the given fond.
+
+        Raises:
+            ValueError: If ``ecli`` is empty or ``fond`` is not one of
+                ``"JURI"`` or ``"CETAT"``.
+            Exception: If the HTTP call fails (transport, auth, 4xx, 5xx).
+
+        Examples:
+            >>> matches = juri.search_by_ecli("ECLI:FR:CCASS:2018:CO00579")
+            >>> if not matches:
+            ...     raise ValueError("ECLI does not resolve on Legifrance")
+        """
+        if not ecli or not ecli.strip():
+            raise ValueError("L'ECLI ne peut pas être vide")
+
+        fond_normalized = fond.strip().upper()
+        if fond_normalized == "JURI":
+            fond_dto = Fond.juri
+        elif fond_normalized == "CETAT":
+            fond_dto = Fond.cetat
+        else:
+            raise ValueError(
+                f"Fond non supporté pour une recherche par ECLI: {fond}. "
+                "Valeurs acceptées: 'JURI', 'CETAT'."
+            )
+
+        request_dto = self._build_field_search_dto(
+            value=ecli,
+            type_champ=TypeChamp.ecli,
+            fond=fond_dto,
+        )
+
+        return self._run_search_dto(request_dto)
+
+    def search_by_affaire(
+        self,
+        num_affaire: str,
+        *,
+        formation: str | None = None,
+        date_decision: date | None = None,
+        date_range: tuple[date, date] | None = None,
+    ) -> list[JuriDecision]:
+        """Exact-tuple lookup for Cassation-style case citations.
+
+        Wraps ``POST /search`` on fond ``JURI`` combining:
+
+        - a field search on ``typeChamp=NUM_AFFAIRE`` (``typeRecherche=EXACTE``),
+        - an optional ``CASSATION_FORMATION`` filter,
+        - an optional ``DATE_DECISION`` filter (either an exact day or an
+          inclusive date range).
+
+        This is designed to verify canonical French case citations of the
+        form ``Cass. Soc. 4 mars 2020 n° 18-26.218``: the caller supplies
+        the formation, the date, and the case number, and this method
+        returns the matching JURITEXT — or an empty list if no decision
+        matches the tuple exactly.
+
+        Args:
+            num_affaire: The case number (``"18-26.218"``,
+                ``"20-80.000"``...). Exact match is used.
+            formation: Optional Cassation formation. Accepts either a short
+                alias (``"Soc"``, ``"Civ1"``, ``"Civ2"``, ``"Civ3"``,
+                ``"Com"``, ``"Crim"``, ``"Mixte"``, ``"Pleniere"``) or the
+                canonical Legifrance label (``"Chambre sociale"``,
+                ``"Première chambre civile"``...). Aliases are resolved via
+                :data:`CASSATION_FORMATION_ALIASES`; unknown strings are
+                forwarded to the API unchanged.
+            date_decision: Optional exact decision date. Mutually exclusive
+                with ``date_range``.
+            date_range: Optional ``(start, end)`` inclusive date range for
+                the decision date. Mutually exclusive with ``date_decision``.
+
+        Returns:
+            A list of matching :class:`JuriDecision` objects. Empty list if
+            no decision matches the tuple.
+
+        Raises:
+            ValueError: If ``num_affaire`` is empty, if both
+                ``date_decision`` and ``date_range`` are provided, or if
+                ``date_range`` is not a 2-tuple with start <= end.
+            Exception: If the HTTP call fails.
+
+        Examples:
+            >>> from datetime import date
+            >>> juri.search_by_affaire(
+            ...     num_affaire="18-26.218",
+            ...     formation="Soc",
+            ...     date_decision=date(2020, 3, 4),
+            ... )
+        """
+        if not num_affaire or not num_affaire.strip():
+            raise ValueError("Le numéro d'affaire ne peut pas être vide")
+
+        if date_decision is not None and date_range is not None:
+            raise ValueError(
+                "Paramètres incompatibles: utilisez soit 'date_decision', "
+                "soit 'date_range', mais pas les deux."
+            )
+
+        filters: list[FiltreDTO] = []
+
+        if formation is not None:
+            canonical_formation = _normalize_formation(formation)
+            filters.append(
+                FiltreDTO(
+                    facette=FacettesJURI.CASSATION_FORMATION.value,
+                    valeurs=[canonical_formation],
+                    dates=None,
+                    singleDate=None,
+                    multiValeurs=None,
+                )
+            )
+
+        if date_decision is not None:
+            start = datetime.combine(date_decision, datetime.min.time())
+            end = datetime.combine(date_decision, datetime.min.time())
+            filters.append(
+                FiltreDTO(
+                    facette="DATE_DECISION",
+                    valeurs=None,
+                    dates=DatePeriod(start=start, end=end),
+                    singleDate=None,
+                    multiValeurs=None,
+                )
+            )
+        elif date_range is not None:
+            if len(date_range) != 2:
+                raise ValueError("date_range doit être un tuple (start_date, end_date)")
+            start_date, end_date = date_range
+            if end_date < start_date:
+                raise ValueError(
+                    "date_range: la date de fin doit être >= date de début"
+                )
+            filters.append(
+                FiltreDTO(
+                    facette="DATE_DECISION",
+                    valeurs=None,
+                    dates=DatePeriod(
+                        start=datetime.combine(start_date, datetime.min.time()),
+                        end=datetime.combine(end_date, datetime.min.time()),
+                    ),
+                    singleDate=None,
+                    multiValeurs=None,
+                )
+            )
+
+        request_dto = self._build_field_search_dto(
+            value=num_affaire,
+            type_champ=TypeChamp.num_affaire,
+            fond=Fond.juri,
+            filters=filters,
+        )
+
+        return self._run_search_dto(request_dto)
+
+    def _build_field_search_dto(
+        self,
+        *,
+        value: str,
+        type_champ: TypeChamp,
+        fond: Fond,
+        filters: list[FiltreDTO] | None = None,
+    ) -> SearchRequestDTO:
+        """Build a :class:`SearchRequestDTO` for a single exact field search.
+
+        Mirrors the helpers on
+        :class:`pylegifrance.models.juri.search.SearchRequest` but operates
+        directly on DTOs so we can target fonds other than JURI and field
+        types (ECLI, NUM_AFFAIRE...) that the higher-level ``SearchRequest``
+        wrapper does not currently expose.
+        """
+        criteria = CritereDTO(
+            valeur=value,
+            operateur=Operateur.et,
+            typeRecherche=TypeRecherche.exacte,
+            proximite=None,
+            criteres=None,
+        )
+        champ = ChampDTO(
+            criteres=[criteria],
+            operateur=Operateur.et,
+            typeChamp=type_champ,
+        )
+        recherche = RechercheSpecifiqueDTO(
+            champs=[champ],
+            filtres=filters or [],
+            pageNumber=1,
+            pageSize=10,
+            sort="PERTINENCE",
+            fromAdvancedRecherche=False,
+            secondSort="ID",
+            typePagination=TypePagination.defaut,
+            operateur=Operateur.et,
+        )
+        return SearchRequestDTO(recherche=recherche, fond=fond)
+
+    def _run_search_dto(self, request_dto: SearchRequestDTO) -> list[JuriDecision]:
+        """Execute a prepared search DTO and hydrate matches into JuriDecisions.
+
+        Mirrors the post-processing loop of :meth:`search`: walks the
+        ``results[].titles[0].id`` path and calls :meth:`fetch` for each
+        hit so callers uniformly receive rich :class:`JuriDecision`
+        instances. Matches the behaviour of :meth:`search` for parity.
+        """
+        request = request_dto.model_dump(by_alias=True)
+        request = json.loads(json.dumps(request, cls=EnumEncoder))
+
+        response = self._client.call_api("search", request)
+
+        if response.status_code != HTTP_OK:
+            return []
+
+        response_data = response.json()
+
+        if "results" not in response_data or not isinstance(
+            response_data["results"], list
+        ):
+            return []
+
+        results: list[JuriDecision] = []
+        for result in response_data["results"]:
+            if (
+                "titles" not in result
+                or not isinstance(result["titles"], list)
+                or len(result["titles"]) == 0
+            ):
+                continue
+
+            title = result["titles"][0]
+            if "id" not in title:
+                continue
+
+            text_id = title["id"]
+            try:
+                decision = self.fetch(text_id)
+                if decision is not None:
+                    results.append(decision)
+            except Exception as exc:
+                logger.error(
+                    f"Exception lors de la récupération de la décision {text_id}: {exc}"
                 )
 
         return results
