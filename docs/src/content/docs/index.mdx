@@ -1,0 +1,75 @@
+---
+title: PyLegifrance
+description: Librairie Python pour l'API Legifrance — wiki LLM-maintenu.
+template: splash
+hero:
+  tagline: Accès simple aux données juridiques françaises via l'API Legifrance.
+  actions:
+    - text: Démarrage rapide
+      link: /operations/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/pylegifrance/pylegifrance
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+Ce site est un **wiki LLM-maintenu**. Voir
+[`docs/CLAUDE.md`](https://github.com/pylegifrance/pylegifrance/blob/main/docs/CLAUDE.md)
+pour les conventions de contribution.
+
+## Entités
+
+<CardGrid>
+  <Card title="LegifranceClient" icon="seti:python">
+    [Client HTTP + cycle de vie session](/pylegifrance/entities/legifrance-client/)
+  </Card>
+  <Card title="ApiConfig" icon="setting">
+    [Configuration PISTE (env, from_env)](/pylegifrance/entities/api-config/)
+  </Card>
+  <Card title="Authentication" icon="seti:lock">
+    [Gestion des jetons OAuth](/pylegifrance/entities/authentication/)
+  </Card>
+  <Card title="Fond Code" icon="document">
+    [Recherche dans les codes](/pylegifrance/entities/fond-code/)
+  </Card>
+  <Card title="Fond Juri" icon="open-book">
+    [Jurisprudence](/pylegifrance/entities/fond-juri/)
+  </Card>
+  <Card title="Fond LODA" icon="list-format">
+    [Lois / ordonnances / décrets / arrêtés](/pylegifrance/entities/fond-loda/)
+  </Card>
+  <Card title="Article" icon="pencil">
+    [Modèle Article](/pylegifrance/entities/article/)
+  </Card>
+</CardGrid>
+
+## Concepts
+
+- [Architecture](/pylegifrance/concepts/architecture/) — vue C4, couches, façade/modèle/client
+- [Builder pattern](/pylegifrance/concepts/builder-pattern/) — `.in_code().text().execute()`
+- [Fond facade](/pylegifrance/concepts/fond-facade/) — pourquoi `fonds/` et `models/` sont séparés
+- [Enum wrapping](/pylegifrance/concepts/enum-wrapping/) — enum domaine vs enum généré
+- [Generated models](/pylegifrance/concepts/generated-models/) — `datamodel-codegen` et règle « ne pas éditer »
+- [PISTE OAuth](/pylegifrance/concepts/piste-oauth/) — flux d'authentification
+- [CID & versioning](/pylegifrance/concepts/cid-and-versioning/) — consolidation, états juridiques, disposition balai
+
+## Opérations
+
+- [Démarrage](/pylegifrance/operations/getting-started/)
+- [Installation](/pylegifrance/operations/install-pylegifrance/)
+- [Obtenir un compte PISTE](/pylegifrance/operations/create-piste-account/)
+- [Configurer les clés API](/pylegifrance/operations/configure-api-credentials/)
+- [Rechercher dans les codes](/pylegifrance/operations/search-legal-code/)
+- [Récupérer une décision de jurisprudence](/pylegifrance/operations/fetch-case-law/)
+- [Rechercher dans LODA](/pylegifrance/operations/search-loda/)
+
+## Référence
+
+- [LegifranceClient](/pylegifrance/references/client/)
+- [ApiConfig](/pylegifrance/references/config/)
+- [Code](/pylegifrance/references/code/)
+- [JuriAPI](/pylegifrance/references/juri/)
+- [Loda](/pylegifrance/references/loda/)
