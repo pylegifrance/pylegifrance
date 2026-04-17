@@ -59,6 +59,22 @@ body:
       required: true
 
   - type: markdown
+    id: llm_prompt_description
+    attributes:
+      value: |
+        ## 🤖 Prompt LLM utilisé (optionnel)
+        Si vous avez utilisé un LLM (ChatGPT, Claude, Codex, etc.) pour rédiger cette demande, collez le prompt ici **verbatim**. Voir [CONTRIBUTING.md](../blob/main/.github/CONTRIBUTING.md#transparence-llm-pour-les-demandes-de-fonctionnalité) pour le contexte.
+
+        ---
+  - type: textarea
+    id: llm_prompt
+    attributes:
+      label: Prompt LLM utilisé
+      placeholder: "Collez ici le prompt complet, sans reformulation."
+    validations:
+      required: false
+
+  - type: markdown
     id: test_description
     attributes:
       value: |

@@ -24,6 +24,17 @@ Ce projet s'appuie sur les technologies suivantes :
 
 > ⚠️ N'utilisez **pas** `main` ou `develop` pour vos modifications.
 
+## Transparence LLM pour les demandes de fonctionnalité
+
+Si vous avez utilisé un LLM (ChatGPT, Claude, Codex, etc.) pour rédiger ou affiner votre demande de fonctionnalité, **incluez le prompt utilisé, verbatim**, dans le champ « Prompt LLM utilisé » de l'issue (ou collez-le dans « Informations Complémentaires » si votre éditeur ne le montre pas).
+
+Cela sert deux objectifs :
+
+1. **Transparence** — les mainteneurs voient l'intention brute derrière la proposition, avant reformulation.
+2. **Matière première du wiki** — ces prompts sont archivés dans `docs/raw/prompts/` et servent de sources pour maintenir la documentation (voir `docs/CLAUDE.md`).
+
+Vous n'êtes pas obligé·e d'utiliser un LLM. Mais si vous l'avez fait, partagez-le plutôt que de le cacher.
+
 ## Préparer votre environnement
 
 ### 1. Installer les dépendances avec UV
