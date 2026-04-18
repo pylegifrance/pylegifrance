@@ -110,6 +110,7 @@ class Fond(StrEnum):
     CIRC = "CIRC"
     ACCO = "ACCO"
 
+
 class Nature(StrEnum):
     """
     Enumeration of document nature types.
@@ -197,6 +198,7 @@ class TypeRecherche(StrEnum):
     CONTIENT = "CONTIENT"  # Added for compatibility with existing code
     EGAL = "EXACTE"  # Alias for EXACTE
 
+
 class Operateur(StrEnum):
     """Opérateur entre les champs de recherche.
 
@@ -209,6 +211,7 @@ class Operateur(StrEnum):
 
     def to_generated(self) -> _GeneratedOperateur:
         return _GeneratedOperateur(self.value)
+
 
 class TypeChamp(StrEnum):
     """Type de champ.
@@ -304,6 +307,7 @@ class EtatJuridique(Enum):
     SANS_ETAT = "SANS_ETAT"
     DENONCE = "DENONCE"
     REMPLACE = "REMPLACE"
+
 
 class TypeFacette(StrEnum):
     """Types de facettes disponibles pour filtrer les recherches dans l'API Légifrance.

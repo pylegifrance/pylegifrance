@@ -147,7 +147,9 @@ class TestJuriDecisionToMarkdown:
 
     def test_url_in_metadata(self):
         md = _make_juri_decision().to_markdown()
-        assert "**URL**: https://www.legifrance.gouv.fr/juri/id/JURITEXT000027546700" in md
+        assert (
+            "**URL**: https://www.legifrance.gouv.fr/juri/id/JURITEXT000027546700" in md
+        )
 
     def test_plain_text_body_from_texte(self):
         jd = _make_juri_decision(texte="Attendu que la demande est rejetée.")
@@ -226,7 +228,9 @@ class TestTexteLodaToMarkdown:
 
     def test_url_in_metadata(self):
         md = _make_texte_loda().to_markdown()
-        assert "**URL**: https://www.legifrance.gouv.fr/loda/id/LEGITEXT000041952174" in md
+        assert (
+            "**URL**: https://www.legifrance.gouv.fr/loda/id/LEGITEXT000041952174" in md
+        )
 
     def test_nor_in_metadata_when_present(self):
         md = _make_texte_loda(nor="MTRD2011622L").to_markdown()
