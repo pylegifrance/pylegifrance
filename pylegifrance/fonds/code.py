@@ -135,15 +135,12 @@ class CodeSearchBuilder:
         Returns:
             Self: Le builder pour chaînage.
         """
-        # Validation et conversion des noms de codes
         validated_codes = []
         for code in code_names:
             if isinstance(code, str):
                 try:
-                    # Tenter de convertir en NomCode si c'est une chaîne
                     validated_codes.append(getattr(NomCode, code))
                 except AttributeError:
-                    # Vérifier si c'est un nom de code valide
                     valid_codes = [c.value for c in NomCode]
                     if code in valid_codes:
                         validated_codes.append(code)
@@ -152,7 +149,6 @@ class CodeSearchBuilder:
             else:
                 validated_codes.append(code)
 
-        # Ajouter le filtre de codes
         self._filtres.append(NomCodeFiltre(valeurs=validated_codes))
         return self
 
@@ -226,7 +222,6 @@ class CodeSearchBuilder:
                 "Le filtre de date n'est utilisable qu'avec le fond CODE_DATE"
             )
 
-        # Convertir la date en datetime
         try:
             date_obj = datetime.fromisoformat(date_str)
         except ValueError:
@@ -234,7 +229,6 @@ class CodeSearchBuilder:
                 f"Format de date invalide: {date_str}. Utilisez YYYY-MM-DD"
             ) from None
 
-        # Ajouter le filtre de date
         self._filtres.append(DateVersionFiltre(singleDate=date_obj))
         return self
 
@@ -298,18 +292,14 @@ class CodeSearchBuilder:
         Raises:
             ValueError: Si les critères de recherche sont invalides.
         """
-        # Finaliser les critères de recherche
         logger.debug(f"Champs: {self._champs}")
         logger.debug(f"Filtres: {self._filtres}")
 
-        # Vérifier qu'au moins un filtre est spécifié ou qu'il y a des champs de recherche
         if not self._filtres and not self._champs:
             raise ValueError(
                 "Au moins un filtre ou un champ de recherche doit être spécifié"
             )
 
-        # Si aucun champ n'est spécifié mais qu'un filtre de code est présent,
-        # on considère que c'est une recherche de code complet
         if not self._champs and any(
             isinstance(f, NomCodeFiltre) for f in self._filtres
         ):
@@ -320,14 +310,10 @@ class CodeSearchBuilder:
         logger.debug(f"Criteria champs: {self.criteria.champs}")
         logger.debug(f"Criteria filtres: {self.criteria.filtres}")
 
-        # Créer la requête selon le type de fond
         if self.fond == "CODE_DATE":
-            # Vérifier qu'un filtre de date est présent
             has_date_filter = any(
                 isinstance(f, DateVersionFiltre) for f in self._filtres
             )
-
-            # Pour une recherche de code complet, on n'exige pas de filtre de date
             is_complete_code_search = not self._champs and any(
                 isinstance(f, NomCodeFiltre) for f in self._filtres
             )
@@ -335,7 +321,6 @@ class CodeSearchBuilder:
             if not has_date_filter and not is_complete_code_search:
                 raise ValueError("CODE_DATE nécessite un filtre de date (at_date)")
 
-            # Si c'est une recherche de code complet sans date, on ajoute la date du jour
             if not has_date_filter and is_complete_code_search:
                 logger.debug(
                     "Ajout de la date du jour pour la recherche de code complet"
@@ -349,7 +334,6 @@ class CodeSearchBuilder:
         else:
             raise ValueError(f"Type de fond non supporté: {self.fond}")
 
-        # Exécuter la requête
         request_dict = request.model_dump(by_alias=True, mode="json")
         if hasattr(request.recherche, "to_generated"):
             request_dict["recherche"] = request.recherche.to_generated(
@@ -362,7 +346,6 @@ class CodeSearchBuilder:
         if response:
             response_json = json.loads(response.text)
 
-            # Log pagination information
             page_number = response_json.get("pageNumber", 1)
             page_size = response_json.get("pageSize", 10)
             total_results = response_json.get("totalResults", 0)
@@ -435,20 +418,16 @@ class CodeConsultFetcher:
             ValueError: Si le format de date est invalide.
         """
         logger.debug(f"CodeConsultFetcher.at called with date: {date}")
-        # Essayer de traiter comme un timestamp Unix en millisecondes
         if date.isdigit() and len(date) >= 10:
             try:
-                # Convertir le timestamp (millisecondes) en datetime
                 timestamp = int(date) / 1000
                 dt = datetime.fromtimestamp(timestamp)
-                # Formater en YYYY-MM-DD
                 self.date = dt.strftime("%Y-%m-%d")
                 logger.debug(f"Date converted from timestamp to: {self.date}")
                 return self._execute()
             except (ValueError, OverflowError):
-                pass  # Continuer avec la validation du format YYYY-MM-DD
+                pass
 
-        # Valider le format de date YYYY-MM-DD
         try:
             datetime.fromisoformat(date)
             self.date = date
@@ -520,8 +499,6 @@ class ArticleFetcher:
     def __init__(self, api_client: LegifranceClient, article_id: str):
         self.api = api_client
         self.article_id = article_id
-        self.date = None
-        self.searched_string = None
 
     def at(self, date: str | datetime | int) -> models.Article:
         """Récupère un article à une date spécifique.

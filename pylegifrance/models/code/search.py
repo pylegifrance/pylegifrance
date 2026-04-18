@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
 from pylegifrance.models.base import PyLegifranceBaseModel
 
@@ -45,8 +45,6 @@ class DateVersionFiltre(PyLegifranceBaseModel):
         ...     single_date=datetime(2018, 1, 1)
         ... )
     """
-
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     facette: Literal[Facette.DATE_VERSION] = Field(
         default=Facette.DATE_VERSION,
@@ -160,8 +158,6 @@ class TextLegalStatusFiltre(PyLegifranceBaseModel):
         >>> filtre = TextLegalStatusFiltre(valeur="ABROGE")
     """
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
-
     facette: Facette = Field(
         default=Facette.TEXT_LEGAL_STATUS,
         frozen=True,
@@ -194,8 +190,6 @@ class CritereCode(PyLegifranceBaseModel):
         proximite: Distance maximale entre les mots (optionnel)
     """
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
-
     type_recherche: TypeRecherche = Field(
         ..., description="Type de recherche effectuée"
     )
@@ -226,8 +220,6 @@ class ChampCode(PyLegifranceBaseModel):
         operateur: Opérateur entre les critères
     """
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
-
     type_champ: TypeChampCode = Field(
         default=TypeChampCode.ALL,
         description="Type de champ de recherche",
@@ -253,8 +245,6 @@ class CodeSearchCriteria(PyLegifranceBaseModel):
 
     Regroupe tous les paramètres de recherche pour CODE_DATE et CODE_ETAT.
     """
-
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     champs: list[ChampCode] = Field(
         default_factory=list, description="Champs de recherche avec leurs critères"
@@ -396,8 +386,6 @@ class CodeSearchResponse(PyLegifranceBaseModel):
 
     Contient les résultats de recherche avec pagination et métadonnées.
     """
-
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     results: list[dict[str, Any]] = Field(
         default_factory=list, description="Liste des résultats de recherche"

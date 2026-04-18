@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Any
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
 from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
@@ -149,8 +149,6 @@ class Code(PyLegifranceBaseModel):
         - Les articles sont les unités de base contenant le texte juridique
     """
 
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
-
     id: str | None = Field(
         default=None,
         description="Identifiant unique LEGITEXT du code",
@@ -293,8 +291,6 @@ class Article(PyLegifranceBaseModel):
         Code: Classe représentant un code juridique complet
         SearchResult: Résultat de recherche contenant des références d'articles
     """
-
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     id: str = Field(
         description="Identifiant unique LEGIARTI de l'article",

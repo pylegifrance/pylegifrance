@@ -8,4 +8,6 @@ class PyLegifranceBaseModel(BaseModel):
         alias_generator=to_camel,
         str_strip_whitespace=True,
         validate_assignment=True,
+        validate_by_name=True,
+        validate_by_alias=True,
     )
