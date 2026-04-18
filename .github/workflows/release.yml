@@ -17,6 +17,8 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: googleapis/release-please-action@v4
         with:
