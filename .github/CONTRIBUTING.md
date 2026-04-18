@@ -29,6 +29,3 @@ gh pr create   # sans --fill pour laisser le modèle se charger
 
 Si vous avez utilisé un LLM pour rédiger votre contribution, collez le prompt verbatim dans la section « Prompt LLM utilisé » du modèle de PR. Ces prompts alimentent le wiki (`docs/raw/prompts/`).
 
-## Standards de codage
-
-Appliqués automatiquement par ruff et ty au commit. Pour les conventions qui ne se vérifient pas automatiquement (architecture, patterns Pydantic, tests BDD), voir [`.claude/rules/`](../.claude/rules/).
