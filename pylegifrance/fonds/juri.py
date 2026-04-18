@@ -11,6 +11,8 @@ from pylegifrance.models.generated.model import (
     DatePeriod,
     FiltreDTO,
     Fond,
+    JuriConsultRequest,
+    JuriConsultWithAncienId,
     Operateur,
     RechercheSpecifiqueDTO,
     SearchRequestDTO,
@@ -19,11 +21,6 @@ from pylegifrance.models.generated.model import (
     TypeRecherche,
 )
 from pylegifrance.models.identifier import Cid, Eli, Nor
-from pylegifrance.models.juri.api_wrappers import (
-    ConsultByAncienIdRequest,
-    ConsultRequest,
-    ConsultResponse,
-)
 from pylegifrance.models.juri.constants import FacettesJURI
 from pylegifrance.models.juri.models import Decision
 from pylegifrance.models.juri.search import SearchRequest
@@ -432,9 +429,7 @@ class JuriAPI:
         """
         self._client = client
 
-    def _process_consult_response(
-        self, response_data: ConsultResponse
-    ) -> Decision | None:
+    def _process_consult_response(self, response_data: dict) -> Decision | None:
         """Traite une réponse de consultation et extrait la Décision.
 
         Args:
@@ -443,18 +438,10 @@ class JuriAPI:
         Returns:
             L'objet Decision, ou None si non trouvé.
         """
-        consult_response = ConsultResponse.from_api_model(response_data)
-
-        if not consult_response.text:
+        text_data = response_data.get("text")
+        if not text_data:
             return None
-
-        # Fix: Use the text data directly since it's already a dict
-        if isinstance(consult_response.text, dict):
-            decision_data = consult_response.text
-        else:
-            decision_data = consult_response.text.model_dump()
-
-        return Decision.model_validate(decision_data)
+        return Decision.model_validate(text_data)
 
     def fetch(self, text_id: str) -> JuriDecision | None:
         """Récupère une décision par son identifiant.
@@ -472,10 +459,11 @@ class JuriAPI:
         if not text_id:
             raise ValueError("L'identifiant du texte ne peut pas être vide")
 
-        request = ConsultRequest(textId=text_id, searchedString="")
-
         response = self._client.call_api(
-            "consult/juri", request.to_api_model().model_dump(by_alias=True)
+            "consult/juri",
+            JuriConsultRequest(textId=text_id, searchedString="").model_dump(
+                by_alias=True
+            ),
         )
 
         if response.status_code != HTTP_OK:
@@ -501,11 +489,9 @@ class JuriAPI:
         if not ancien_id:
             raise ValueError("L'ancien identifiant ne peut pas être vide")
 
-        request = ConsultByAncienIdRequest(ancienId=ancien_id)
-
         response = self._client.call_api(
             "consult/juri/ancienId",
-            request.to_api_model().model_dump(by_alias=True),
+            JuriConsultWithAncienId(ancienId=ancien_id).model_dump(by_alias=True),
         )
 
         if response.status_code != HTTP_OK:
@@ -709,8 +695,6 @@ class JuriAPI:
                 f"CETATEXT<12 digits>, got {text_id!r}"
             )
 
-        request = ConsultRequest(textId=normalized, searchedString=None)
-
         # Match the DILA API cookbook example for POST /consult/juri which
         # sends only ``{"textId": ...}``. Excluding None keeps the body
         # minimal and avoids transmitting a dangling ``"searchedString":
@@ -718,7 +702,9 @@ class JuriAPI:
         try:
             response = self._client.call_api(
                 "consult/juri",
-                request.to_api_model().model_dump(by_alias=True, exclude_none=True),
+                JuriConsultRequest(textId=normalized, searchedString=None).model_dump(
+                    by_alias=True, exclude_none=True
+                ),
             )
         except Exception as exc:
             # LegifranceClient wraps 4xx/5xx responses into plain
