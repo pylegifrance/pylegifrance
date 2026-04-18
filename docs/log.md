@@ -128,3 +128,24 @@
 - `raw/README.md` mis à jour : les trois CGU sont désormais toutes
   mirrorées localement, la note « non mirrorées » est supprimée, et
   les versions/dates sont indiquées.
+
+## [2026-04-18] refactor | Flux de contribution PR-first (issues désactivées)
+
+- Issues GitHub désactivées côté repo → flux de contribution collapsé
+  en « créer une branche + ouvrir une PR » directement, sans étape
+  intermédiaire.
+- `.github/CONTRIBUTING.md` réécrit : ajoute une note explicite
+  « issues désactivées », détaille le nommage de branche
+  Conventional-Commits-friendly, référence le nouveau modèle de PR,
+  explique que `pre-commit install` couvre maintenant les deux stages.
+- `.github/PULL_REQUEST_TEMPLATE.md` créé avec les sections de
+  l'ancien story.yml (problématique, tests BDD, critères d'acceptation)
+  plus une section « Prompt LLM utilisé (optionnel) » à la place du
+  champ d'issue form.
+- `.github/ISSUE_TEMPLATE/story.yml` supprimé (dead weight puisque les
+  issues sont désactivées). Répertoire `ISSUE_TEMPLATE/` supprimé avec.
+- `docs/raw/prompts/README.md` : convention de nommage et format
+  frontmatter basculés d'`issue` vers `pr` (`YYYY-MM-DD-pr-<n>-<slug>.md`,
+  frontmatter `pr:` / `url: pulls/<n>`).
+- L'entrée du log de [2026-04-17] « LLM transparency workflow »
+  n'est pas réécrite (log append-only, cf. @docs/CLAUDE.md § 10).
