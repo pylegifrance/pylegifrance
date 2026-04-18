@@ -37,10 +37,13 @@ Types acceptés : `feat`, `fix`, `perf`, `refactor`, `docs`, `ci`, `chore`, `tes
 
 ```bash
 git push -u origin <nom-de-branche>
-gh pr create --fill          # ou via l'interface GitHub
+gh pr create                 # ouvre un éditeur pré-rempli avec le modèle de PR
+                             # (ou via l'interface GitHub, mêmes pré-remplissage)
 ```
 
-Le modèle de PR (`.github/PULL_REQUEST_TEMPLATE.md`) s'applique automatiquement. Remplissez-le ; la section « Prompt LLM utilisé » est optionnelle mais vivement encouragée — voir ci-dessous.
+> ⚠️ N'utilisez **pas** `gh pr create --fill` : le flag `--fill` écrase le modèle par le contenu du dernier commit. Utilisez `gh pr create` sans flag pour laisser le modèle `.github/PULL_REQUEST_TEMPLATE.md` se charger automatiquement ([doc `gh`](https://cli.github.com/manual/gh_pr_create)).
+
+Remplissez le modèle ; la section « Prompt LLM utilisé » est optionnelle mais vivement encouragée — voir ci-dessous.
 
 ## Transparence LLM pour les PR
 
