@@ -19,6 +19,24 @@ juri = JuriAPI(client)
 
 decision = juri.fetch("JURITEXT000037999394")
 decision = juri.fetch_with_ancien_id("07-87362")
+
+# Vérification par identifiant canonique (v1.3.2)
+decision = juri.fetch_by_id("JURITEXT000037999394")
+```
+
+## Recherche par ECLI ou par affaire
+
+```python
+# Par identifiant ECLI européen (v1.3.2)
+resultats = juri.search_by_ecli("ECLI:FR:CCASS:2019:C200148")
+
+# Par numéro d'affaire — style Cour de cassation (v1.3.2)
+from datetime import date
+resultats = juri.search_by_affaire(
+    "07-87.362",
+    formation="chambre criminelle",
+    date_decision=date(2008, 1, 22),
+)
 ```
 
 Le retour est un `JuriDecision` enrichi.

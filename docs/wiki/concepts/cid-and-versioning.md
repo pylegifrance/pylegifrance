@@ -41,11 +41,12 @@ renvoie la liste complète des versions successives.
 | Code | Abréviation | Sens |
 |---|---|---|
 | `VIGUEUR` | V | article s'appliquant à la date courante |
-| `VIGUEUR_AVEC_TERME` | VT | en vigueur, mais fin de vigueur déjà programmée (souvent appelé « abrogé différé ») |
-| `VIGUEUR_DIFFEREE` | VD | entrée en vigueur prévue à une date ultérieure |
+| `ABROGE_DIFF` | VT | en vigueur, mais fin de vigueur déjà programmée (abrogé différé) |
+| `VIGUEUR_DIFF` | VD | entrée en vigueur prévue à une date ultérieure |
 | `ABROGE` | Ab | n'est plus en vigueur |
-| `ABROGE_DIFF` | — | abrogation programmée (variante de VT) |
-| `MODIFIE` | — | version remplacée par une version postérieure |
+| `MODIFIE` | M | version remplacée par une version postérieure |
+| `PERIME` | P | abrogation implicite (texte caduc) |
+| `ANNULE` | A | annulé par le Conseil d'État |
 
 Côté pylegifrance, ces valeurs apparaissent sur le champ
 [`Article.legal_status`](/pylegifrance/entities/article/) et dans le filtre

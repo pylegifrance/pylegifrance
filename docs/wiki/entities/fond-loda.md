@@ -52,6 +52,21 @@ texte_version = loda.fetch_version_at("78-17", "2022-01-01")
 versions = loda.fetch_versions("78-17")
 ```
 
+## Champs du TexteLoda
+
+| Champ | Type | Rôle |
+|---|---|---|
+| `id` | `str \| None` | identifiant LEGITEXT |
+| `cid` | `Cid \| None` | CID du texte |
+| `nor` | `Nor \| None` | numéro NOR |
+| `titre` | `str \| None` | titre court |
+| `titre_long` | `str \| None` | titre complet |
+| `date_debut` | `datetime \| None` | date d'entrée en vigueur |
+| `date_fin` | `datetime \| None` | date de fin de vigueur |
+| `etat` | `str \| None` | état juridique |
+| `texte_html` | `str \| None` | contenu HTML |
+| `texte_brut` | `str \| None` | contenu en texte brut (HTML dépouillé, v1.4.0) |
+
 ## Voir aussi
 
 - [How-to : rechercher dans LODA](/pylegifrance/operations/search-loda/)

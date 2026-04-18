@@ -22,7 +22,7 @@ identifiée par un LEGIARTI. Côté domaine, les façades renvoient des objets
 | `cid` | `str \| None` | LEGITEXT du code parent |
 | `code_name` | `str \| None` | nom du code (`"Code civil"`) |
 | `version_date` | `datetime \| None` | date de version (auto-parsée depuis timestamp Unix ou ISO) |
-| `legal_status` | `str \| None` | état juridique — voir [`/concepts/cid-and-versioning`](/pylegifrance/concepts/cid-and-versioning/) pour la liste complète (`VIGUEUR`, `VIGUEUR_AVEC_TERME`, `VIGUEUR_DIFFEREE`, `ABROGE`, …) |
+| `legal_status` | `str \| None` | état juridique — voir [`/concepts/cid-and-versioning`](/pylegifrance/concepts/cid-and-versioning/) pour la liste complète (`VIGUEUR`, `ABROGE_DIFF`, `VIGUEUR_DIFF`, `ABROGE`, …) |
 | `url` | `str \| None` | URL sur legifrance.gouv.fr |
 
 Méthode utile : `article.format_citation()` →

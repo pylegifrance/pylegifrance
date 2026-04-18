@@ -56,7 +56,7 @@ from pylegifrance.models.code.enum import TypeChampCode
 resultats = (
     code.search()
         .in_code(NomCode.CC)
-        .text("responsabilité", in_field=TypeChampCode.TEXT)
+        .text("responsabilité", in_field=TypeChampCode.ARTICLE)
         .paginate(page_size=20)
         .execute()
 )

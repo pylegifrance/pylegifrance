@@ -24,7 +24,7 @@ class Code:
 | `article_number` | `(number: str) -> Self` | par numéro d'article |
 | `text` | `(search_text: str, in_field: TypeChampCode = TypeChampCode.ALL) -> Self` | recherche textuelle |
 | `at_date` | `(date_str: str) -> Self` | `YYYY-MM-DD` |
-| `with_legal_status` | `(status: list[EtatJuridique] = [EtatJuridique.VIGUEUR]) -> Self` | filtrer par état |
+| `with_legal_status` | `(status: list[EtatJuridique] | None = None) -> Self` | filtrer par état |
 | `with_formatter` | `() -> Self` | activer formatage |
 | `paginate` | `(page_number: int = 1, page_size: int = 10) -> Self` | pagination |
 | `execute` | `() -> list[Article]` | exécuter |
@@ -33,7 +33,7 @@ Valeurs possibles pour `in_field` :
 
 - `TypeChampCode.NUM_ARTICLE`
 - `TypeChampCode.TITLE`
-- `TypeChampCode.TEXT`
+- `TypeChampCode.ARTICLE`
 - `TypeChampCode.ALL` (défaut)
 
 ## Exceptions

@@ -14,8 +14,8 @@ class LegifranceClient:
 
     def update_api_keys(
         self,
-        legifrance_api_key: str | None = None,
-        legifrance_api_secret: str | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
     )
 
     def call_api(self, route: str, data: Any) -> requests.Response

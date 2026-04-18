@@ -24,7 +24,7 @@ export default defineConfig({
       ],
       editLink: {
         baseUrl:
-          "https://github.com/pylegifrance/pylegifrance/edit/main/docs/",
+          "https://github.com/pylegifrance/pylegifrance/edit/main/docs/wiki/",
       },
       sidebar: [
         {
