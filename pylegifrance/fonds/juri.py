@@ -347,6 +347,73 @@ class JuriDecision:
         """
         return self._decision.model_dump()
 
+    def _extract_plain_text(self) -> str | None:
+        """Extrait le texte brut depuis le champ texte ou texteHtml.
+
+        Tente d'abord le champ texte brut, puis nettoie texteHtml via BeautifulSoup.
+
+        Returns:
+            Texte brut ou None si aucun contenu disponible.
+        """
+        if self.text:
+            return self.text
+
+        html = self.text_html
+        if not html:
+            return None
+
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html, "html.parser")
+        for br in soup.find_all("br"):
+            br.replace_with(soup.new_string("\n"))
+        for tag in soup.find_all(["p", "div"]):
+            tag.insert_after(soup.new_string("\n"))
+        text = soup.get_text()
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        return text.strip() or None
+
+    def to_markdown(self) -> str:
+        """Retourne une représentation Markdown de la décision, optimisée pour les LLM.
+
+        Inclut les métadonnées structurées (juridiction, solution, ECLI, URL) suivies
+        du texte brut de la décision.
+
+        Returns:
+            str: Représentation Markdown de la décision de justice.
+
+        Examples:
+            >>> decision.to_markdown()
+            '## Cour de cassation, Chambre sociale, 04/03/2020\\n\\n**Solution**: REJET\\n...'
+        """
+        parts: list[str] = []
+
+        heading_parts = [p for p in [self.jurisdiction, self.formation] if p]
+        if self.date:
+            heading_parts.append(self.date.strftime("%d/%m/%Y"))
+        parts.append(f"## {', '.join(heading_parts) or self.title or 'Décision'}")
+        parts.append("")
+
+        if self.title:
+            parts.append(f"**Titre**: {self.title}")
+        if self.solution:
+            parts.append(f"**Solution**: {self.solution}")
+        if self.numero:
+            parts.append(f"**Numéro**: {self.numero}")
+        if self.ecli:
+            parts.append(f"**ECLI**: {self.ecli}")
+        if self.id:
+            parts.append(f"**Référence**: {self.id}")
+        if self.url:
+            parts.append(f"**URL**: {self.url}")
+        parts.append("")
+
+        plain = self._extract_plain_text()
+        if plain:
+            parts.append(plain)
+
+        return "\n".join(parts)
+
     def __repr__(self) -> str:
         """Récupère une représentation sous forme de chaîne de la décision."""
         return f"JuriDecision(id={self.id}, date={self.date}, title={self.title})"

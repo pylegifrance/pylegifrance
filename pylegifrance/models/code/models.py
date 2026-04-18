@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Any
 
@@ -363,7 +364,7 @@ class Article(PyLegifranceBaseModel):
             return None
         if isinstance(v, str):
             return datetime.fromisoformat(v)
-        if isinstance(v, (int, float)):
+        if isinstance(v, int | float):
             # Timestamp en millisecondes (format API Légifrance)
             return datetime.fromtimestamp(v / 1000)
         return v
@@ -390,6 +391,44 @@ class Article(PyLegifranceBaseModel):
         if self.version_date:
             parts.append(f"(version du {self.version_date.strftime('%d/%m/%Y')})")
         return ", ".join(parts)
+
+    def to_markdown(self) -> str:
+        """Retourne une représentation Markdown de l'article, optimisée pour les LLM.
+
+        Inclut les métadonnées structurées (statut, référence, URL) suivies
+        du contenu textuel brut de l'article.
+
+        Returns:
+            str: Représentation Markdown de l'article.
+
+        Examples:
+            >>> article.to_markdown()
+            '## Article L1121-1 (Code du travail)\\n\\n**Statut**: VIGUEUR\\n...'
+        """
+        parts: list[str] = []
+
+        heading = f"Article {self.number}"
+        if self.code_name:
+            heading += f" ({self.code_name})"
+        parts.append(f"## {heading}")
+        parts.append("")
+
+        if self.legal_status:
+            parts.append(f"**Statut**: {self.legal_status}")
+        if self.id:
+            parts.append(f"**Référence**: {self.id}")
+        if self.version_date:
+            parts.append(f"**Version du**: {self.version_date.strftime('%d/%m/%Y')}")
+        if self.url:
+            parts.append(f"**URL**: {self.url}")
+        parts.append("")
+
+        if self.content:
+            parts.append(self.content)
+        elif self.content_html:
+            parts.append(re.sub(r"<[^>]+>", "", self.content_html).strip())
+
+        return "\n".join(parts)
 
     @classmethod
     def from_orm(cls, data: Any) -> "Article":

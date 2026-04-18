@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from collections.abc import Iterator
 from datetime import datetime
 from typing import Self
@@ -53,6 +54,37 @@ def _extract_articles_from_response(
             yield item
 
 
+_ARTICLE_NUMBER_PREFIX_RE = re.compile(r"^([A-Za-z]+)\.\s*(.+)$")
+
+
+def _normalize_article_number(number: str) -> str:
+    """Normalise le format d'un numéro d'article pour l'API Légifrance.
+
+    Supprime le point et l'espace entre la lettre préfixe et les chiffres
+    dans les formats courants tels que ``"L. 1121-1"`` → ``"L1121-1"``.
+    Les numéros déjà au bon format sont retournés inchangés.
+
+    Args:
+        number: Numéro de l'article (potentiellement formaté avec point/espace).
+
+    Returns:
+        Numéro normalisé pour l'API.
+
+    Examples:
+        >>> _normalize_article_number("L. 1121-1")
+        'L1121-1'
+        >>> _normalize_article_number("R. 4614-2")
+        'R4614-2'
+        >>> _normalize_article_number("L1121-1")
+        'L1121-1'
+    """
+    number = number.strip()
+    match = _ARTICLE_NUMBER_PREFIX_RE.match(number)
+    if match:
+        return match.group(1) + match.group(2).replace(" ", "")
+    return number
+
+
 class CodeSearchBuilder:
     """Builder pour construire des requêtes de recherche de codes juridiques.
 
@@ -76,6 +108,7 @@ class CodeSearchBuilder:
         self._champs = []
         self._filtres = []
         self._formatter = False
+        self._requested_statuses: list[EtatJuridique] | None = None
 
     def in_code(self, code_name: NomCode) -> Self:
         """Filtre la recherche à un code juridique spécifique.
@@ -126,8 +159,12 @@ class CodeSearchBuilder:
     def article_number(self, number: str) -> Self:
         """Recherche un article par son numéro.
 
+        Normalise automatiquement le format de l'article : supprime le point
+        et l'espace entre la lettre préfixe et les chiffres (ex: ``"L. 1121-1"``
+        devient ``"L1121-1"``).
+
         Args:
-            number: Numéro de l'article (ex: "1234", "L123-4").
+            number: Numéro de l'article (ex: "1234", "L123-4", "L. 1121-1").
 
         Returns:
             Self: Le builder pour chaînage.
@@ -138,7 +175,7 @@ class CodeSearchBuilder:
                 criteres=[
                     CritereCode(
                         typeRecherche=TypeRecherche.EXACTE,
-                        valeur=number,
+                        valeur=_normalize_article_number(number),
                         proximite=None,
                     )
                 ],
@@ -220,6 +257,7 @@ class CodeSearchBuilder:
 
         if status is None:
             status = [EtatJuridique.VIGUEUR]
+        self._requested_statuses = status
         self._filtres.append(TextLegalStatusFiltre(valeurs=status))
         return self
 
@@ -345,6 +383,14 @@ class CodeSearchBuilder:
                     results.append(models.Article.from_orm(article_data))
                     if len(results) >= self.criteria.page_size:
                         break
+
+        # Post-filter by legal status when an explicit status filter was requested.
+        # The Legifrance API applies the EtatJuridique filter at the section level,
+        # not the article level, so individual articles may slip through with a
+        # different status.
+        if self._requested_statuses is not None:
+            requested_values = {s.value for s in self._requested_statuses}
+            results = [a for a in results if a.legal_status in requested_values]
 
         return results
 

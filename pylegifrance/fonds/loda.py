@@ -164,8 +164,6 @@ class TexteLoda:
     def texte_brut(self) -> str | None:
         """Récupère le contenu du texte nettoyé des balises HTML avec formatage préservé.
 
-        Utilise BeautifulSoup (recommandé 2025) avec fallback regex.
-
         Returns:
             Le contenu du texte sans balises HTML mais avec formatage lisible.
         """
@@ -173,53 +171,26 @@ class TexteLoda:
         if not html_content:
             return None
 
-        try:
-            # Méthode recommandée 2025: BeautifulSoup (optional dependency)
-            from bs4 import BeautifulSoup
+        from bs4 import BeautifulSoup
 
-            soup = BeautifulSoup(html_content, "html.parser")
+        soup = BeautifulSoup(html_content, "html.parser")
 
-            # Ajouter des retours à la ligne avant les balises de structure
-            for br in soup.find_all("br"):
-                br.replace_with(soup.new_string("\n"))
-            for p in soup.find_all(["p", "div"]):
-                p.insert_before(soup.new_string("\n"))
-                p.insert_after(soup.new_string("\n"))
-            for blockquote in soup.find_all("blockquote"):
-                blockquote.insert_before(soup.new_string("\n"))
-                blockquote.insert_after(soup.new_string("\n"))
-            for h in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
-                h.insert_before(soup.new_string("\n"))
-                h.insert_after(soup.new_string("\n"))
+        for br in soup.find_all("br"):
+            br.replace_with(soup.new_string("\n"))
+        for p in soup.find_all(["p", "div"]):
+            p.insert_before(soup.new_string("\n"))
+            p.insert_after(soup.new_string("\n"))
+        for blockquote in soup.find_all("blockquote"):
+            blockquote.insert_before(soup.new_string("\n"))
+            blockquote.insert_after(soup.new_string("\n"))
+        for h in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+            h.insert_before(soup.new_string("\n"))
+            h.insert_after(soup.new_string("\n"))
 
-            text = soup.get_text()
-
-            # Nettoyer les espaces multiples et retours à la ligne excessifs
-            text = re.sub(r"\n\s*\n", "\n\n", text)
-            text = re.sub(r" +", " ", text)
-
-            return text.strip() or None
-
-        except ImportError:
-            # Fallback: regex (built-in) avec amélioration du formatage
-
-            # Remplacer certaines balises par des retours à la ligne
-            text = re.sub(r"<br/?>", "\n", html_content)
-            text = re.sub(r"<p[^>]*>", "\n", text)
-            text = re.sub(r"</p>", "\n", text)
-            text = re.sub(r"<BLOCKQUOTE[^>]*>", "\n", text)
-            text = re.sub(r"</BLOCKQUOTE>", "\n", text)
-            text = re.sub(r"<h[1-6][^>]*>", "\n", text)
-            text = re.sub(r"</h[1-6]>", "\n", text)
-
-            # Supprimer toutes les autres balises HTML
-            text = re.sub(r"<[^>]+>", "", text)
-
-            # Nettoyer les espaces multiples et retours à la ligne excessifs
-            text = re.sub(r"\n\s*\n", "\n\n", text)
-            text = re.sub(r" +", " ", text)
-
-            return text.strip() or None
+        text = soup.get_text()
+        text = re.sub(r"\n\s*\n", "\n\n", text)
+        text = re.sub(r" +", " ", text)
+        return text.strip() or None
 
     @property
     def sections(self) -> list[ConsultSection] | None:
@@ -503,6 +474,50 @@ class TexteLoda:
         rapport += self._build_report_summary(impact_counters, impacts_found)
         return rapport
 
+    def to_markdown(self) -> str:
+        """Retourne une représentation Markdown du texte LODA, optimisée pour les LLM.
+
+        Inclut les métadonnées structurées (statut, NOR, référence, URL) suivies
+        du contenu textuel converti depuis HTML. Lorsque le contenu HTML n'est pas
+        disponible (résultat de recherche sans consultation complète), un message
+        indicatif invite à appeler `.latest()` ou `.at(date)`.
+
+        Returns:
+            str: Représentation Markdown du texte LODA.
+
+        Examples:
+            >>> texte.to_markdown()
+            '## Loi n° 2020-734 du 17 juin 2020\\n\\n**Statut**: VIGUEUR\\n...'
+        """
+        parts: list[str] = []
+
+        parts.append(f"## {self.titre or self.id or 'Texte'}")
+        parts.append("")
+
+        if self.etat:
+            parts.append(f"**Statut**: {self.etat}")
+        if self.nor:
+            parts.append(f"**NOR**: {self.nor}")
+        if self.id:
+            parts.append(f"**Référence**: {self.id}")
+        if self.date_debut:
+            parts.append(
+                f"**En vigueur depuis**: {self.date_debut.strftime('%d/%m/%Y')}"
+            )
+        if self.id:
+            parts.append(f"**URL**: https://www.legifrance.gouv.fr/loda/id/{self.id}")
+        parts.append("")
+
+        html = self.texte_html
+        if html:
+            body = self._clean_html_for_markdown(html)
+            if body:
+                parts.append(body)
+        else:
+            parts.append("*(Contenu disponible via `.latest()` ou `.at(date)`)*")
+
+        return "\n".join(parts)
+
     def _build_report_header(self) -> str:
         """Construit l'en-tête du rapport."""
         date_vigueur = (
@@ -668,86 +683,46 @@ class TexteLoda:
         if not html_content:
             return ""
 
-        import re
         import urllib.parse
 
-        # Prétraitement pour décoder les entités URL
         try:
-            # Décoder les caractères URL-encodés
             text = urllib.parse.unquote(html_content)
         except Exception:
             text = html_content
 
-        try:
-            # Méthode recommandée 2025: BeautifulSoup (optional dependency)
-            from bs4 import BeautifulSoup
+        from bs4 import BeautifulSoup, Tag
 
-            soup = BeautifulSoup(text, "html.parser")
+        soup = BeautifulSoup(text, "html.parser")
 
-            # Supprimer les liens vers affichCodeArticle.do et autres URLs internes
-            for a in soup.find_all("a"):
-                href = a.get("href", "")
-                if any(pattern in href for pattern in INTERNAL_URL_PATTERNS):
-                    # Remplacer le lien par juste son texte
-                    a.replace_with(soup.new_string(a.get_text()))
+        for a in soup.find_all("a"):
+            href = a.get("href", "")
+            if any(pattern in href for pattern in INTERNAL_URL_PATTERNS):
+                a.replace_with(soup.new_string(a.get_text()))
 
-            # Remplacer les éléments HTML par leur équivalent markdown
-            for br in soup.find_all("br"):
-                br.replace_with(soup.new_string("\n"))
+        for br in soup.find_all("br"):
+            br.replace_with(soup.new_string("\n"))
 
-            for p in soup.find_all("p"):
-                p.insert_after(soup.new_string("\n\n"))
+        for p in soup.find_all("p"):
+            p.insert_after(soup.new_string("\n\n"))
 
-            for blockquote in soup.find_all("blockquote"):
-                blockquote.insert_before(soup.new_string("> "))
-                blockquote.insert_after(soup.new_string("\n\n"))
+        for blockquote in soup.find_all("blockquote"):
+            blockquote.insert_before(soup.new_string("> "))
+            blockquote.insert_after(soup.new_string("\n\n"))
 
-            # Traiter les liens restants (externes)
-            from bs4 import Tag
+        for a in soup.find_all("a"):
+            if isinstance(a, Tag) and a.get("href"):
+                link_text = a.get_text()
+                href = a.get("href")
+                if (
+                    isinstance(href, str)
+                    and href.startswith("http")
+                    and "legifrance.gouv.fr" not in href
+                ):
+                    a.replace_with(soup.new_string(f"[{link_text}]({href})"))
+                else:
+                    a.replace_with(soup.new_string(link_text))
 
-            for a in soup.find_all("a"):
-                if isinstance(a, Tag) and a.get("href"):
-                    link_text = a.get_text()
-                    href = a.get("href")
-                    # Convertir en lien markdown seulement si c'est un lien externe utile
-                    if (
-                        isinstance(href, str)
-                        and href.startswith("http")
-                        and "legifrance.gouv.fr" not in href
-                    ):
-                        a.replace_with(soup.new_string(f"[{link_text}]({href})"))
-                    else:
-                        a.replace_with(soup.new_string(link_text))
-
-            text = soup.get_text()
-
-        except ImportError:
-            # Fallback: regex simple
-            # Supprimer les URLs de Légifrance
-            text = re.sub(r'/affichCodeArticle\.do\?[^"]*', "", text)
-            text = re.sub(r'/affichTexte\.do\?[^"]*', "", text)
-
-            # Remplacer les balises par des équivalents markdown
-            text = re.sub(r"<br\s*/?>\s*", "\n", text)
-            text = re.sub(r"<p[^>]*>\s*", "\n", text)
-            text = re.sub(r"</p>\s*", "\n\n", text)
-            text = re.sub(r"<blockquote[^>]*>\s*", "\n> ", text)
-            text = re.sub(r"</blockquote>\s*", "\n\n", text)
-
-            # Supprimer les liens internes de Légifrance mais garder le texte
-            text = re.sub(
-                r'<a[^>]*href="[^"]*(?:affichCodeArticle|affichTexte|legifrance\.gouv\.fr)[^"]*"[^>]*>([^<]*)</a>',
-                r"\1",
-                text,
-            )
-
-            # Traiter les autres liens
-            text = re.sub(
-                r'<a[^>]*href="(http[^"]*)"[^>]*>([^<]*)</a>', r"[\2](\1)", text
-            )
-
-            # Supprimer les autres balises HTML
-            text = re.sub(r"<[^>]+>", "", text)
+        text = soup.get_text()
 
         # Nettoyage final
         # Supprimer les paramètres d'URL restants
