@@ -7,12 +7,9 @@ and ensure consistency across the codebase.
 
 from enum import Enum, StrEnum
 
-from pylegifrance.models.generated.model import Fond as _GeneratedFond
-from pylegifrance.models.generated.model import LegalStatu as _GeneratedLegalStatu
 from pylegifrance.models.generated.model import Nature2 as _Nature2
 from pylegifrance.models.generated.model import Operateur as _GeneratedOperateur
 from pylegifrance.models.generated.model import TypeChamp as _TypeChamp
-from pylegifrance.models.generated.model import TypeRecherche as _GeneratedTypeRecherche
 
 
 class SupplyEnum(StrEnum):
@@ -113,14 +110,6 @@ class Fond(StrEnum):
     CIRC = "CIRC"
     ACCO = "ACCO"
 
-    def to_generated(self) -> _GeneratedFond:
-        return _GeneratedFond(self.value)
-
-    @classmethod
-    def from_generated(cls, generated: _GeneratedFond) -> "Fond":
-        return cls(generated.value)
-
-
 class Nature(StrEnum):
     """
     Enumeration of document nature types.
@@ -208,14 +197,6 @@ class TypeRecherche(StrEnum):
     CONTIENT = "CONTIENT"  # Added for compatibility with existing code
     EGAL = "EXACTE"  # Alias for EXACTE
 
-    def to_generated(self) -> _GeneratedTypeRecherche:
-        return _GeneratedTypeRecherche(self.value)
-
-    @classmethod
-    def from_generated(cls, generated: _GeneratedTypeRecherche) -> "TypeRecherche":
-        return cls(generated.value)
-
-
 class Operateur(StrEnum):
     """Opérateur entre les champs de recherche.
 
@@ -228,11 +209,6 @@ class Operateur(StrEnum):
 
     def to_generated(self) -> _GeneratedOperateur:
         return _GeneratedOperateur(self.value)
-
-    @classmethod
-    def from_generated(cls, generated: _GeneratedOperateur) -> "Operateur":
-        return cls(generated.value)
-
 
 class TypeChamp(StrEnum):
     """Type de champ.
@@ -309,16 +285,6 @@ class EtatJuridique(Enum):
         DENONCE: Texte dénoncé.
         REMPLACE: Texte qui a été remplacé par un autre.
 
-    Examples:
-        >>> status = EtatJuridique.VIGUEUR
-        >>> generated = status.to_generated()
-        >>> print(generated.value)
-        'VIGUEUR'
-
-        >>> from_api = _GeneratedLegalStatu(value='ABROGE')
-        >>> status = EtatJuridique.from_generated(from_api)
-        >>> print(status)
-        <LegalStatus.ABROGE: 'ABROGE'>
     """
 
     VIGUEUR = "VIGUEUR"
@@ -338,31 +304,6 @@ class EtatJuridique(Enum):
     SANS_ETAT = "SANS_ETAT"
     DENONCE = "DENONCE"
     REMPLACE = "REMPLACE"
-
-    def to_generated(self) -> _GeneratedLegalStatu:
-        """Convertit vers le type généré pour l'API.
-
-        Returns:
-            _GeneratedLegalStatu: Instance du type généré avec la valeur
-                correspondante pour l'API Légifrance.
-        """
-        return _GeneratedLegalStatu(self.value)
-
-    @classmethod
-    def from_generated(cls, generated: _GeneratedLegalStatu) -> "EtatJuridique":
-        """Crée une instance depuis le type généré de l'API.
-
-        Args:
-            generated: Instance du type généré provenant de l'API Légifrance.
-
-        Returns:
-            LegalStatus: Énumération correspondant au statut juridique.
-
-        Raises:
-            ValueError: Si la valeur du statut n'est pas reconnue.
-        """
-        return cls(generated.value)
-
 
 class TypeFacette(StrEnum):
     """Types de facettes disponibles pour filtrer les recherches dans l'API Légifrance.

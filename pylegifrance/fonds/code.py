@@ -7,7 +7,6 @@ from typing import Self
 
 from pylegifrance import LegifranceClient
 from pylegifrance.models.code import models
-from pylegifrance.models.code.consult import CodeConsultRequest
 from pylegifrance.models.code.enum import NomCode, TypeChampCode
 from pylegifrance.models.code.search import (
     ChampCode,
@@ -20,6 +19,7 @@ from pylegifrance.models.code.search import (
     TextLegalStatusFiltre,
 )
 from pylegifrance.models.constants import EtatJuridique, TypeRecherche
+from pylegifrance.models.generated.model import CodeConsultRequest
 
 logger = logging.getLogger(__name__)
 
