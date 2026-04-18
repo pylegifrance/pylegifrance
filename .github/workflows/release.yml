@@ -1,15 +1,31 @@
-name: Publish
+name: Release
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   id-token: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  release-please:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
+
   publish:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: self-hosted
     container:
       image: python:3.12
