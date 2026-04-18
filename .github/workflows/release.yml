@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: self-hosted
@@ -21,10 +25,7 @@ jobs:
       - name: Setup Common Environment
         uses: ./.github/actions/setup
         with:
-          install-dependencies: "true"
-
-      - name: Build pylegifrance
-        run: uv build
+          create-env-file: "false"
 
       - name: Check Version Consistency
         run: |
@@ -35,6 +36,9 @@ jobs:
             echo "Tag version ($TAG_VERSION) does not match pyproject.toml version ($PROJECT_VERSION)"
             exit 1
           fi
+
+      - name: Build pylegifrance
+        run: uv build
 
       - name: Publish pylegifrance to PyPI
         run: uv publish

@@ -6,6 +6,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: self-hosted
@@ -23,9 +27,7 @@ jobs:
       - name: Setup Common Environment
         uses: ./.github/actions/setup
         with:
-          install-dependencies: "true"
           extras: "true"
-          create-env-file: "true"
           env-content: ${{ secrets.ENV }}
 
       - name: Run tests
