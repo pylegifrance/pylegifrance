@@ -41,7 +41,9 @@ defaults point at prod.
 - `401` on token request → invalid credentials or expired API subscription
   on PISTE.
 - `429` on business calls → PISTE rate limiting; `LegifranceClient` uses
-  `tenacity` for retry with back-off.
+  `tenacity` for retry with back-off. Exact quotas are visible in the
+  PISTE console and can change at any time — see
+  [`/en/concepts/api-terms-and-quotas`](/pylegifrance/en/concepts/api-terms-and-quotas/).
 
 ## See also
 

@@ -76,3 +76,25 @@
   etc.) dans les pages `references/` respectives — nécessite de nouvelles
   façades côté code (pour KALI/BOCC/ACCO/CNIL/débats/questions/docAdmin
   notamment ; pas encore exposés par pylegifrance).
+
+## [2026-04-18] ingest | CGU PISTE de l'API Légifrance Beta
+
+- Téléchargé `cgu-piste-legifrance-beta.pdf` (674 KB, v2, DILA) depuis
+  [piste.gouv.fr/images/cgu/DILA_Legifrance_Beta_v2.pdf](https://piste.gouv.fr/images/cgu/DILA_Legifrance_Beta_v2.pdf).
+  Text extract via `pdftotext -layout` : `cgu-piste-legifrance-beta.txt`
+  (400 lignes).
+- Nouvelle page concept `concepts/api-terms-and-quotas.md` (FR+EN)
+  documentant : statut bêta sans SLA (§IV.1), quotas PISTE
+  req/s/min/jour consultables dans la console PISTE (§IV.3), licence
+  Etalab 2.0 sur les données exposées (§IX), procédure de
+  compromission d'identifiants OAuth (§V.3).
+- `concepts/piste-oauth` (FR+EN) enrichi : le paragraphe « 429 » pointe
+  désormais vers la nouvelle page pour les quotas exacts.
+- `index.mdx` (FR+EN) : entrée « CGU, quotas et licence » ajoutée au
+  catalogue.
+- Tentative de mirroring des deux CGU `legifrance.gouv.fr` bloquée par
+  Cloudflare (challenge JS) ; URLs référencées dans `raw/README.md`
+  pour téléchargement manuel.
+- Le schéma OpenAPI officiel existe déjà en repo
+  (`@pylegifrance/models/generated/legifrance.json`) ; référencé depuis
+  `raw/README.md` plutôt que dupliqué.

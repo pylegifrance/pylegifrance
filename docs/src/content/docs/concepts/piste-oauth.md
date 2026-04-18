@@ -41,7 +41,9 @@ défauts visent la prod.
 - `401` à l'obtention du jeton → identifiants invalides ou abonnement API
   expiré sur PISTE.
 - `429` sur les appels métier → rate limiting PISTE ; `LegifranceClient`
-  utilise `tenacity` pour le retry avec back-off.
+  utilise `tenacity` pour le retry avec back-off. Les quotas exacts sont
+  visibles dans la console PISTE et peuvent changer à tout moment —
+  voir [`/concepts/api-terms-and-quotas`](/pylegifrance/concepts/api-terms-and-quotas/).
 
 ## Voir aussi
 
