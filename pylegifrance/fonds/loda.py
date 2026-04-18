@@ -59,7 +59,6 @@ class TexteLoda:
         """
         self._texte = texte
         self._client = client
-        self._code_client = None
 
     @property
     def id(self) -> str | None:
@@ -136,20 +135,16 @@ class TexteLoda:
         # Si texte_html est None, tenter d'extraire le contenu des sections et articles
         content_parts = []
 
-        # Extraire le contenu des articles racine
         if self._texte.articles:
             for article in self._texte.articles:
                 if article.content:
                     content_parts.append(article.content)
 
-        # Extraire le contenu des sections
         if self._texte.sections:
             for section in self._texte.sections:
-                # Ajouter le titre de la section
                 if section.title:
                     content_parts.append(f"<h2>{section.title}</h2>")
 
-                # Extraire le contenu des articles de la section
                 if section.articles:
                     for article in section.articles:
                         if article.content:
@@ -226,7 +221,6 @@ class TexteLoda:
             except ValueError:
                 raise ValueError(f"Format de date invalide: {date_str}") from None
 
-        # Créer une instance Loda pour utiliser sa méthode fetch_version_at
         loda = Loda(self._client)
         if self.id is None:
             raise ValueError("TexteLoda.id is None; cannot fetch version at.")
@@ -238,7 +232,6 @@ class TexteLoda:
         Returns:
             La dernière version du texte, ou None si non trouvée.
         """
-        # Créer une instance Loda pour utiliser sa méthode fetch
         if self.id is None:
             raise ValueError("TexteLoda.id is None, cannot fetch Loda.")
         loda = Loda(self._client)
@@ -250,7 +243,6 @@ class TexteLoda:
         Returns:
             Une liste de toutes les versions du texte.
         """
-        # Créer une instance Loda pour utiliser sa méthode fetch_versions
         loda = Loda(self._client)
         if self.id is None:
             return []
@@ -542,7 +534,6 @@ class TexteLoda:
         """Formate la section d'un article avec ses impacts."""
         section = f"## Article {article.num}\n\n"
 
-        # Ajouter le contenu de l'article de loi lui-même
         if article.content:
             section += self._format_article_content(article.content)
 

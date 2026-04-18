@@ -3,12 +3,9 @@
 from datetime import datetime
 from unittest.mock import MagicMock
 
-import pytest
-
 from pylegifrance.fonds.juri import JuriDecision
 from pylegifrance.fonds.loda import TexteLoda as DomainTexteLoda
 from pylegifrance.models.code.models import Article
-
 
 # ---------------------------------------------------------------------------
 # Article.to_markdown()

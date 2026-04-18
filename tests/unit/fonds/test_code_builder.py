@@ -9,7 +9,6 @@ from pylegifrance.fonds.code import CodeSearchBuilder, _normalize_article_number
 from pylegifrance.models.code.enum import NomCode
 from pylegifrance.models.constants import EtatJuridique
 
-
 # ---------------------------------------------------------------------------
 # _normalize_article_number
 # ---------------------------------------------------------------------------
