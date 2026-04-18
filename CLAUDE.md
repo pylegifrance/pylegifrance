@@ -17,6 +17,7 @@ Requires Python 3.12+.
 
 ## Rules
 
+@.claude/rules/principles.md
 @.claude/rules/coding.md
 @.claude/rules/testing.md
 @.claude/rules/architecture.md
