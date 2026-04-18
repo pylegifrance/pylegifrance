@@ -1,0 +1,76 @@
+---
+title: PyLegifrance
+description: Python library for the French Legifrance API — an LLM-maintained wiki.
+template: splash
+hero:
+  tagline: Simple access to French legal data through the Legifrance API.
+  actions:
+    - text: Quick start
+      link: /pylegifrance/en/operations/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/pylegifrance/pylegifrance
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+This site is an **LLM-maintained wiki**. See
+[`docs/CLAUDE.md`](https://github.com/pylegifrance/pylegifrance/blob/main/docs/CLAUDE.md)
+for the contribution conventions.
+
+## Entities
+
+<CardGrid>
+  <Card title="LegifranceClient" icon="seti:python">
+    [HTTP client + session lifecycle](/pylegifrance/en/entities/legifrance-client/)
+  </Card>
+  <Card title="ApiConfig" icon="setting">
+    [PISTE configuration (env, from_env)](/pylegifrance/en/entities/api-config/)
+  </Card>
+  <Card title="Authentication" icon="seti:lock">
+    [OAuth token management](/pylegifrance/en/entities/authentication/)
+  </Card>
+  <Card title="Fond Code" icon="document">
+    [Search in legal codes](/pylegifrance/en/entities/fond-code/)
+  </Card>
+  <Card title="Fond Juri" icon="open-book">
+    [Case law](/pylegifrance/en/entities/fond-juri/)
+  </Card>
+  <Card title="Fond LODA" icon="list-format">
+    [Laws / ordinances / decrees / orders](/pylegifrance/en/entities/fond-loda/)
+  </Card>
+  <Card title="Article" icon="pencil">
+    [Article model](/pylegifrance/en/entities/article/)
+  </Card>
+</CardGrid>
+
+## Concepts
+
+- [Architecture](/pylegifrance/en/concepts/architecture/) — C4 view, layers, facade/model/client
+- [Builder pattern](/pylegifrance/en/concepts/builder-pattern/) — `.in_code().text().execute()`
+- [Fond facade](/pylegifrance/en/concepts/fond-facade/) — why `fonds/` and `models/` are separated
+- [Enum wrapping](/pylegifrance/en/concepts/enum-wrapping/) — domain enum vs generated enum
+- [Generated models](/pylegifrance/en/concepts/generated-models/) — `datamodel-codegen` and the "don't edit" rule
+- [PISTE OAuth](/pylegifrance/en/concepts/piste-oauth/) — authentication flow
+- [CID & versioning](/pylegifrance/en/concepts/cid-and-versioning/) — consolidation, legal statuses, sweep provisions
+- [Terms, quotas and licence](/pylegifrance/en/concepts/api-terms-and-quotas/) — beta status, PISTE quotas, Etalab 2.0 licence
+
+## Operations
+
+- [Quick start](/pylegifrance/en/operations/getting-started/)
+- [Install](/pylegifrance/en/operations/install-pylegifrance/)
+- [Create a PISTE account](/pylegifrance/en/operations/create-piste-account/)
+- [Configure API credentials](/pylegifrance/en/operations/configure-api-credentials/)
+- [Search in legal codes](/pylegifrance/en/operations/search-legal-code/)
+- [Fetch a case law decision](/pylegifrance/en/operations/fetch-case-law/)
+- [Search in LODA](/pylegifrance/en/operations/search-loda/)
+
+## Reference
+
+- [LegifranceClient](/pylegifrance/en/references/client/)
+- [ApiConfig](/pylegifrance/en/references/config/)
+- [Code](/pylegifrance/en/references/code/)
+- [JuriAPI](/pylegifrance/en/references/juri/)
+- [Loda](/pylegifrance/en/references/loda/)

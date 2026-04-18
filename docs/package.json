@@ -1,0 +1,19 @@
+{
+  "name": "pylegifrance-docs",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "latest",
+    "astro": "latest",
+    "sharp": "latest",
+    "starlight-llms-txt": "latest"
+  }
+}

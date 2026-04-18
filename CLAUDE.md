@@ -13,7 +13,7 @@ Requires Python 3.12+.
 | Format | `uv run ruff format .` |
 | Type check | `uvx ty check` |
 | Pre-commit | `uv run pre-commit run --all-files` |
-| Docs | `uv run mkdocs serve` |
+| Docs | `cd docs && pnpm install && pnpm dev` |
 
 ## Rules
 

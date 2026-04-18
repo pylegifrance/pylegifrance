@@ -1,0 +1,8 @@
+:root {
+  --sl-nav-height: 3.5rem;
+}
+
+.site-title img {
+  max-height: 2rem;
+  width: auto;
+}
