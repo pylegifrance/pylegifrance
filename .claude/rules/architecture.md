@@ -25,7 +25,6 @@ pylegifrance/
     code/              # Code-specific domain models
       enum.py          # NomCode, TypeChampCode, SortCode
       search.py        # Search request/criteria/filters
-      consult.py       # Consult request models
       models.py        # Article, Code result models
     juri/              # Jurisprudence domain models
     loda/              # Lois et décrets domain models

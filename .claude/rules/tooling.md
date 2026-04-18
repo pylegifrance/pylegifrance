@@ -61,11 +61,9 @@ Hook order:
 1. `conventional-pre-commit` (commit-msg stage) — rejects commit messages
    that don't match Conventional Commits. Allowed types are the same set
    as @.github/release-please-config.json plus `revert`.
-2. `validate-pyproject` — validates @pyproject.toml.
-3. `prettier` — formats YAML / JSON.
-4. `ruff` — lint with `--fix --exit-non-zero-on-fix`.
-5. `ruff-format` — format.
-6. `ty` — local hook running `uvx ty check`.
+2. `ruff-check` — lint with `--fix`.
+3. `ruff-format` — format.
+4. `ty` — local hook running `uvx ty check`.
 
 ## Commit messages
 
