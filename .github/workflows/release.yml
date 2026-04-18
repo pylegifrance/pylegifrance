@@ -1,34 +1,15 @@
-name: Release
+name: Publish
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   id-token: write
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  release-please:
-    # Only on branch push to main; tags are handled by the publish job below.
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: googleapis/release-please-action@v4
-        with:
-          config-file: .github/release-please-config.json
-          manifest-file: .github/release-please-manifest.json
-
   publish:
-    # Fires when a v* tag is pushed, either by release-please after merging
-    # its release PR, or manually via `git tag vX.Y.Z && git push --tags`.
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: self-hosted
     container:
       image: python:3.12
