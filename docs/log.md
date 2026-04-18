@@ -98,3 +98,33 @@
 - Le schéma OpenAPI officiel existe déjà en repo
   (`@pylegifrance/models/generated/legifrance.json`) ; référencé depuis
   `raw/README.md` plutôt que dupliqué.
+
+## [2026-04-18] ingest | CGU API Légifrance v1.0 (15/12/2022) — téléchargement manuel
+
+- Ajouté `cgu-legifrance-api.pdf` (273 KB, v1.0 DILA du 15/12/2022 —
+  **version canonique actuelle**) et `conditions-generales-d-utilisation-de-l-api.docx`
+  (53 KB, source éditable) après téléchargement manuel par le mainteneur
+  (Cloudflare bloquait l'accès programmatique). Text extracts :
+  `cgu-legifrance-api.txt` (433 lignes) et
+  `conditions-generales-d-utilisation-de-l-api.txt` (344 lignes).
+- Diff contre la v1.1 de 2020 (PISTE) a révélé plusieurs changements
+  substantiels intégrés dans `concepts/api-terms-and-quotas.md` (FR+EN) :
+  - **§IV.1** : introduction d'un engagement de moyens **95 % par
+    jour** sur prod (la v2020 n'avait aucun engagement). Pas
+    d'engagement sur sandbox.
+  - **§I.1** : la licence Etalab 2.0 est désormais explicitement dans
+    le périmètre des CGU (était implicite en 2020).
+  - **§I.2** : âge minimum clarifié → 15 ans (majeur numérique en
+    France). En 2020 : majeur ou mineur avec autorisation parentale.
+  - **§V.1** : baseline sécurité ajoute référence explicite aux
+    recommandations **CNIL et ANSSI**.
+  - **§I.3 / §IV.3** : notifications de changement de CGU / quotas
+    désormais « par email » (explicite), plus « tout autre moyen ».
+  - **§X** : contact RGPD DILA = `rgpd@dila.gouv.fr` (remplace
+    `dpd@pm.gouv.fr` de 2020), nouvelle adresse postale
+    26 rue Desaix, 75727 Paris Cedex 15.
+- La page concept a été restructurée autour des CGU 2022 comme source
+  principale, avec la v2020 conservée comme source historique.
+- `raw/README.md` mis à jour : les trois CGU sont désormais toutes
+  mirrorées localement, la note « non mirrorées » est supprimée, et
+  les versions/dates sont indiquées.

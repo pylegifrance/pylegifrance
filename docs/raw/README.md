@@ -15,17 +15,13 @@ d'origine ; les LLM les convertissent en texte lors de la lecture.
   - [Lexique](https://www.legifrance.gouv.fr/contenu/Media/files/lexique-api-lgf.docx) → `lexique-api-lgf.docx`
   - [Exemples d'utilisation](https://www.legifrance.gouv.fr/contenu/Media/Files/pied-de-page/exemples-d-utilisation-de-l-api.docx) → `exemples-d-utilisation-de-l-api.docx`
   - [Description des tris et filtres](https://www.legifrance.gouv.fr/contenu/Media/Files/pied-de-page/description-des-tris-et-filtres-de-l-api.xlsx) → `description-des-tris-et-filtres-de-l-api.xlsx`
-  - [CGU PISTE de l'API Légifrance Beta (v2)](https://piste.gouv.fr/images/cgu/DILA_Legifrance_Beta_v2.pdf) → `cgu-piste-legifrance-beta.pdf`
+  - [CGU API Légifrance v1.0 — 15/12/2022 (canonique)](https://www.legifrance.gouv.fr/contenu/Media/files/pied-de-page/cgu-legifrance-api-vf-15-12-2022_0.pdf) → `cgu-legifrance-api.pdf`
+  - [CGU API Légifrance (docx, version éditable)](https://www.legifrance.gouv.fr/contenu/Media/Files/pied-de-page/conditions-generales-d-utilisation-de-l-api-legifrance.docx) → `conditions-generales-d-utilisation-de-l-api.docx`
+  - [CGU PISTE Légifrance Beta v1.1 — 04/08/2020 (historique)](https://piste.gouv.fr/images/cgu/DILA_Legifrance_Beta_v2.pdf) → `cgu-piste-legifrance-beta.pdf`
 
   Chaque binaire est accompagné d'un `.txt` companion (extrait texte brut
   obtenu via `zipfile`+ElementTree pour docx/xlsx et `pdftotext -layout`
   pour les PDF) afin de faciliter l'ingestion par LLM.
-
-  **Sources officielles non mirrorées** (téléchargement programmatique
-  bloqué par Cloudflare — à récupérer manuellement si besoin) :
-
-  - [CGU Légifrance API v1.1](https://www.legifrance.gouv.fr/contenu/Media/files/pied-de-page/cgu-legifrance-api-vf-15-12-2022_0.pdf)
-  - [Conditions générales d'utilisation de l'API Légifrance (docx)](https://www.legifrance.gouv.fr/contenu/Media/Files/pied-de-page/conditions-generales-d-utilisation-de-l-api-legifrance.docx)
 
   Le schéma OpenAPI de l'API (source de `@pylegifrance/models/generated/model.py`)
   vit dans le repo à `@pylegifrance/models/generated/legifrance.json` —
