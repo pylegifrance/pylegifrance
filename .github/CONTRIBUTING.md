@@ -1,6 +1,6 @@
 # Guide de Contribution
 
-Merci de votre intérêt pour ce projet ! Ce guide a pour but de garantir une collaboration efficace et cohérente.
+Merci de votre intérêt pour ce projet ! Ce guide a pour but de garantir une collaboration efficace et cohérente.
 
 ## Technologies utilisées
 
@@ -12,21 +12,39 @@ Ce projet s'appuie sur les technologies suivantes :
 
 ## Étapes pour contribuer
 
-### 1. Ouvrir ou identifier une *issue*
+> ℹ️ Les **issues GitHub sont désactivées** sur ce repo. Ouvrez directement une Pull Request — il n'y a pas d'étape intermédiaire.
 
-- Vérifiez qu’une [issue](../../issues) existe pour le problème ou la fonctionnalité.
-- Sinon, ouvrez une nouvelle issue en suivant le modèle proposé.
+### 1. Créer une branche
 
-### 2. Créer une branche depuis GitHub
+Depuis une copie locale à jour de `main` :
 
-- Depuis l’issue, cliquez sur **"Create branch"** dans l’interface GitHub.
-- Cela crée automatiquement une branche nommée selon l’issue et la lie à celle-ci.
+```bash
+git switch main && git pull --ff-only
+git switch -c <type>/<slug-court>    # ex : feat/cache-token-piste
+```
 
-> ⚠️ N'utilisez **pas** `main` ou `develop` pour vos modifications.
+Nom de branche recommandé : `<type>/<slug>` où `<type>` est un type Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `ci`, `chore`…) et `<slug>` un résumé court en kebab-case.
 
-## Transparence LLM pour les demandes de fonctionnalité
+> ⚠️ N'utilisez **pas** `main` pour vos modifications.
 
-Si vous avez utilisé un LLM (ChatGPT, Claude, Codex, etc.) pour rédiger ou affiner votre demande de fonctionnalité, **incluez le prompt utilisé, verbatim**, dans le champ « Prompt LLM utilisé » de l'issue (ou collez-le dans « Informations Complémentaires » si votre éditeur ne le montre pas).
+### 2. Faire vos commits
+
+Chaque commit doit suivre la spécification [Conventional Commits](https://www.conventionalcommits.org/fr/v1.0.0/) — c'est ce que release-please parse pour déterminer le prochain numéro de version et régénérer le `CHANGELOG.md`. Le hook pre-commit (`conventional-pre-commit`) valide chaque message localement.
+
+Types acceptés : `feat`, `fix`, `perf`, `refactor`, `docs`, `ci`, `chore`, `test`, `build`, `style`, `revert`.
+
+### 3. Ouvrir la Pull Request
+
+```bash
+git push -u origin <nom-de-branche>
+gh pr create --fill          # ou via l'interface GitHub
+```
+
+Le modèle de PR (`.github/PULL_REQUEST_TEMPLATE.md`) s'applique automatiquement. Remplissez-le ; la section « Prompt LLM utilisé » est optionnelle mais vivement encouragée — voir ci-dessous.
+
+## Transparence LLM pour les PR
+
+Si vous avez utilisé un LLM (ChatGPT, Claude, Codex, etc.) pour rédiger ou affiner votre proposition, **incluez le prompt utilisé, verbatim**, dans la section « Prompt LLM utilisé » du modèle de PR.
 
 Cela sert deux objectifs :
 
@@ -54,24 +72,13 @@ Cette commande installe toutes les dépendances de base et optionnelles.
   uv run pre-commit run --all-files
 ```
 
-## Ouvrir une Pull Request
-
-### 1. Pousser votre branche
-
-Poussez votre branche sur GitHub :
-
-```bash
-  git push origin <nom-de-branche>
-```
-
-### 2. Créer la Pull Request
-
-Créez une [Pull Request](https://docs.github.com/fr/pull-requests) depuis l'interface GitHub.
+`pre-commit install` installe d'un coup les hooks `pre-commit` **et** `commit-msg` (voir `default_install_hook_types` dans `.pre-commit-config.yaml`).
 
 ## Bonnes pratiques
 
 - Une PR = une fonctionnalité ou un correctif
-- Assurez-vous que tout le code est en anglais, mais que les messages de log sont en français
+- Commits atomiques suivant Conventional Commits (le hook vous empêchera de faire autrement)
+- Tout le code en anglais, messages de log en français
 - Suivez les standards de codage décrits ci-dessous
 
 ---
