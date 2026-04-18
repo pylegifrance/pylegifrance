@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class NomCode(str, Enum):
+class NomCode(StrEnum):
     """Énumération des noms officiels des codes juridiques français."""
 
     CC = "Code civil"
@@ -76,7 +76,7 @@ class NomCode(str, Enum):
     CTRANS = "Code des transports"
 
 
-class TypeChampCode(str, Enum):
+class TypeChampCode(StrEnum):
     """Types de champs de recherche disponibles pour le fond CODE.
 
     Définit les différents types de champs sur lesquels effectuer une recherche
@@ -120,7 +120,7 @@ class TypeChampCode(str, Enum):
     ARTICLE = "ARTICLE"
 
 
-class SortCode(str, Enum):
+class SortCode(StrEnum):
     """Options de tri pour les recherches dans le fond CODE."""
 
     PERTINENCE = "PERTINENCE"

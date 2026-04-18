@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DecisionsAttaquees(str, Enum):
+class DecisionsAttaquees(StrEnum):
     """Liste pour le filtre DECISION_ATTAQUEE"""
 
     COMMISSION_INDEMNISATION_VICTIMES_INFRACTIONS = (
@@ -27,7 +27,7 @@ class DecisionsAttaquees(str, Enum):
     TRIBUNAL_SUPERIEURS_APPEL = "TRIBUNAL_SUPERIEURS_APPEL"
 
 
-class CoursAppel(str, Enum):
+class CoursAppel(StrEnum):
     """Liste pour le filtre APPEL_SIEGE_APPEL"""
 
     GRENOBLE = "GRENOBLE"
@@ -68,7 +68,7 @@ class CoursAppel(str, Enum):
     RENNES = "RENNES"
 
 
-class FormationsJudiciaires(str, Enum):
+class FormationsJudiciaires(StrEnum):
     """Formations judiciaires"""
 
     AVIS = "AVIS"
@@ -87,7 +87,7 @@ class FormationsJudiciaires(str, Enum):
     CHAMBRES_REUNIES = "CHAMBRES_REUNIES"
 
 
-class JuridictionJudiciaire(str, Enum):
+class JuridictionJudiciaire(StrEnum):
     """Liste pour filtre juridiction judiciaire"""
 
     cour_de_cassation = "Cour de cassation"
@@ -95,7 +95,7 @@ class JuridictionJudiciaire(str, Enum):
     juridictions_1er_degre = "Juridictions du premier degré"
 
 
-class SortOptions(str, Enum):
+class SortOptions(StrEnum):
     """Options de tri"""
 
     RELEVANCE = "PERTINENCE"
@@ -103,14 +103,14 @@ class SortOptions(str, Enum):
     DATE_ASC = "DATE_ASC"
 
 
-class PublicationStatus(str, Enum):
+class PublicationStatus(StrEnum):
     """Statut de publication"""
 
     PUBLISHED = "T"
     NOT_PUBLISHED = "F"
 
 
-class FilterTypes(str, Enum):
+class FilterTypes(StrEnum):
     """Types de filtres disponibles"""
 
     PUBLICATION_BULLETIN = "CASSATION_TYPE_PUBLICATION_BULLETIN"
@@ -120,7 +120,7 @@ class FilterTypes(str, Enum):
     DECISION_ATTAQUEE = "CASSATION_DECISION_ATTAQUEE"
 
 
-class FacettesJURI(str, Enum):
+class FacettesJURI(StrEnum):
     """
     Les filtres de JURI sont référencés dans le document "description-des-tris-et-filtres-de-l-pi.xlsx
     La liste ci-dessous n'en reprends qu'une partie. A ce stade, les filtres ne marchent pas

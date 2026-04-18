@@ -5,7 +5,7 @@ This module centralizes all shared constants and enumerations to avoid duplicati
 and ensure consistency across the codebase.
 """
 
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pylegifrance.models.generated.model import Fond as _GeneratedFond
 from pylegifrance.models.generated.model import LegalStatu as _GeneratedLegalStatu
@@ -15,7 +15,7 @@ from pylegifrance.models.generated.model import TypeChamp as _TypeChamp
 from pylegifrance.models.generated.model import TypeRecherche as _GeneratedTypeRecherche
 
 
-class SupplyEnum(str, Enum):
+class SupplyEnum(StrEnum):
     """
     Enumeration of supply sources for suggestions.
     Used to specify which data sources to query for suggestions.
@@ -46,7 +46,7 @@ class SupplyEnum(str, Enum):
     PDF = "PDF"
 
 
-class Fond(str, Enum):
+class Fond(StrEnum):
     """Fonds de données juridiques disponibles pour la recherche Légifrance.
 
     Spécifie la base de données juridique dans laquelle effectuer la recherche.
@@ -121,7 +121,7 @@ class Fond(str, Enum):
         return cls(generated.value)
 
 
-class Nature(str, Enum):
+class Nature(StrEnum):
     """
     Enumeration of document nature types.
     """
@@ -138,7 +138,7 @@ class Nature(str, Enum):
     ACCORD_FONCTION_PUBLIQUE = _Nature2.accord_fonction_publique.value
 
 
-class Facette(str, Enum):
+class Facette(StrEnum):
     """Facettes de filtrage pour les recherches dans l'API juridique Légifrance.
 
     Définit les critères de filtrage utilisables pour affiner les recherches
@@ -193,7 +193,7 @@ class Facette(str, Enum):
     NOR = "NOR"
 
 
-class TypeRecherche(str, Enum):
+class TypeRecherche(StrEnum):
     """
     Enumeration of search types.
     """
@@ -216,7 +216,7 @@ class TypeRecherche(str, Enum):
         return cls(generated.value)
 
 
-class Operateur(str, Enum):
+class Operateur(StrEnum):
     """Opérateur entre les champs de recherche.
 
     This enum is compatible with the generated Operateur enum.
@@ -234,7 +234,7 @@ class Operateur(str, Enum):
         return cls(generated.value)
 
 
-class TypeChamp(str, Enum):
+class TypeChamp(StrEnum):
     """Type de champ.
 
     This enum is compatible with the generated TypeChamp enum.
@@ -364,7 +364,7 @@ class EtatJuridique(Enum):
         return cls(generated.value)
 
 
-class TypeFacette(str, Enum):
+class TypeFacette(StrEnum):
     """Types de facettes disponibles pour filtrer les recherches dans l'API Légifrance.
 
     Les facettes permettent de restreindre les résultats de recherche selon
