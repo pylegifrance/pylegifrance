@@ -12,11 +12,6 @@ from pylegifrance.models.generated.model import (
     ConsultTextResponse,
 )
 from pylegifrance.models.identifier import Cid, Nor
-from pylegifrance.models.loda.api_wrappers import (
-    ConsultRequest,
-    ConsultVersionRequest,
-    ListVersionsRequest,
-)
 from pylegifrance.models.loda.models import TexteLoda as TexteLodaModel
 from pylegifrance.models.loda.search import SearchRequest
 from pylegifrance.utils import EnumEncoder
@@ -878,8 +873,10 @@ class Loda:
             f"Récupération du texte avec ID: {text_id}, ID de base: {base_id}, date: {date}"
         )
 
-        request = ConsultRequest(textId=base_id, date=date)
-        api_model = request.to_api_model().model_dump(by_alias=True)
+        api_model = {
+            "textId": base_id,
+            "date": date or datetime.now().strftime("%Y-%m-%d"),
+        }
 
         # Debug log the consult request
         logger.debug(
@@ -922,12 +919,16 @@ class Loda:
             raise ValueError("text_id ne peut pas être vide")
 
         try:
-            datetime.fromisoformat(date)
+            date_obj = datetime.fromisoformat(date)
         except ValueError:
             raise ValueError(f"Format de date invalide: {date}") from None
 
-        request = ConsultVersionRequest(textId=text_id, date=date)
-        api_model = request.to_api_model()
+        api_model = {
+            "textId": text_id,
+            "year": date_obj.year,
+            "month": date_obj.month,
+            "dayOfMonth": date_obj.day,
+        }
 
         response = self._client.call_api("consult/loda/version", api_model)
 
@@ -958,8 +959,7 @@ class Loda:
         if not text_id:
             raise ValueError("text_id ne peut pas être vide")
 
-        request = ListVersionsRequest(textId=text_id)
-        api_model = request.to_api_model()
+        api_model = {"textId": text_id}
 
         response = self._client.call_api("consult/loda/versions", api_model)
 
