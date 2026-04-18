@@ -1,41 +1,48 @@
-name: Release to PyPI
+name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      created: ${{ steps.rp.outputs.release_created }}
+      tag: ${{ steps.rp.outputs.tag_name }}
+      sha: ${{ steps.rp.outputs.sha }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: rp
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.created == 'true'
     runs-on: self-hosted
-    permissions:
-      contents: read
-      id-token: write
     container:
       image: python:3.12
-
     steps:
-      - name: Checkout code
+      - name: Checkout release commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release-please.outputs.sha }}
 
       - name: Setup Common Environment
         uses: ./.github/actions/setup
         with:
           create-env-file: "false"
-
-      - name: Check Version Consistency
-        run: |
-          RAW_TAG_NAME="${GITHUB_REF##*/}"
-          TAG_VERSION="${RAW_TAG_NAME#v}"
-          PROJECT_VERSION=$(awk -F\" '/^version =/ {print $2}' pyproject.toml)
-          if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
-            echo "Tag version ($TAG_VERSION) does not match pyproject.toml version ($PROJECT_VERSION)"
-            exit 1
-          fi
 
       - name: Build pylegifrance
         run: uv build
