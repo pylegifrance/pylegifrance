@@ -2,6 +2,7 @@ name: Test
 
 on:
   push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,12 +14,8 @@ concurrency:
 jobs:
   test:
     runs-on: self-hosted
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.12", "3.13"]
     container:
-      image: python:${{ matrix.python-version }}
+      image: python:3.12
 
     steps:
       - name: Checkout Code
