@@ -167,10 +167,10 @@ class CodeSearchBuilder:
         """
         self._champs.append(
             ChampCode(
-                typeChamp=TypeChampCode.NUM_ARTICLE,
+                type_champ=TypeChampCode.NUM_ARTICLE,
                 criteres=[
                     CritereCode(
-                        typeRecherche=TypeRecherche.EXACTE,
+                        type_recherche=TypeRecherche.EXACTE,
                         valeur=_normalize_article_number(number),
                         proximite=None,
                     )
@@ -193,10 +193,10 @@ class CodeSearchBuilder:
         """
         self._champs.append(
             ChampCode(
-                typeChamp=in_field,
+                type_champ=in_field,
                 criteres=[
                     CritereCode(
-                        typeRecherche=TypeRecherche.TOUS_LES_MOTS_DANS_UN_CHAMP,
+                        type_recherche=TypeRecherche.TOUS_LES_MOTS_DANS_UN_CHAMP,
                         valeur=search_text,
                         proximite=None,
                     )
@@ -229,7 +229,7 @@ class CodeSearchBuilder:
                 f"Format de date invalide: {date_str}. Utilisez YYYY-MM-DD"
             ) from None
 
-        self._filtres.append(DateVersionFiltre(singleDate=date_obj))
+        self._filtres.append(DateVersionFiltre(single_date=date_obj))
         return self
 
     def with_legal_status(self, status: list[EtatJuridique] | None = None) -> Self:
@@ -326,7 +326,7 @@ class CodeSearchBuilder:
                     "Ajout de la date du jour pour la recherche de code complet"
                 )
                 current_timestamp = datetime.now()
-                self._filtres.append(DateVersionFiltre(singleDate=current_timestamp))
+                self._filtres.append(DateVersionFiltre(single_date=current_timestamp))
 
             request = CodeDateSearchRequest(recherche=self.criteria)
         elif self.fond == "CODE_ETAT":

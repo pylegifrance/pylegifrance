@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, field_validator
 
@@ -8,7 +8,6 @@ from pylegifrance.models.base import PyLegifranceBaseModel
 from pylegifrance.models.generated.model import (
     ConsultArticle,
     ConsultSection,
-    ConsultTextResponse,
 )
 
 
@@ -179,7 +178,7 @@ class Code(PyLegifranceBaseModel):
     )
 
     @classmethod
-    def from_orm(cls, data: ConsultTextResponse) -> "Code":
+    def from_orm(cls, obj: Any) -> Self:
         """Crée une instance de Code à partir d'une réponse de l'API.
 
         Args:
@@ -188,6 +187,7 @@ class Code(PyLegifranceBaseModel):
         Returns:
             Code: Une nouvelle instance de Code.
         """
+        data = obj
         # Handle both Pydantic model and dictionary inputs
         if hasattr(data, "model_dump"):
             data_dict = data.model_dump()
@@ -427,7 +427,7 @@ class Article(PyLegifranceBaseModel):
         return "\n".join(parts)
 
     @classmethod
-    def from_orm(cls, data: Any) -> "Article":
+    def from_orm(cls, obj: Any) -> Self:
         """Crée une instance d'Article à partir d'un dictionnaire ou d'une réponse API.
 
         Gère les réponses de consultation (clé ``article`` imbriquée) et les
@@ -439,7 +439,7 @@ class Article(PyLegifranceBaseModel):
         Returns:
             Une nouvelle instance d'Article.
         """
-        raw_data = _to_dict(data)
+        raw_data = _to_dict(obj)
 
         # Consult shape: nested "article" dict; Search shape: flat top-level
         nested = raw_data.get("article")

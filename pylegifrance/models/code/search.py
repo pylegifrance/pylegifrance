@@ -201,8 +201,8 @@ class CritereCode(PyLegifranceBaseModel):
 
     def to_generated(self) -> CritereDTO:
         """Convertit vers le DTO pour l'API."""
-        data = {
-            "typeRecherche": TypeRecherche(self.type_recherche.value),
+        data: dict[str, Any] = {
+            "typeRecherche": self.type_recherche.value,
             "valeur": self.valeur,
             "operateur": self.operateur.value,
         }

@@ -6,6 +6,7 @@ This module provides utility functions used across the package.
 import enum
 import json
 from datetime import datetime
+from typing import Any
 
 import requests
 
@@ -15,12 +16,12 @@ from pylegifrance.config import ApiConfig
 class EnumEncoder(json.JSONEncoder):
     """JSON encoder that can handle Enum objects and datetime objects."""
 
-    def default(self, obj):
-        if isinstance(obj, enum.Enum):
-            return obj.value
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        return super().default(obj)
+    def default(self, o: Any) -> Any:
+        if isinstance(o, enum.Enum):
+            return o.value
+        elif isinstance(o, datetime):
+            return o.isoformat()
+        return super().default(o)
 
 
 def configure_session_timeouts(session: requests.Session, config: ApiConfig) -> None:
@@ -44,4 +45,4 @@ def configure_session_timeouts(session: requests.Session, config: ApiConfig) -> 
         return original_request(*args, **kwargs)
 
     # Replace the request method with our wrapper
-    session.request = request_with_timeout
+    session.request = request_with_timeout  # ty: ignore[invalid-assignment]

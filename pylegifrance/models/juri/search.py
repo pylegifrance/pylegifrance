@@ -179,6 +179,8 @@ class SearchRequest(PyLegifranceBaseModel):
 
     def _create_date_filter(self) -> FiltreDTO:
         """Create date range filter."""
+        assert self.date_start is not None
+        assert self.date_end is not None
         return FiltreDTO(
             facette=self.date_facet,
             valeurs=None,

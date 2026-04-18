@@ -682,7 +682,9 @@ class TexteLoda:
 
         for a in soup.find_all("a"):
             href = a.get("href", "")
-            if any(pattern in href for pattern in INTERNAL_URL_PATTERNS):
+            if isinstance(href, str) and any(
+                pattern in href for pattern in INTERNAL_URL_PATTERNS
+            ):
                 a.replace_with(soup.new_string(a.get_text()))
 
         for br in soup.find_all("br"):
@@ -1316,13 +1318,10 @@ class Loda:
             ValueError: Si la requête contient des valeurs invalides
                 (comme une nature non reconnue).
         """
-        is_string_query = isinstance(query, str)
-
         try:
-            if is_string_query:
+            if isinstance(query, str):
                 return SearchRequest(search=query)
-            else:
-                return query
+            return query
         except Exception as e:
             # Convert Pydantic validation errors to ValueError for better error handling
             if "not a valid" in str(e):
