@@ -103,25 +103,10 @@ justifying implementation choices (see @CLAUDE.md).
 > - [`starlight-llms-txt`](https://github.com/delucis/starlight-llms-txt).
 > - [Astro — Deploy to GitHub Pages](https://docs.astro.build/en/guides/deploy/github/).
 
-The docs site is an Astro + Starlight project under @docs/ (Node
-tooling, pnpm). It is **not** part of the Python package; `uv sync` no
-longer installs docs dependencies.
+The docs site is an Astro + Starlight project under @docs/ (Node tooling, pnpm).
+It is **not** part of the Python package; `uv sync` no longer installs docs dependencies.
 
-```bash
-cd docs
-pnpm install             # first-time
-pnpm dev                 # http://localhost:4321/pylegifrance
-pnpm build               # static output in docs/dist/
-```
-
-French is the default locale (Starlight's `root` locale pattern, served
-at `/pylegifrance/`); English mirror lives under `/pylegifrance/en/`
-with automatic fallback to French for untranslated pages. The
-`starlight-llms-txt` plugin emits `/llms.txt` and `/llms-full.txt` at
-build time for LLM consumption.
-
-Wiki schema and ingest/query/lint workflow live in @docs/CLAUDE.md
-(nested — automatically loaded when working under @docs/).
+Dev commands, locale setup, and wiki maintenance schema: @docs/CLAUDE.md
 
 ## GitHub Actions
 

@@ -80,10 +80,4 @@ def fetch_article(self, article_id: str) -> ArticleFetcher:
 
 ## Enum Wrapping Pattern
 
-> Project-specific — no upstream authority. Rationale and worked example:
 > @docs/src/content/docs/concepts/enum-wrapping.md
-
-Domain enums (e.g. `NomCode`, `TypeChampCode`) wrap generated DTO enums
-from `models/generated/model.py`. Each domain model provides
-`to_generated()` to convert to the DTO form and, where needed, a
-`from_generated()` classmethod for the reverse.

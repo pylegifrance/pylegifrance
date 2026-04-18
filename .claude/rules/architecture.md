@@ -55,68 +55,21 @@ Configuration is in @pyproject.toml under `[tool.datamodel-codegen]`.
 
 ## Builder Pattern
 
-> Sources:
->
-> - [PEP 673 — `typing.Self`](https://peps.python.org/pep-0673/).
-> - Project wiki page: @docs/src/content/docs/concepts/builder-pattern.md
-
-Each fond facade exposes builders for fluent API construction:
-
-- `CodeSearchBuilder` — `.in_code()` → `.text()` → `.at_date()` → `.execute()`
-- `CodeConsultFetcher` — `.include_abrogated()` → `.section()` → `.at(date)`
-- `ArticleFetcher` — `.at(date)`
-
-Builders return `Self` for chaining and take `LegifranceClient` as first
-argument.
+> @docs/src/content/docs/concepts/builder-pattern.md
 
 ## API Client
 
-> Sources:
->
-> - [requests — Sessions](https://requests.readthedocs.io/en/latest/user/advanced/#session-objects).
-> - [`contextlib.contextmanager`](https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager).
-> - [`tenacity` — Retrying](https://tenacity.readthedocs.io/en/latest/).
-> - Project wiki page: @docs/src/content/docs/entities/legifrance-client.md
-
-- **Factory**: `LegifranceClient.create(config)` or `LegifranceClient(config)`.
-- **Context manager**: `client.session_context()` ensures session cleanup.
-- **Auth**: Handled transparently by `AuthenticationManager`; tokens are
-  refreshed on each `call_api` / `get`.
+> @docs/src/content/docs/entities/legifrance-client.md
 
 ## Fond Facade Pattern
 
-> Project-specific — see @docs/src/content/docs/concepts/fond-facade.md
-
-Each fond (Code, Juri, Loda) has a facade class in @pylegifrance/fonds/
-that:
-
-1. Takes a `LegifranceClient` and optional `fond` string.
-2. Exposes `.search()` returning a builder.
-3. Exposes `.fetch_*()` methods returning fetcher objects.
+> @docs/src/content/docs/concepts/fond-facade.md
 
 ## Enum Wrapping
 
-> Project-specific — see @docs/src/content/docs/concepts/enum-wrapping.md
-
-Domain enums in `models/<fond>/enum.py` wrap generated DTO enums.
-Conversion is done via `to_generated()` on domain models before API
-calls. This isolates the public API from generated code changes.
+> @docs/src/content/docs/concepts/enum-wrapping.md
 
 ## CID & Versioning (Legifrance)
 
-> Sources:
->
-> - Official Legifrance glossary:
->   [Lexique de l'API Légifrance (DILA)](https://www.legifrance.gouv.fr/contenu/Media/files/lexique-api-lgf.docx).
-> - Project wiki page: @docs/src/content/docs/concepts/cid-and-versioning.md
-
-Articles, sections, and texts have two kinds of identifiers: the
-version-specific `LEGIARTI…` / `LEGITEXT…` / `LEGISCTA…` and the
-**CID** (Common Identifier) shared by every version of the same object.
-Any code that compares, deduplicates, or joins across versions should
-pivot on the CID, not on the versioned identifier.
-
-Legal statuses (`VIGUEUR`, `VIGUEUR_AVEC_TERME`, `VIGUEUR_DIFFEREE`,
-`ABROGE`, `ABROGE_DIFF`, `MODIFIE`) are the enum space surfaced on
-`Article.legal_status` and on the Code builder's `EtatJuridique`
-filter.
+> @docs/src/content/docs/concepts/cid-and-versioning.md
+> Raw source: @docs/raw/legifrance/lexique-api-lgf.md
