@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     branches: [main]
+    tags: ["v*"]
 
 permissions:
   contents: write
@@ -15,34 +16,39 @@ concurrency:
 
 jobs:
   release-please:
+    # Only on branch push to main; tags are handled by the publish job below.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    outputs:
-      created: ${{ steps.rp.outputs.release_created }}
-      tag: ${{ steps.rp.outputs.tag_name }}
-      sha: ${{ steps.rp.outputs.sha }}
     steps:
       - uses: googleapis/release-please-action@v4
-        id: rp
         with:
           config-file: .github/release-please-config.json
           manifest-file: .github/release-please-manifest.json
 
   publish:
-    needs: release-please
-    if: needs.release-please.outputs.created == 'true'
+    # Fires when a v* tag is pushed, either by release-please after merging
+    # its release PR, or manually via `git tag vX.Y.Z && git push --tags`.
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: self-hosted
     container:
       image: python:3.12
     steps:
-      - name: Checkout release commit
+      - name: Checkout tagged commit
         uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release-please.outputs.sha }}
 
       - name: Setup Common Environment
         uses: ./.github/actions/setup
         with:
           create-env-file: "false"
+
+      - name: Check tag vs pyproject version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PROJECT_VERSION=$(awk -F\" '/^version =/ {print $2}' pyproject.toml)
+          if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match pyproject.toml version ($PROJECT_VERSION)"
+            exit 1
+          fi
 
       - name: Build pylegifrance
         run: uv build
