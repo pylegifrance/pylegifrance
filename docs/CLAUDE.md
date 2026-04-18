@@ -1,6 +1,6 @@
 # Wiki pylegifrance — schéma de maintenance
 
-> Règles projet : voir `../CLAUDE.md`. Ce fichier ajoute les conventions du
+> Règles projet : voir @CLAUDE.md. Ce fichier ajoute les conventions du
 > wiki ; Claude Code le charge automatiquement quand le répertoire de travail
 > est sous `docs/`.
 
@@ -14,7 +14,7 @@ Une base de connaissances **maintenue par des LLM** pour la librairie
 - **Pages dérivées** — `src/content/docs/` (entities, concepts, operations,
   references). Générées et tenues à jour par le LLM à partir des sources et
   des discussions avec les mainteneur·se·s.
-- **Schéma** — ce fichier + `../CLAUDE.md`. Dit au LLM comment ingérer,
+- **Schéma** — ce fichier + @CLAUDE.md. Dit au LLM comment ingérer,
   requêter, et maintenir le wiki.
 
 ## 2. Structure des répertoires
@@ -69,8 +69,8 @@ Optionnel, utilisé par le LLM pour la maintenance :
 title: …
 description: …
 sidebar: { order: 2 }       # override l'ordre alpha si besoin
-sources:                    # chemins relatifs vers raw/
-  - ../../../raw/legifrance/lexique-api-lgf.docx
+sources:                    # @paths depuis la racine du repo
+  - "@docs/raw/legifrance/lexique-api-lgf.docx"
 related:                    # slugs d'autres pages
   - /concepts/builder-pattern
   - /references/code
@@ -84,7 +84,7 @@ updated: 2026-04-17
   `en/…` quand disponible ; sinon Starlight affiche automatiquement la version
   française avec une bannière « not yet translated ».
 - **Identifiants de code** (noms de classes, fonctions, variables, types) : en
-  anglais, conformément à `.claude/rules/coding.md`.
+  anglais, conformément à @.claude/rules/coding.md.
 - **Exemples de code** : commentaires en français autorisés, identifiants en
   anglais.
 

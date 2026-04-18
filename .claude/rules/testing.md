@@ -40,7 +40,7 @@ Feature files are written in **French** (`# language: fr`).
 
 Step definitions live in `steps.py` next to the `.feature` file. Shared
 steps (e.g. "l'API Legifrance est accessible") live in
-`tests/integration/fonds/shared.py`.
+@tests/integration/fonds/shared.py.
 
 Scenario runners follow this exact template:
 
@@ -65,13 +65,13 @@ scenario runners.
 > - [pytest — Fixture scopes](https://docs.pytest.org/en/stable/how-to/fixtures.html#fixture-scopes).
 
 - `api_client` (module scope): Creates a real `LegifranceClient` from
-  env vars. Defined in `tests/conftest.py`.
+  env vars. Defined in @tests/conftest.py.
 - Integration tests require valid `.env` credentials.
 
 ## Adding a New Fond
 
 > Project-specific workflow — see the wiki for fond-level walkthroughs:
-> [`docs/src/content/docs/operations/`](../../docs/src/content/docs/operations/).
+> @docs/src/content/docs/operations/
 
 1. Create `tests/integration/fonds/<fond>/` with `<fond>.feature`,
    `steps.py`, `test_<fond>_scenario.py`.

@@ -70,7 +70,7 @@ def fetch_article(self, article_id: str) -> ArticleFetcher:
 > - [Pydantic — `model_dump`](https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_dump).
 
 - All domain models extend `PyLegifranceBaseModel`
-  (in `pylegifrance/models/base.py`).
+  (in @pylegifrance/models/base.py).
 - `PyLegifranceBaseModel` uses `ConfigDict` with
   `alias_generator=to_camel` and `populate_by_name=True`.
 - Serialize with `model_dump(by_alias=True, mode="json")` for API
@@ -81,7 +81,7 @@ def fetch_article(self, article_id: str) -> ArticleFetcher:
 ## Enum Wrapping Pattern
 
 > Project-specific — no upstream authority. Rationale and worked example:
-> [`docs/src/content/docs/concepts/enum-wrapping.md`](../../docs/src/content/docs/concepts/enum-wrapping.md).
+> @docs/src/content/docs/concepts/enum-wrapping.md
 
 Domain enums (e.g. `NomCode`, `TypeChampCode`) wrap generated DTO enums
 from `models/generated/model.py`. Each domain model provides

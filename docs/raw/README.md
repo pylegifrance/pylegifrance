@@ -1,9 +1,9 @@
 # raw/ — Sources immuables du wiki
 
 Ce dossier contient les **sources brutes** que les LLM lisent pour maintenir le
-wiki (`../src/content/docs/`). Les fichiers ici ne sont **jamais modifiés** par
-le wiki : on ajoute, on ne réécrit pas. Voir `../CLAUDE.md` pour le workflow
-d'ingestion.
+wiki (@docs/src/content/docs/). Les fichiers ici ne sont **jamais modifiés**
+par le wiki : on ajoute, on ne réécrit pas. Voir @docs/CLAUDE.md pour le
+workflow d'ingestion.
 
 Convention : les fichiers binaires (PDF, DOCX, XLSX) restent dans leur format
 d'origine ; les LLM les convertissent en texte lors de la lecture.

@@ -26,7 +26,7 @@ uv run ruff check . --fix        # Lint with auto-fix
 uv run ruff format .             # Format
 ```
 
-Config: `pyproject.toml` under `[tool.ruff]`.
+Config: @pyproject.toml under `[tool.ruff]`.
 
 ## ty (Type Checker)
 
@@ -37,8 +37,8 @@ Config: `pyproject.toml` under `[tool.ruff]`.
 uvx ty check             # Type check
 ```
 
-Config: `pyproject.toml` under `[tool.ty]` — `python-version = "3.12"`,
-includes `pylegifrance/`.
+Config: @pyproject.toml under `[tool.ty]` — `python-version = "3.12"`,
+includes @pylegifrance/.
 
 ## Pre-commit
 
@@ -54,14 +54,14 @@ uv run pre-commit run --all-files  # run every pre-commit hook on the whole tree
 ```
 
 `default_install_hook_types: [pre-commit, commit-msg]` in
-`.pre-commit-config.yaml` wires both stages in one install.
+@.pre-commit-config.yaml wires both stages in one install.
 
 Hook order:
 
 1. `conventional-pre-commit` (commit-msg stage) — rejects commit messages
    that don't match Conventional Commits. Allowed types are the same set
-   as `.github/release-please-config.json` plus `revert`.
-2. `validate-pyproject` — validates `pyproject.toml`.
+   as @.github/release-please-config.json plus `revert`.
+2. `validate-pyproject` — validates @pyproject.toml.
 3. `prettier` — formats YAML / JSON.
 4. `ruff` — lint with `--fix --exit-non-zero-on-fix`.
 5. `ruff-format` — format.
@@ -91,7 +91,7 @@ effect on the next release:
 | `ci:` / `chore:` / `test:` / `build:` / `style:` / `revert:` | no bump | hidden |
 
 Commits should include a `References:` section with official docs URLs
-justifying implementation choices (see repo-root `CLAUDE.md`).
+justifying implementation choices (see @CLAUDE.md).
 
 ## Documentation (Astro Starlight)
 
@@ -103,7 +103,7 @@ justifying implementation choices (see repo-root `CLAUDE.md`).
 > - [`starlight-llms-txt`](https://github.com/delucis/starlight-llms-txt).
 > - [Astro — Deploy to GitHub Pages](https://docs.astro.build/en/guides/deploy/github/).
 
-The docs site is an Astro + Starlight project under `docs/` (Node
+The docs site is an Astro + Starlight project under @docs/ (Node
 tooling, pnpm). It is **not** part of the Python package; `uv sync` no
 longer installs docs dependencies.
 
@@ -120,8 +120,8 @@ with automatic fallback to French for untranslated pages. The
 `starlight-llms-txt` plugin emits `/llms.txt` and `/llms-full.txt` at
 build time for LLM consumption.
 
-Wiki schema and ingest/query/lint workflow live in `docs/CLAUDE.md`
-(nested — automatically loaded when working under `docs/`).
+Wiki schema and ingest/query/lint workflow live in @docs/CLAUDE.md
+(nested — automatically loaded when working under @docs/).
 
 ## GitHub Actions
 
@@ -135,7 +135,7 @@ Wiki schema and ingest/query/lint workflow live in `docs/CLAUDE.md`
 > - [Composite actions](https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-composite-action).
 > - [Concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency).
 
-Four workflows under `.github/workflows/`:
+Four workflows under @.github/workflows/:
 
 - `test.yml` — runs pytest on Python 3.12 and 3.13 on every push and on
   PRs to `main`. Self-hosted runner. Concurrency cancels older runs.
@@ -148,7 +148,7 @@ Four workflows under `.github/workflows/`:
   `release_created == 'true'` and runs `uv build` + `uv publish` with
   PyPI trusted publishing (`id-token: write`).
 
-Composite action `./.github/actions/setup` is the single source of
+Composite action @.github/actions/setup is the single source of
 truth for the Python env setup (uv install, `.env` creation, `uv sync`).
 
 ## Version Management
@@ -160,14 +160,14 @@ truth for the Python env setup (uv install, `.env` creation, `uv sync`).
 > - [release-please-action — Outputs](https://github.com/googleapis/release-please-action#outputs).
 > - [PyPI — Trusted Publishers](https://docs.pypi.org/trusted-publishers/).
 
-**Do not bump `pyproject.toml` version manually.** Release-please owns
+**Do not bump @pyproject.toml version manually.** Release-please owns
 version state; its source of truth is
-`.github/release-please-manifest.json`. On push to `main`, release-please
+@.github/release-please-manifest.json. On push to `main`, release-please
 parses Conventional Commits since the last tag, opens (or updates) a
 rolling release PR that bumps both
-`.github/release-please-manifest.json` and `pyproject.toml`, and writes
-`CHANGELOG.md`. Merging the release PR creates the tag and triggers the
+@.github/release-please-manifest.json and @pyproject.toml, and writes
+@CHANGELOG.md. Merging the release PR creates the tag and triggers the
 `publish` job.
 
-Config: `.github/release-please-config.json` (packages, release type,
+Config: @.github/release-please-config.json (packages, release type,
 visible changelog sections).

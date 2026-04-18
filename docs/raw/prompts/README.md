@@ -2,9 +2,8 @@
 
 Lorsqu'un·e contributeur·rice rédige une demande de fonctionnalité à l'aide d'un
 LLM (ChatGPT, Claude, Codex…) et partage le prompt via le champ « Prompt LLM
-utilisé » de l'issue (voir
-[`.github/CONTRIBUTING.md`](../../../.github/CONTRIBUTING.md#transparence-llm-pour-les-demandes-de-fonctionnalité)),
-le prompt est archivé ici.
+utilisé » de l'issue (voir @.github/CONTRIBUTING.md, section
+« Transparence LLM »), le prompt est archivé ici.
 
 ## Convention de nommage
 
@@ -41,4 +40,4 @@ Legifrance. Lors de l'ingestion, le LLM peut :
 - proposer de nouvelles entrées dans `references/` si l'issue cible une API,
 - annoter `log.md` avec l'entrée ingérée.
 
-Voir `../../CLAUDE.md` § 7 « Opération: Ingest ».
+Voir @docs/CLAUDE.md § 7 « Opération: Ingest ».
