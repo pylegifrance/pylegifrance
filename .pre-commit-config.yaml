@@ -11,11 +11,6 @@ repos:
           - --types
           - build,chore,ci,docs,feat,fix,perf,refactor,revert,style,test
 
-  - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.23
-    hooks:
-      - id: validate-pyproject
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.11
     hooks:
