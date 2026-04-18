@@ -11,7 +11,7 @@ Une base de connaissances **maintenue par des LLM** pour la librairie
 
 - **Sources immuables** — `raw/` (docx, xlsx, prompts d'issues, extraits de
   l'API officielle). On lit, on n'écrit pas.
-- **Pages dérivées** — `wiki/` (entities, concepts, operations,
+- **Pages dérivées** — `src/content/docs/` (entities, concepts, operations,
   references). Générées et tenues à jour par le LLM à partir des sources et
   des discussions avec les mainteneur·se·s.
 - **Schéma** — ce fichier + @CLAUDE.md. Dit au LLM comment ingérer,
@@ -29,17 +29,17 @@ docs/
     legifrance/          ← docs officielles PISTE
     prompts/             ← prompts LLM des issues
   public/                ← fichiers statiques (robots.txt, favicon)
-  wiki/                  ← pages rendues
-    index.mdx            ← catalogue
-    entities/            ← une page par chose de 1ʳᵉ classe
-    concepts/            ← patterns, décisions d'archi
-    operations/          ← how-to lecteurs
-    references/          ← référence API
-    en/                  ← miroir anglais (partiel, fallback auto)
   src/
     assets/logo.svg
     content.config.ts    ← collections Starlight (docs + i18n)
     styles/custom.css
+    content/docs/        ← pages rendues (chemin imposé par Starlight)
+      index.mdx          ← catalogue
+      entities/          ← une page par chose de 1ʳᵉ classe
+      concepts/          ← patterns, décisions d'archi
+      operations/        ← how-to lecteurs
+      references/        ← référence API
+      en/                ← miroir anglais (partiel, fallback auto)
 ```
 
 ## 3. Types de pages
@@ -111,7 +111,7 @@ Quand une nouvelle source arrive dans `raw/` :
    - un cas d'usage → `operations/<slug>.md`
    - une API → `references/<slug>.md`
 4. Mettre à jour les `related:` des pages voisines.
-5. Mettre à jour `wiki/index.mdx` (catalogue).
+5. Mettre à jour `src/content/docs/index.mdx` (catalogue).
 6. Ajouter une entrée à `log.md` :
    `## [YYYY-MM-DD] ingest | <titre de la source>`.
 
@@ -119,7 +119,7 @@ Quand une nouvelle source arrive dans `raw/` :
 
 Pour répondre à une question :
 
-1. Lire `wiki/index.mdx` pour repérer les pages pertinentes.
+1. Lire `src/content/docs/index.mdx` pour repérer les pages pertinentes.
 2. Descendre dans les pages nécessaires ; citer avec liens Starlight absolus.
 3. Si la synthèse est non-triviale et réutilisable, la filer comme nouvelle
    page (`operations/` pour un how-to, `concepts/` pour une explication) —
