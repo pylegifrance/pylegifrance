@@ -149,3 +149,22 @@
   frontmatter `pr:` / `url: pulls/<n>`).
 - L'entrée du log de [2026-04-17] « LLM transparency workflow »
   n'est pas réécrite (log append-only, cf. @docs/CLAUDE.md § 10).
+
+## [2026-04-20] ingest | Façade KALI (conventions collectives)
+
+- Façade `pylegifrance/fonds/kali.py` ajoutée, exposant `KaliAPI`,
+  `ConventionCollective`, `TexteKali`. Couvre `POST /consult/kaliCont`,
+  `/consult/kaliContIdcc`, `/consult/kaliText`, `/consult/kaliArticle`,
+  `/consult/kaliSection`, et la recherche `/search` avec `fond: "KALI"`.
+- Modèles domaine sous `pylegifrance/models/kali/` : `enum.py`
+  (`TypeChampKali`, `SortKali`, `FacettesKALI`), `search.py`
+  (`SearchRequest` → `SearchRequestDTO`), `models.py` (wrappers
+  Pydantic autour de `ConsultKaliContResponse` /
+  `ConsultKaliTextResponse`).
+- Tests unitaires sous `tests/unit/fonds/test_kali.py` (17 cas,
+  ciblent la frontière `call_api` sans HTTP réel).
+- Nouvelle page `entities/fond-kali.md`, carte ajoutée au catalogue
+  `index.mdx`. Pas de `references/kali.md` pour l'instant (YAGNI,
+  à créer quand l'API se stabilise).
+- KALI n'exposant pas d'endpoint `/version` / `/versions`, aucun
+  équivalent à `.at(date)` / `.versions()` n'est prévu.
