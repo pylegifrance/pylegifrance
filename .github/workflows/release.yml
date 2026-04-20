@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
     tags: ["v*", "pylegifrance-v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v1.6.0). Required when dispatched manually."
+        required: true
+        type: string
 
 concurrency:
   group: release-${{ github.ref }}
@@ -39,7 +45,10 @@ jobs:
             --manifest-file=.github/release-please-manifest.json
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/tags/pylegifrance-v')
+    if: >-
+      startsWith(github.ref, 'refs/tags/v')
+      || startsWith(github.ref, 'refs/tags/pylegifrance-v')
+      || github.event_name == 'workflow_dispatch'
     runs-on: self-hosted
     permissions:
       contents: read
@@ -49,6 +58,8 @@ jobs:
     steps:
       - name: Checkout tagged commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Setup Common Environment
         uses: ./.github/actions/setup
