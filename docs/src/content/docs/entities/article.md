@@ -2,7 +2,7 @@
 title: Article
 description: Modèle de domaine représentant un article juridique (LEGIARTI) renvoyé par l'API.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 Un **article** désigne une unité textuelle dans un code ou un texte LODA,

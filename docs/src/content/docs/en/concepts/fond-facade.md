@@ -1,11 +1,11 @@
 ---
 title: Fond facade
-description: Facade pattern per documentary fond (Code, Juri, LODA) to isolate the public API from generated DTOs.
+description: Facade pattern per documentary fond to isolate the public API from generated DTOs.
 sidebar:
   order: 3
 ---
 
-Each Legifrance **fond** (Code, Juri, LODA, JORF…) has its own facade in
+Each Legifrance **fond** (Code, Juri, LODA, KALI…) has its own facade in
 `pylegifrance/fonds/`. A facade:
 
 1. takes a [`LegifranceClient`](/pylegifrance/en/entities/legifrance-client/)

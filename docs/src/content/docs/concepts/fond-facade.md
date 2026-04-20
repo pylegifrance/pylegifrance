@@ -1,11 +1,11 @@
 ---
 title: Fond facade
-description: Pattern de façade par fond documentaire (Code, Juri, LODA) pour isoler l'API publique des DTO générés.
+description: Pattern de façade par fond documentaire pour isoler l'API publique des DTO générés.
 sidebar:
   order: 3
 ---
 
-Chaque **fond** Legifrance (Code, Juri, LODA, JORF…) a sa propre façade dans
+Chaque **fond** Legifrance (Code, Juri, LODA, KALI…) a sa propre façade dans
 `pylegifrance/fonds/`. Une façade :
 
 1. prend un [`LegifranceClient`](/pylegifrance/entities/legifrance-client/) (et un

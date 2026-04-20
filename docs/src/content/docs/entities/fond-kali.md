@@ -2,7 +2,7 @@
 title: Fond KALI
 description: Façade pour consulter et rechercher les conventions collectives nationales (KALI).
 sidebar:
-  order: 6
+  order: 7
 sources:
   - "@docs/raw/legifrance/description-des-tris-et-filtres-de-l-api.md"
   - "@docs/raw/legifrance/exemples-d-utilisation-de-l-api.md"

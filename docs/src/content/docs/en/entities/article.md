@@ -2,7 +2,7 @@
 title: Article
 description: Domain model representing a legal article (LEGIARTI) returned by the API.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 An **article** is a textual unit inside a code or a LODA text, identified by

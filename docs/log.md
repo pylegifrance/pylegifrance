@@ -168,3 +168,19 @@
   à créer quand l'API se stabilise).
 - KALI n'exposant pas d'endpoint `/version` / `/versions`, aucun
   équivalent à `.at(date)` / `.versions()` n'est prévu.
+
+## [2026-04-20] lint | Parité EN de KALI + catalogues de fonds
+
+- Mirroir anglais `en/entities/fond-kali.md` créé (parité avec la page
+  FR, liens `/pylegifrance/en/…`, même frontmatter étendu).
+- `en/index.mdx` : carte « Fond KALI » ajoutée entre LODA et Article.
+- Collision `sidebar: order: 6` entre `fond-loda.md` et `fond-kali.md`
+  résolue — KALI passe à `order: 7`, Article à `order: 8` (FR+EN).
+- `concepts/architecture.md` (FR+EN) : `KaliAPI` ajouté à la liste
+  exhaustive des façades (était : `Code, JuriAPI, Loda`).
+- `concepts/fond-facade.md` (FR+EN) : la liste illustrative « Code,
+  Juri, LODA, JORF… » remplacée par « Code, Juri, LODA, KALI… » — KALI
+  existe, JORF non. Le `description:` frontmatter listait également
+  « (Code, Juri, LODA) » — parenthétique retiré (liste illustrative, pas
+  load-bearing ; simplifie le `<meta>` et les snippets de recherche).
+- Build Starlight : 59 pages, pas de lien interne cassé.

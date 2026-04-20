@@ -12,7 +12,7 @@ User → fonds/ (facades) → models/ (domain) → models/generated/ → client.
 ```
 
 1. **Domain facades** (`fonds/`) — high-level API per documentary fond
-   (`Code`, `JuriAPI`, `Loda`).
+   (`Code`, `JuriAPI`, `Loda`, `KaliAPI`).
 2. **Domain models** (`models/<fond>/`) — business structures validated by
    Pydantic (search, consult, results).
 3. **Generated models** (`models/generated/`) — auto-generated from the

@@ -12,7 +12,7 @@ User → fonds/ (façades) → models/ (domaine) → models/generated/ → clien
 ```
 
 1. **Façades de domaine** (`fonds/`) — API de haut niveau par fond documentaire
-   (`Code`, `JuriAPI`, `Loda`).
+   (`Code`, `JuriAPI`, `Loda`, `KaliAPI`).
 2. **Modèles de domaine** (`models/<fond>/`) — structures métier validées par
    Pydantic (recherche, consultation, résultats).
 3. **Modèles générés** (`models/generated/`) — modèles auto-générés depuis
