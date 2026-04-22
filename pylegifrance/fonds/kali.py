@@ -329,20 +329,24 @@ class KaliAPI:
             f"Attendu un des: {', '.join(KALI_PREFIXES)}."
         )
 
-    def search(self, query: str | SearchRequest) -> list[ConventionCollective]:
+    def search(self, query: str | SearchRequest) -> list[TexteKali]:
         """Recherche dans le fond KALI.
 
-        La recherche renvoie des conteneurs (``KALICONT...``) : pour
-        chaque résultat le ``id`` du premier titre est extrait puis
-        hydraté via :meth:`fetch_container`, afin d'exposer uniformément
-        des :class:`ConventionCollective`.
+        Le endpoint ``/search`` du fond KALI retourne des **textes**
+        (accords, avenants, etc.), pas des conteneurs : pour chaque
+        résultat le ``id`` du premier titre est un ``KALITEXT...`` que
+        l'on hydrate via :meth:`fetch_text`, afin d'exposer
+        uniformément des :class:`TexteKali`.
+
+        Pour obtenir la convention collective (conteneur) associée,
+        utiliser :meth:`fetch_by_idcc` ou :meth:`fetch_container` à
+        partir d'un identifiant ``KALICONT`` connu.
 
         Args:
             query: texte libre ou :class:`SearchRequest` pré-construit.
 
         Returns:
-            Liste de :class:`ConventionCollective`. Vide si aucun
-            résultat.
+            Liste de :class:`TexteKali`. Vide si aucun résultat.
         """
         if isinstance(query, str):
             search_query = SearchRequest(search=query)
@@ -363,21 +367,21 @@ class KaliAPI:
         if not isinstance(raw_results, list):
             return []
 
-        containers: list[ConventionCollective] = []
+        texts: list[TexteKali] = []
         for result in raw_results:
             text_id = self._extract_result_id(result)
             if text_id is None:
                 continue
             try:
-                container = self.fetch_container(text_id)
+                text = self.fetch_text(text_id)
             except Exception as exc:
                 logger.warning(
-                    "Échec de récupération du conteneur KALI %s: %s", text_id, exc
+                    "Échec de récupération du texte KALI %s: %s", text_id, exc
                 )
                 continue
-            if container is not None:
-                containers.append(container)
-        return containers
+            if text is not None:
+                texts.append(text)
+        return texts
 
     @staticmethod
     def _extract_result_id(result: dict[str, Any]) -> str | None:

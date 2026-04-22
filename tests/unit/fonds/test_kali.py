@@ -136,19 +136,28 @@ class TestFetchDispatcher:
 
 
 class TestSearch:
-    def test_hydrates_results_to_containers(self):
+    def test_hydrates_results_to_texts(self):
+        """The KALI /search endpoint returns KALITEXT ids in each
+        ``results[i].titles[0].id``. Each result is hydrated via
+        ``fetch_text`` so the return type is ``list[TexteKali]``.
+        """
         client = MagicMock()
         client.call_api.side_effect = [
-            _mock_response(200, _search_payload(["KALICONT000005635384"])),
-            _mock_response(200, _cont_payload("KALICONT000005635384")),
+            _mock_response(200, _search_payload(["KALITEXT000005677408"])),
+            _mock_response(200, _text_payload()),
         ]
 
         results = KaliAPI(client).search("santé prévoyance")
 
         assert len(results) == 1
-        assert isinstance(results[0], ConventionCollective)
-        assert results[0].id == "KALICONT000005635384"
+        assert isinstance(results[0], TexteKali)
         assert client.call_api.call_count == 2
+        # Second call must hit the kaliText endpoint, not kaliCont —
+        # this is the regression guard for the 1.6.0 bug where a
+        # KALITEXT id was passed to ``consult/kaliCont``, triggering
+        # empty-body JSON decode failures.
+        second_route = client.call_api.call_args_list[1].args[0]
+        assert second_route == "consult/kaliText"
 
     def test_returns_empty_list_on_non_200(self):
         client = MagicMock()
