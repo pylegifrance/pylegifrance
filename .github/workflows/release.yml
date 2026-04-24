@@ -3,11 +3,10 @@ name: Release
 on:
   push:
     branches: [main]
-    tags: ["v*", "pylegifrance-v*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to publish (e.g. v1.6.0). Required when dispatched manually."
+        description: "Tag to publish (e.g. v1.6.3). Required for manual dispatch (fallback / re-publish)."
         required: true
         type: string
 
@@ -16,39 +15,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # release-please: on every push to main, create/update the release PR
+  # and, if the release PR was just merged, create the tag + GitHub
+  # release. Uses the official release-please-action (v4) so its
+  # outputs (``release_created``, ``tag_name``) can drive the publish
+  # job below without relying on a cross-workflow trigger.
   release-please:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: googleapis/release-please-action@v4
+        id: release
         with:
-          node-version: lts/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
 
-      - name: Create or update release PR
-        run: |
-          npx release-please@latest release-pr \
-            --token=${{ secrets.GITHUB_TOKEN }} \
-            --repo-url=${{ github.repository }} \
-            --config-file=.github/release-please-config.json \
-            --manifest-file=.github/release-please-manifest.json
-
-      - name: Tag and create GitHub release
-        run: |
-          npx release-please@latest github-release \
-            --token=${{ secrets.GITHUB_TOKEN }} \
-            --repo-url=${{ github.repository }} \
-            --config-file=.github/release-please-config.json \
-            --manifest-file=.github/release-please-manifest.json
-
+  # publish: build and upload to PyPI. Two entry points:
+  #
+  # 1. Automatic — when release-please created a new release on the
+  #    current push-to-main run. ``needs: [release-please]`` carries
+  #    the tag name through, so no tag-push trigger is needed.
+  #
+  # 2. Manual — ``workflow_dispatch`` with an explicit tag input, used
+  #    as a fallback / re-publish path.
+  #
+  # WHY SAME FILE (not a separate workflow triggered on ``push: tags``):
+  # release-please authenticates via ``GITHUB_TOKEN``. GitHub suppresses
+  # workflow triggers that would be fired by GITHUB_TOKEN-authenticated
+  # actions (its anti-recursion guardrail), so an API-created tag does
+  # NOT fire ``push: tags: ["v*"]`` and a release.published event also
+  # does NOT fire. An inter-job ``needs:`` dependency within a single
+  # workflow file is not gated by that guardrail, so auto-publish works
+  # here without a PAT.
   publish:
+    needs: [release-please]
     if: >-
-      startsWith(github.ref, 'refs/tags/v')
-      || startsWith(github.ref, 'refs/tags/pylegifrance-v')
-      || github.event_name == 'workflow_dispatch'
+      always() && (
+        (needs.release-please.result == 'success' && needs.release-please.outputs.release_created == 'true')
+        || github.event_name == 'workflow_dispatch'
+      )
     runs-on: self-hosted
     permissions:
       contents: read
@@ -56,10 +69,19 @@ jobs:
     container:
       image: python:3.12
     steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ needs.release-please.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout tagged commit
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          ref: ${{ steps.tag.outputs.tag }}
 
       - name: Setup Common Environment
         uses: ./.github/actions/setup
@@ -67,11 +89,9 @@ jobs:
           create-env-file: "false"
 
       - name: Check tag vs pyproject version
-        env:
-          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG_REF="${INPUT_TAG:-$GITHUB_REF_NAME}"
-          TAG_VERSION="${TAG_REF#pylegifrance-v}"
+          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          TAG_VERSION="${TAG_VERSION#pylegifrance-v}"
           TAG_VERSION="${TAG_VERSION#v}"
           PROJECT_VERSION=$(awk -F\" '/^version =/ {print $2}' pyproject.toml)
           if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
