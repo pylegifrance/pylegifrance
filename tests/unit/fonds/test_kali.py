@@ -150,6 +150,82 @@ class TestSearch:
         assert results[0].id == "KALICONT000005635384"
         assert client.call_api.call_count == 2
 
+    def test_hydrates_kalitext_search_hits_via_container_id(self):
+        """Real-world shape: /search returns KALITEXT ids; search()
+        must dispatch through fetch_text, read TexteKali.container_id,
+        then hydrate the enclosing container via fetch_container.
+        """
+        client = MagicMock()
+        client.call_api.side_effect = [
+            _mock_response(200, _search_payload(["KALITEXT000005677408"])),
+            _mock_response(200, _text_payload()),
+            _mock_response(200, _cont_payload("KALICONT000005635384")),
+        ]
+
+        results = KaliAPI(client).search("santé prévoyance")
+
+        assert len(results) == 1
+        assert isinstance(results[0], ConventionCollective)
+        assert results[0].id == "KALICONT000005635384"
+        # 3 API calls: /search, /consult/kaliText, /consult/kaliCont.
+        assert client.call_api.call_count == 3
+        routes = [c.args[0] for c in client.call_api.call_args_list]
+        assert routes == ["search", "consult/kaliText", "consult/kaliCont"]
+
+    def test_skips_kalitext_without_container_id(self):
+        """Orphan KALITEXT case: the text has no idConteneur — there
+        is no way to navigate to a container, so the result is
+        silently dropped. Documented limitation in search() docstring.
+        """
+        orphan_text = dict(_text_payload())
+        orphan_text.pop("idConteneur", None)
+        client = MagicMock()
+        client.call_api.side_effect = [
+            _mock_response(200, _search_payload(["KALITEXT000005644305"])),
+            _mock_response(200, orphan_text),
+        ]
+
+        results = KaliAPI(client).search("avenant isolé")
+
+        assert results == []
+        # No /consult/kaliCont call when container_id is missing.
+        assert client.call_api.call_count == 2
+        routes = [c.args[0] for c in client.call_api.call_args_list]
+        assert routes == ["search", "consult/kaliText"]
+
+    def test_deduplicates_texts_sharing_same_container(self):
+        """N KALITEXT hits under the same convention must cost one
+        /consult/kaliCont call, not N. Regression guard: the dedupe
+        check must happen BEFORE fetch_container is invoked.
+        """
+        client = MagicMock()
+        client.call_api.side_effect = [
+            _mock_response(
+                200,
+                _search_payload(["KALITEXT000005677408", "KALITEXT000005677409"]),
+            ),
+            _mock_response(200, _text_payload()),  # first text → KALICONT000005635384
+            _mock_response(200, _cont_payload("KALICONT000005635384")),
+            _mock_response(200, _text_payload()),  # second text → same container
+            # NO fourth call_api for the container — deduped.
+        ]
+
+        results = KaliAPI(client).search("convention X")
+
+        assert len(results) == 1
+        assert results[0].id == "KALICONT000005635384"
+        # 1 /search + 2 /consult/kaliText + 1 /consult/kaliCont = 4
+        # (NOT 5 — the dedupe must short-circuit before the second
+        # container fetch).
+        assert client.call_api.call_count == 4
+        routes = [c.args[0] for c in client.call_api.call_args_list]
+        assert routes == [
+            "search",
+            "consult/kaliText",
+            "consult/kaliCont",
+            "consult/kaliText",
+        ]
+
     def test_returns_empty_list_on_non_200(self):
         client = MagicMock()
         client.call_api.return_value = _mock_response(500, {})

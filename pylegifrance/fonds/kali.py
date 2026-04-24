@@ -332,17 +332,32 @@ class KaliAPI:
     def search(self, query: str | SearchRequest) -> list[ConventionCollective]:
         """Recherche dans le fond KALI.
 
-        La recherche renvoie des conteneurs (``KALICONT...``) : pour
-        chaque résultat le ``id`` du premier titre est extrait puis
-        hydraté via :meth:`fetch_container`, afin d'exposer uniformément
-        des :class:`ConventionCollective`.
+        Le endpoint ``/search`` peut renvoyer différents types
+        d'identifiants — typiquement des ``KALITEXT...`` (texte : une
+        convention spécifique, un avenant…), parfois des
+        ``KALICONT...`` (conteneur : la convention collective
+        parente). Chaque identifiant est dispatché par préfixe via
+        :meth:`fetch` pour charger l'entité correcte, puis ramené à un
+        :class:`ConventionCollective` (conteneur) : pour un hit texte,
+        on navigue vers le conteneur parent via
+        :attr:`TexteKali.container_id`.
 
         Args:
             query: texte libre ou :class:`SearchRequest` pré-construit.
 
         Returns:
-            Liste de :class:`ConventionCollective`. Vide si aucun
-            résultat.
+            Liste de :class:`ConventionCollective` déduplicée par
+            identifiant conteneur. Vide si aucun résultat n'a pu être
+            résolu vers un conteneur.
+
+        Note:
+            Limitation connue — un hit ``KALITEXT...`` dont la charge
+            utile ne contient pas ``idConteneur`` est ignoré silen-
+            cieusement (il n'y a pas d'autre chemin pour remonter au
+            conteneur parent sans API additionnelle). Les avenants
+            isolés peuvent donc être absents des résultats même après
+            ce correctif ; une résolution complète nécessiterait un
+            complément côté API Legifrance.
         """
         if isinstance(query, str):
             search_query = SearchRequest(search=query)
@@ -364,17 +379,48 @@ class KaliAPI:
             return []
 
         containers: list[ConventionCollective] = []
+        seen_container_ids: set[str] = set()
         for result in raw_results:
-            text_id = self._extract_result_id(result)
-            if text_id is None:
+            result_id = self._extract_result_id(result)
+            if result_id is None:
                 continue
             try:
-                container = self.fetch_container(text_id)
+                entity = self.fetch(result_id)
             except Exception as exc:
-                logger.warning(
-                    "Échec de récupération du conteneur KALI %s: %s", text_id, exc
-                )
+                logger.warning("Échec de récupération KALI %s: %s", result_id, exc)
                 continue
+            if entity is None:
+                continue
+
+            container: ConventionCollective | None
+            if isinstance(entity, ConventionCollective):
+                cont_id = entity.id
+                if not cont_id or cont_id in seen_container_ids:
+                    continue
+                seen_container_ids.add(cont_id)
+                container = entity
+            elif isinstance(entity, TexteKali):
+                parent_id = entity.container_id
+                # Dedupe BEFORE issuing the /consult/kaliCont call so
+                # N text hits under the same convention cost 1 extra
+                # fetch, not N.
+                if not parent_id or parent_id in seen_container_ids:
+                    continue
+                seen_container_ids.add(parent_id)
+                try:
+                    container = self.fetch_container(parent_id)
+                except Exception as exc:
+                    logger.warning(
+                        "Échec de récupération du conteneur KALI %s: %s",
+                        parent_id,
+                        exc,
+                    )
+                    continue
+            else:
+                # KALIARTI / KALISCTA hits are not search-level
+                # convention sources — skip.
+                continue
+
             if container is not None:
                 containers.append(container)
         return containers
