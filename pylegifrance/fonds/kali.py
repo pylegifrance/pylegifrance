@@ -146,12 +146,30 @@ class TexteKali:
     def container_id(self) -> str | None:
         """Identifiant ``KALICONT`` du conteneur parent, si disponible.
 
-        ``ConsultKaliTextResponse`` n'expose pas d'``id`` propre (le
-        schéma DILA l'implique via le contexte d'appel) ; seul
-        ``id_conteneur`` est disponible pour remonter au conteneur
-        parent.
+        Priorité de lecture :
+
+        1. ``id_conteneur`` (``idConteneur`` côté API) — présent pour
+           les textes de base (``typeTexte = "TEXTE_BASE"``).
+        2. ``conteneurs[0].cid`` — présent pour les textes dérivés
+           (avenants, accords). Les avenants retournés par
+           ``/consult/kaliText`` n'ont pas d'``idConteneur`` au niveau
+           racine mais listent leurs conventions parentes dans
+           ``conteneurs`` ; le champ ``cid`` de chaque entrée est
+           l'identifiant ``KALICONT`` canonique.
+
+        Sans ce fallback, ``KaliAPI.search`` (qui navigue texte →
+        conteneur) dropperait tous les avenants retournés par
+        ``/search``, ce qui correspond au cas commun des recherches
+        par secteur puisque la majorité des hits sont des avenants.
         """
-        return self._data.id_conteneur
+        if self._data.id_conteneur:
+            return self._data.id_conteneur
+        conteneurs = self._data.conteneurs
+        if conteneurs:
+            first = conteneurs[0]
+            if first is not None and first.cid:
+                return first.cid
+        return None
 
     @property
     def titre(self) -> str | None:

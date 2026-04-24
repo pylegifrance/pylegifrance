@@ -48,6 +48,33 @@ def _text_payload() -> dict:
     }
 
 
+def _avenant_text_payload(cid: str = "KALICONT000005635384") -> dict:
+    """Avenant-shaped KALI text: no top-level ``idConteneur``, parent
+    container referenced only in ``conteneurs[0].cid``.
+
+    Real KALI avenants/accords returned by ``/consult/kaliText`` look
+    like this — see `TexteKali.container_id` docstring for the priority
+    rule this payload exercises.
+    """
+    return {
+        "title": "Avenant n° 1 du 28 novembre 2002 relatif à ...",
+        "etat": "VIGUEUR_ETEN",
+        "typeTexte": "AVENANT",
+        "idConteneur": None,
+        "conteneurs": [
+            {
+                "id": "JORFCONT000038052140",
+                "cid": cid,
+                "titre": "Convention collective nationale parente",
+                "nature": "IDCC",
+                "etat": "VIGUEUR_ETEN",
+            }
+        ],
+        "nor": None,
+        "articles": [],
+    }
+
+
 def _search_payload(ids: list[str]) -> dict:
     return {
         "totalNbResult": len(ids),
@@ -110,6 +137,65 @@ class TestFetchText:
         assert payload == {"id": "KALITEXT000005677408"}
 
 
+class TestTexteKaliContainerId:
+    """`TexteKali.container_id` reads `id_conteneur` first, then falls
+    back to `conteneurs[0].cid`. The fallback is load-bearing for
+    avenants/accords returned by `/search`, which do not carry
+    `idConteneur` at the root but reference their parent convention
+    through `conteneurs`.
+    """
+
+    def test_reads_id_conteneur_when_present(self):
+        client = MagicMock()
+        client.call_api.return_value = _mock_response(200, _text_payload())
+
+        text = KaliAPI(client).fetch_text("KALITEXT000005677408")
+
+        assert text is not None
+        assert text.container_id == "KALICONT000005635384"
+
+    def test_falls_back_to_conteneurs_cid_for_avenants(self):
+        """Real-world avenant shape: idConteneur=None, conteneurs[0].cid
+        carries the parent KALICONT id. Regression guard for the bug
+        where `KaliAPI.search` dropped every avenant result because
+        `container_id` returned None."""
+        client = MagicMock()
+        client.call_api.return_value = _mock_response(
+            200, _avenant_text_payload(cid="KALICONT000005635384")
+        )
+
+        text = KaliAPI(client).fetch_text("KALITEXT000005679954")
+
+        assert text is not None
+        assert text.container_id == "KALICONT000005635384"
+
+    def test_returns_none_when_both_sources_are_empty(self):
+        orphan = dict(_text_payload())
+        orphan.pop("idConteneur", None)
+        orphan["conteneurs"] = []
+        client = MagicMock()
+        client.call_api.return_value = _mock_response(200, orphan)
+
+        text = KaliAPI(client).fetch_text("KALITEXT000009999999")
+
+        assert text is not None
+        assert text.container_id is None
+
+    def test_id_conteneur_wins_over_conteneurs_when_both_present(self):
+        """Priority rule: root `idConteneur` is authoritative when set;
+        `conteneurs[0].cid` is only consulted as a fallback."""
+        mixed = dict(_text_payload())
+        mixed["idConteneur"] = "KALICONT000000000001"
+        mixed["conteneurs"] = [{"cid": "KALICONT999999999999"}]
+        client = MagicMock()
+        client.call_api.return_value = _mock_response(200, mixed)
+
+        text = KaliAPI(client).fetch_text("KALITEXT000000000000")
+
+        assert text is not None
+        assert text.container_id == "KALICONT000000000001"
+
+
 class TestFetchDispatcher:
     @pytest.mark.parametrize(
         ("kali_id", "expected_route"),
@@ -168,6 +254,30 @@ class TestSearch:
         assert isinstance(results[0], ConventionCollective)
         assert results[0].id == "KALICONT000005635384"
         # 3 API calls: /search, /consult/kaliText, /consult/kaliCont.
+        assert client.call_api.call_count == 3
+        routes = [c.args[0] for c in client.call_api.call_args_list]
+        assert routes == ["search", "consult/kaliText", "consult/kaliCont"]
+
+    def test_hydrates_avenant_search_hits_via_conteneurs_fallback(self):
+        """End-to-end regression guard: /search returns a KALITEXT hit
+        that resolves to an avenant (no ``idConteneur`` at the root,
+        parent in ``conteneurs[0].cid``). Before the
+        ``TexteKali.container_id`` fallback was added, search() dropped
+        every such hit under the orphan branch — which was the common
+        case for sector-based queries like "SYNTEC" or "batiment".
+        """
+        client = MagicMock()
+        client.call_api.side_effect = [
+            _mock_response(200, _search_payload(["KALITEXT000005679954"])),
+            _mock_response(200, _avenant_text_payload(cid="KALICONT000005635384")),
+            _mock_response(200, _cont_payload("KALICONT000005635384")),
+        ]
+
+        results = KaliAPI(client).search("SYNTEC")
+
+        assert len(results) == 1
+        assert isinstance(results[0], ConventionCollective)
+        assert results[0].id == "KALICONT000005635384"
         assert client.call_api.call_count == 3
         routes = [c.args[0] for c in client.call_api.call_args_list]
         assert routes == ["search", "consult/kaliText", "consult/kaliCont"]
