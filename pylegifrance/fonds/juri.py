@@ -16,6 +16,7 @@ from pylegifrance.models.generated.model import (
     Operateur,
     RechercheSpecifiqueDTO,
     SearchRequestDTO,
+    TexteSommaire,
     TypeChamp,
     TypePagination,
     TypeRecherche,
@@ -95,6 +96,22 @@ def _normalize_formation(formation: str) -> str:
 # legifrance.gouv.fr.
 JURI_URL_ID_PREFIXES: tuple[str, ...] = ("JURITEXT", "CETATEXT")
 JURI_URL_TEMPLATE = "https://www.legifrance.gouv.fr/juri/id/{decision_id}"
+
+# Cour de cassation bulletin publication categories. Decisions on the JURI
+# fond carry a single-letter code in ``type_publication_bulletin`` indicating
+# their bulletin status. A decision with a non-empty code in this set has
+# been selected for editorial publication — a strong "arrêt de principe"
+# signal in French doctrinal practice. ``"N"`` (or an empty / missing flag)
+# means the decision was not selected.
+#
+# Codes observed on live data and described in the Cour de cassation editorial
+# documentation:
+#
+# - ``P`` — Publié au Bulletin civil / criminel de la Cour de cassation
+# - ``B`` — Bulletin (legacy alias of ``P`` on older records)
+# - ``R`` — Sélectionné pour le Rapport annuel de la Cour de cassation
+# - ``T`` — Cité au Bulletin d'information de la Cour de cassation (BICC)
+PUBLISHED_BULLETIN_CODES: frozenset[str] = frozenset({"P", "B", "R", "T"})
 
 # Canonical Legifrance case-law textId format. A valid JURITEXT or CETATEXT
 # identifier is the literal prefix followed by exactly 12 numeric digits
@@ -258,6 +275,95 @@ class JuriDecision:
         """Récupère la solution de la décision."""
         return getattr(self._decision, "solution", None)
 
+    @property
+    def sommaire(self) -> list[TexteSommaire]:
+        """Récupère la liste des sommaires de la décision.
+
+        Le sommaire est le résumé éditorial canonique d'un arrêt — la
+        synthèse du point de droit tranché, rédigée par les services
+        documentaires de la juridiction. Pour les arrêts de la Cour de
+        cassation publiés au Bulletin, il est l'équivalent d'un *headnote*
+        anglo-saxon. C'est le signal de pertinence le plus précis pour
+        décider si une décision répond à une question juridique donnée
+        (sans avoir à lire le texte intégral).
+
+        Chaque :class:`TexteSommaire` retourné expose en pratique trois
+        champs utiles:
+
+        - ``resume_principal`` — le titre canonique du point de droit
+          (par exemple *"CONTRAT DE TRAVAIL, EXECUTION - Employeur -
+          Coemployeurs - Notion - Critères"*).
+        - ``abstrats`` — le résumé doctrinal en prose, qui décrit la
+          règle dégagée et son application aux faits.
+        - ``autre_resume`` — la taxonomie sous laquelle la décision est
+          classée par la Cour de cassation.
+
+        Returns:
+            La liste des sommaires structurés. Liste vide si la décision
+            n'expose pas de sommaire (cas fréquent pour les juridictions
+            du fond non publiées au Bulletin).
+        """
+        return self._decision.sommaire or []
+
+    @property
+    def headnote(self) -> str | None:
+        """Récupère le titre court du sommaire principal (raccourci).
+
+        Accesseur pratique sur ``sommaire[0].resume_principal``: c'est le
+        champ le plus utile pour un consommateur qui veut lire en une
+        seule phrase de quoi traite la décision. Voir :pyattr:`sommaire`
+        pour les champs plus longs (``abstrats``, ``autre_resume``) et
+        pour les décisions qui exposent plusieurs sommaires.
+
+        Returns:
+            Le ``resume_principal`` du premier sommaire, ou ``None`` si
+            la décision n'expose pas de sommaire ou si ce premier
+            sommaire n'a pas de résumé principal.
+        """
+        for entry in self.sommaire:
+            if entry.resume_principal:
+                return entry.resume_principal
+        return None
+
+    @property
+    def titrages(self) -> list[str]:
+        """Récupère la liste des titrages (taxonomie JURINOME).
+
+        Les titrages sont des chaînes d'identifiants ``JURINOME...``
+        séparés par des tirets, qui codent la position de la décision
+        dans la nomenclature thématique de la Cour de cassation. Utiles
+        pour le routage de pertinence par thème doctrinal sans avoir à
+        analyser le texte de la décision.
+
+        Returns:
+            La liste des titrages. Liste vide si la décision n'expose
+            pas de titrage.
+        """
+        return self._decision.titrages or []
+
+    @property
+    def published_in_bulletin(self) -> bool:
+        """Indique si la décision est publiée dans un bulletin de la juridiction.
+
+        Vrai si ``type_publication_bulletin`` correspond à un code de
+        publication éditoriale (``P``, ``B``, ``R``, ``T`` —
+        cf. :data:`PUBLISHED_BULLETIN_CODES`). Faux si le code est
+        absent, vide, ou explicitement ``"N"`` (non publié).
+
+        Une décision publiée au bulletin a été sélectionnée par les
+        services documentaires de la juridiction comme présentant un
+        intérêt doctrinal — c'est l'un des marqueurs classiques d'un
+        *arrêt de principe* dans la pratique française.
+
+        Returns:
+            ``True`` si la décision est publiée au bulletin, ``False``
+            sinon.
+        """
+        flag = getattr(self._decision, "type_publication_bulletin", None)
+        if not flag:
+            return False
+        return flag.upper() in PUBLISHED_BULLETIN_CODES
+
     def citations(self) -> list["JuriDecision"]:
         """Récupère les citations de la décision.
 
@@ -403,7 +509,17 @@ class JuriDecision:
             parts.append(f"**Référence**: {self.id}")
         if self.url:
             parts.append(f"**URL**: {self.url}")
+        if self.published_in_bulletin:
+            parts.append("**Publié au Bulletin**: oui")
         parts.append("")
+
+        # Surface the canonical editorial summary (sommaire) right above
+        # the body so chunked / token-bounded consumers see the relevance
+        # signal without having to scan the full ruling text.
+        headnote = self.headnote
+        if headnote:
+            parts.append(f"**Sommaire**: {headnote}")
+            parts.append("")
 
         plain = self._extract_plain_text()
         if plain:
