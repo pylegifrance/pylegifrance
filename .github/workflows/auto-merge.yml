@@ -8,6 +8,7 @@ jobs:
   enable-auto-merge:
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       pull-requests: write
     steps:
       - run: gh pr merge "$PR_URL" --auto --squash
