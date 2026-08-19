@@ -8,8 +8,17 @@ repos:
         stages: [commit-msg]
         args:
           - --strict
-          - --types
-          - build,chore,ci,docs,feat,fix,perf,refactor,revert,style,test
+          - build
+          - chore
+          - ci
+          - docs
+          - feat
+          - fix
+          - perf
+          - refactor
+          - revert
+          - style
+          - test
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.11
