@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 
 from pylegifrance.client import LegifranceClient
 from pylegifrance.config import ApiConfig
+from tests.conftest import requires_credentials
 
 
+@requires_credentials
 @pytest.mark.parametrize(
     "config_type,description",
     [
@@ -61,6 +63,7 @@ def test_client_initialization_without_env_vars(monkeypatch):
     assert "Required environment variables" in str(excinfo.value)
 
 
+@requires_credentials
 def test_update_api_keys_with_valid_credentials(monkeypatch):
     """
     Test that update_api_keys replaces invalid credentials with valid ones from env.
@@ -97,6 +100,7 @@ def test_ping_success(api_client):
     assert success is True, "Ping should return True for a valid API connection."
 
 
+@requires_credentials
 def test_session_context_manager():
     """
     Test the session context manager.
