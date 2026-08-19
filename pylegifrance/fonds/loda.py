@@ -1154,7 +1154,7 @@ class Loda:
         """
         try:
             # Création des données de base pour la réponse
-            consult_response_data = {"id": text_id, "title": title_text}
+            consult_response_data: dict[str, Any] = {"id": text_id, "title": title_text}
 
             # Extraction des métadonnées
             self._extract_date_from_text_id(text_id, consult_response_data)
