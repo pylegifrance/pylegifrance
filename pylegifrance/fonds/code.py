@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Self
 
 from pylegifrance import LegifranceClient
@@ -421,7 +421,7 @@ class CodeConsultFetcher:
         if date.isdigit() and len(date) >= 10:
             try:
                 timestamp = int(date) / 1000
-                dt = datetime.fromtimestamp(timestamp)
+                dt = datetime.fromtimestamp(timestamp, tz=UTC)
                 self.date = dt.strftime("%Y-%m-%d")
                 logger.debug(f"Date converted from timestamp to: {self.date}")
                 return self._execute()
@@ -514,7 +514,7 @@ class ArticleFetcher:
             date_str = date.strftime("%Y-%m-%d")
         elif isinstance(date, int):
             # Unix timestamp in milliseconds
-            date_str = datetime.fromtimestamp(date / 1000).strftime("%Y-%m-%d")
+            date_str = datetime.fromtimestamp(date / 1000, tz=UTC).strftime("%Y-%m-%d")
         elif isinstance(date, str):
             # Validate format
             datetime.fromisoformat(date)
