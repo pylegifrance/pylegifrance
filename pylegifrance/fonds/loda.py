@@ -24,6 +24,9 @@ FRENCH_DATE_FORMAT_LENGTH = 10
 FRENCH_DATE_DAY_POSITION = 0
 FRENCH_DATE_MONTH_POSITION = 1
 FRENCH_DATE_YEAR_POSITION = 2
+# Date de fin qu'affiche Légifrance pour une version toujours en vigueur.
+# Ce n'est pas une date de consultation : PISTE la refuse.
+OPEN_ENDED_VERSION_DATES = ("01-01-2999", "2999-01-01")
 
 # Constantes pour les types de liens de modification
 MODIFICATION_LINK_TYPE = "MODIFIE"
@@ -776,6 +779,10 @@ class Loda:
 
         # Extraire l'ID de base et la date
         base_id, date_str = parts
+
+        # Version sans date de fin : on consulte la version du jour
+        if date_str in OPEN_ENDED_VERSION_DATES:
+            return base_id, None
 
         # Vérifier si la date est au format français (DD-MM-YYYY)
         is_french_date_format = (

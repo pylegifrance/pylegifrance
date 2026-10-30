@@ -36,6 +36,21 @@ def test_extract_date_from_id_with_date_fr(loda_instance):
     assert date == "2023-01-01"
 
 
+@pytest.mark.parametrize(
+    "text_id",
+    ["JORFTEXT000048595106_01-01-2999", "JORFTEXT000048595106_2999-01-01"],
+)
+def test_extract_date_from_id_with_open_ended_version(loda_instance, text_id):
+    """Teste qu'une date de fin « 2999 » n'est pas prise pour une date de consultation.
+
+    C'est le suffixe des identifiants renvoyés par la recherche pour une version
+    toujours en vigueur. Transmis tel quel, PISTE répond 400.
+    """
+    base_id, date = loda_instance._extract_date_from_id(text_id)
+    assert base_id == "JORFTEXT000048595106"
+    assert date is None
+
+
 def test_extract_date_from_id_with_invalid_date(loda_instance):
     """Teste l'extraction de date quand l'ID contient une date invalide."""
     text_id = "LEGITEXT000006070721_invalid-date"
