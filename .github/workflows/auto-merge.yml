@@ -5,13 +5,18 @@ on:
     types: [opened, reopened]
 
 jobs:
+  # WHY NOT GITHUB_TOKEN: a merge scheduled with GITHUB_TOKEN is performed by
+  # github-actions[bot], and GitHub creates no workflow run for that push to
+  # main, so Release never tags or publishes. AUTO_MERGE_TOKEN is a personal
+  # access token: the merge is attributed to its owner and the push fires
+  # Release and Test. Without the secret (not set, or a fork pull request) the
+  # step is skipped and the pull request waits for a maintainer to merge it.
   enable-auto-merge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    permissions: {}
+    env:
+      GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
     steps:
-      - run: gh pr merge "$PR_URL" --auto --squash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+      - if: env.GH_TOKEN != ''
+        run: gh pr merge "$PR_URL" --auto --squash
