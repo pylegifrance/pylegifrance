@@ -17,7 +17,8 @@ from pylegifrance.models.juri.models import Decision
 
 def _make_decision(decision_id: str | None) -> JuriDecision:
     """Build a :class:`JuriDecision` around a minimally populated model."""
-    decision = Decision(id=decision_id) if decision_id is not None else Decision()
+    fields: dict[str, Any] = {"id": decision_id} if decision_id is not None else {}
+    decision = Decision(**fields)
     client = MagicMock()
     return JuriDecision(decision=decision, client=client)
 
@@ -27,6 +28,11 @@ def _make_decision_with(**fields: Any) -> JuriDecision:
     decision = Decision(**fields)
     client = MagicMock()
     return JuriDecision(decision=decision, client=client)
+
+
+def _sommaire(**fields: Any) -> TexteSommaire:
+    """Build a :class:`TexteSommaire` from arbitrary fields (by alias)."""
+    return TexteSommaire(**fields)
 
 
 class TestJuriDecisionUrl:
@@ -102,7 +108,7 @@ class TestJuriDecisionSommaire:
     def test_sommaire_returns_list_when_populated(self):
         """The sommaire list is exposed verbatim, preserving its entries."""
         entries = [
-            TexteSommaire(
+            _sommaire(
                 id="1",
                 resumePrincipal="Coemployeurs - Notion - Critères",
                 abstrats="Une société d'un groupe ne peut être coemployeur...",
@@ -111,13 +117,15 @@ class TestJuriDecisionSommaire:
         decision = _make_decision_with(sommaire=entries)
 
         assert decision.sommaire == entries
-        assert decision.sommaire[0].abstrats.startswith("Une société")
+        abstrats = decision.sommaire[0].abstrats
+        assert abstrats is not None
+        assert abstrats.startswith("Une société")
 
     def test_headnote_returns_first_resume_principal(self):
         """``headnote`` is the convenience accessor on ``sommaire[0].resume_principal``."""
         entries = [
-            TexteSommaire(id="1", resumePrincipal="Forfait jours - Nullité"),
-            TexteSommaire(id="2", resumePrincipal="Autre point de droit"),
+            _sommaire(id="1", resumePrincipal="Forfait jours - Nullité"),
+            _sommaire(id="2", resumePrincipal="Autre point de droit"),
         ]
         decision = _make_decision_with(sommaire=entries)
 
@@ -126,9 +134,9 @@ class TestJuriDecisionSommaire:
     def test_headnote_skips_empty_resume_principal(self):
         """``headnote`` returns the first NON-empty ``resume_principal``."""
         entries = [
-            TexteSommaire(id="1", resumePrincipal=None),
-            TexteSommaire(id="2", resumePrincipal=""),
-            TexteSommaire(id="3", resumePrincipal="Travail de nuit - Repos"),
+            _sommaire(id="1", resumePrincipal=None),
+            _sommaire(id="2", resumePrincipal=""),
+            _sommaire(id="3", resumePrincipal="Travail de nuit - Repos"),
         ]
         decision = _make_decision_with(sommaire=entries)
 
@@ -143,8 +151,8 @@ class TestJuriDecisionSommaire:
     def test_headnote_is_none_when_all_resume_principal_empty(self):
         """If every sommaire has an empty ``resume_principal``, headnote is ``None``."""
         entries = [
-            TexteSommaire(id="1", resumePrincipal=None),
-            TexteSommaire(id="2", resumePrincipal=""),
+            _sommaire(id="1", resumePrincipal=None),
+            _sommaire(id="2", resumePrincipal=""),
         ]
         decision = _make_decision_with(sommaire=entries)
 
@@ -212,7 +220,7 @@ class TestJuriDecisionToMarkdown:
 
     def test_to_markdown_includes_headnote_when_present(self):
         """The sommaire's ``resume_principal`` appears as a ``**Sommaire**`` line."""
-        entries = [TexteSommaire(id="1", resumePrincipal="Forfait jours - Nullité")]
+        entries = [_sommaire(id="1", resumePrincipal="Forfait jours - Nullité")]
         decision = _make_decision_with(
             id="JURITEXT000037999394",
             titre="Cass. soc., 6 juillet 2016",

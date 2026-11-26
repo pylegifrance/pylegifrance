@@ -1,6 +1,7 @@
 """Unit tests for .to_markdown() on Article, JuriDecision and TexteLoda."""
 
 from datetime import datetime
+from typing import Any
 from unittest.mock import MagicMock
 
 from pylegifrance.fonds.juri import JuriDecision
@@ -13,8 +14,8 @@ from pylegifrance.models.code.models import Article
 
 
 class TestArticleToMarkdown:
-    def _make_article(self, **kwargs) -> Article:
-        defaults = {
+    def _make_article(self, **kwargs: Any) -> Article:
+        defaults: dict[str, Any] = {
             "id": "LEGIARTI000006419292",
             "number": "L1121-1",
             "code_name": "Code du travail",
@@ -180,12 +181,12 @@ class TestJuriDecisionToMarkdown:
 
 
 def _make_texte_loda(
-    titre="Loi n° 2020-734",
-    id_="LEGITEXT000041952174",
-    etat="VIGUEUR",
-    nor=None,
-    date_debut=None,
-    texte_html=None,
+    titre: str | None = "Loi n° 2020-734",
+    id_: str | None = "LEGITEXT000041952174",
+    etat: str | None = "VIGUEUR",
+    nor: str | None = None,
+    date_debut: datetime | None = None,
+    texte_html: str | None = None,
 ) -> DomainTexteLoda:
     """Build a DomainTexteLoda backed by a MagicMock model."""
     texte_mock = MagicMock()
@@ -201,7 +202,6 @@ def _make_texte_loda(
     loda = DomainTexteLoda.__new__(DomainTexteLoda)
     loda._texte = texte_mock
     loda._client = MagicMock()
-    loda._code_client = None
     return loda
 
 

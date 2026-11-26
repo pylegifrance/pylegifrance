@@ -2,7 +2,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pylegifrance.fonds.judilibre import JudilibreAPI, JudilibreAPIError, JudilibreDecision
+from pylegifrance.fonds.judilibre import (
+    JudilibreAPI,
+    JudilibreAPIError,
+    JudilibreDecision,
+)
 
 
 def test_search_wraps_results_as_decisions():

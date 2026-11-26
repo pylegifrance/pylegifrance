@@ -5,7 +5,9 @@ from pylegifrance.fonds.judilibre import JudilibreClient
 
 
 def test_get_retries_on_503_then_succeeds():
-    client = JudilibreClient(config=ApiConfig(client_id="id", client_secret="secret"), key_id="k")
+    client = JudilibreClient(
+        config=ApiConfig(client_id="id", client_secret="secret"), key_id="k"
+    )
     client._auth_manager.ensure_valid_token = MagicMock(return_value="tok")
     responses = [
         MagicMock(status_code=503, text="unavailable"),

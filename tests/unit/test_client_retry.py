@@ -27,7 +27,9 @@ def test_call_api_retries_on_429_then_succeeds():
 def test_call_api_does_not_retry_on_400():
     client = _client()
     with patch.object(
-        client.session, "post", return_value=MagicMock(status_code=400, text="bad request")
+        client.session,
+        "post",
+        return_value=MagicMock(status_code=400, text="bad request"),
     ) as mock_post:
         with pytest.raises(Exception, match="400"):
             client.call_api("search", {"x": 1})
