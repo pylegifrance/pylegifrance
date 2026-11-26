@@ -968,7 +968,8 @@ class Loda:
         if not text_id:
             raise ValueError("text_id ne peut pas être vide")
 
-        api_model = {"textId": text_id}
+        base_id, _ = self._extract_date_from_id(text_id)
+        api_model = {"textId": base_id}
 
         response = self._client.call_api("consult/loda/versions", api_model)
 

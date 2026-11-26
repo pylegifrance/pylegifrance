@@ -186,6 +186,18 @@ class TestFetchVersions:
         assert args[0] == "consult/loda/versions"
         assert args[1] == {"textId": "LEGITEXT000041952174"}
 
+    def test_fetch_versions_strips_date_suffix_from_compound_id(self, loda):
+        """TexteLoda.id commonly comes back in a compound "ID_DD-MM-YYYY"
+        form (see _texte_payload's default "id") -- fetch_versions() must
+        strip the date suffix before sending textId, like fetch() and
+        fetch_version_at() already do, or the real API rejects it (403)."""
+        loda._client.call_api.return_value = _mock_response(HTTP_OK, [])
+
+        loda.fetch_versions("LEGITEXT000041952174_01-01-2021")
+
+        args, _ = loda._client.call_api.call_args
+        assert args[1] == {"textId": "LEGITEXT000041952174"}
+
     def test_fetch_versions_raises_on_empty_text_id(self, loda):
         with pytest.raises(ValueError):
             loda.fetch_versions("")
