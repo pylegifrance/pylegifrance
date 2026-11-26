@@ -22,6 +22,22 @@ JUDILIBRE_PROD_URL = "https://api.piste.gouv.fr/cassation/judilibre/v1.0"
 HTTP_OK = 200
 HTTP_NOT_FOUND = 404
 
+COUR_DE_CASSATION_URL_TEMPLATE = "https://www.courdecassation.fr/decision/{id}"
+
+
+class JudilibreAPIError(Exception):
+    """A Judilibre API error, after retries for transient (429/5xx) statuses
+    are exhausted. Carries the HTTP status code so callers (notably
+    :meth:`JudilibreAPI.fetch`) can distinguish "not found" (404) from a
+    real failure, rather than every non-2xx response collapsing into the
+    same generic exception.
+    """
+
+    def __init__(self, status_code: int, body: str):
+        self.status_code = status_code
+        self.body = body
+        super().__init__(f"API client error {status_code} - {body}")
+
 
 @retry(
     retry=retry_if_exception_type(_TransientAPIError),
@@ -36,9 +52,11 @@ def _get_with_retry(
     params: dict[str, Any] | None,
 ) -> requests.Response:
     response = session.get(url, headers=headers, params=params)
-    # 404 is Judilibre's legitimate "not found" answer, not a transient
-    # failure, so it is deliberately excluded from the retry condition here
-    # (see the non-retry handling of HTTP_NOT_FOUND in JudilibreClient.get).
+    # 404 is not retried: it's Judilibre's legitimate "not found" answer on
+    # /decision, not a transient failure. It still raises JudilibreAPIError
+    # below like every other non-2xx status — JudilibreAPI.fetch is what
+    # interprets a 404 specifically as "no such decision"; JudilibreClient
+    # itself never silently swallows an error into a successful response.
     if _is_retryable_status(response.status_code):
         raise _TransientAPIError(response.status_code, response.text)
     return response
@@ -97,16 +115,10 @@ class JudilibreClient:
         try:
             response = _get_with_retry(self._session, url, headers, params)
         except _TransientAPIError as exc:
-            raise Exception(f"API client error {exc.status_code} - {exc.body}") from exc
+            raise JudilibreAPIError(exc.status_code, exc.body) from exc
 
-        # 404 is a legitimate "no such decision" answer on Judilibre's
-        # /decision endpoint, not a transport/auth failure, so it is
-        # returned as-is for callers (JudilibreAPI.fetch) to interpret.
-        # Every other 4xx/5xx raises, matching LegifranceClient.call_api.
-        if 400 <= response.status_code < 600 and response.status_code != HTTP_NOT_FOUND:
-            raise Exception(
-                f"API client error {response.status_code} - {response.text}"
-            )
+        if 400 <= response.status_code < 600:
+            raise JudilibreAPIError(response.status_code, response.text)
 
         return response
 
@@ -165,12 +177,22 @@ class JudilibreDecision:
 
     @property
     def url(self) -> str | None:
-        """The source URL from the first file link, for Licence Ouverte
-        attribution. ``None`` if Judilibre did not provide one."""
+        """The source URL, for Licence Ouverte attribution.
+
+        Prefers the first file link (present on decisions with attached
+        documents). Most decisions have no files, so this falls back to
+        the canonical courdecassation.fr decision URL built from the
+        decision's own id — best-effort, not verified against a live
+        Judilibre response at the time of writing.
+        """
         files = self._decision.files
-        if not files:
-            return None
-        return files[0].get("url")
+        if files:
+            url = files[0].get("url")
+            if url:
+                return url
+        if self.id:
+            return COUR_DE_CASSATION_URL_TEMPLATE.format(id=self.id)
+        return None
 
     def to_markdown(self) -> str:
         """Markdown representation of the decision, optimized for LLMs."""
@@ -221,8 +243,10 @@ class JudilibreAPI:
             A list of matching decisions (summary fields only).
         """
         params = _clean_params({"query": query, **filters})
+        # client.get() raises JudilibreAPIError on 4xx/5xx; this check is
+        # only a defensive fallback for a non-OK 2xx (e.g. 204), not for
+        # errors, which never reach this line.
         response = self._client.get("search", params=params)
-
         if response.status_code != HTTP_OK:
             return []
 
@@ -239,10 +263,12 @@ class JudilibreAPI:
         Returns:
             The decision, or ``None`` if no decision matches the id.
         """
-        response = self._client.get("decision", params={"id": decision_id})
-
-        if response.status_code == HTTP_NOT_FOUND:
-            return None
+        try:
+            response = self._client.get("decision", params={"id": decision_id})
+        except JudilibreAPIError as exc:
+            if exc.status_code == HTTP_NOT_FOUND:
+                return None
+            raise
 
         if response.status_code != HTTP_OK:
             return None
