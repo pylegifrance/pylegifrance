@@ -59,10 +59,10 @@ class TestJuriDecisionIdentifiers:
         assert decision.cid is None
 
     def test_cid_returns_validated_cid(self):
-        decision = _make_decision_with(cid="JURX000037999ABC")
+        decision = _make_decision_with(cid="JURITEXT000037999394")
         cid = decision.cid
         assert cid is not None
-        assert str(cid) == "JURX000037999ABC"
+        assert str(cid) == "JURITEXT000037999394"
 
     def test_eli_returns_none_when_absent(self):
         decision = _make_decision_with(id="JURITEXT000037999394")
@@ -154,7 +154,7 @@ class TestJuriDecisionCitations:
         assert decision.citations() == []
 
     def test_skips_non_citation_liens(self):
-        liens = [_make_texte_lien(typeLien="MODIFIE", cidTexte="JURX000037999ABC")]
+        liens = [_make_texte_lien(typeLien="MODIFIE", cidTexte="JURITEXT000037999394")]
         client = MagicMock()
         decision = _make_decision_with(
             id="JURITEXT000037999394", liens=liens, client=client
