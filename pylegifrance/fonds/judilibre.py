@@ -8,8 +8,10 @@ bearer token (see docs/superpowers/specs and the Judilibre OpenAPI spec).
 from typing import Any
 
 import requests
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from pylegifrance.auth import AuthenticationManager
+from pylegifrance.client import _TransientAPIError, _is_retryable_status
 from pylegifrance.config import ApiConfig
 from pylegifrance.models.judilibre.models import DecisionFull, DecisionShort
 from pylegifrance.utils import configure_session_timeouts
@@ -19,6 +21,27 @@ JUDILIBRE_PROD_URL = "https://api.piste.gouv.fr/cassation/judilibre/v1.0"
 
 HTTP_OK = 200
 HTTP_NOT_FOUND = 404
+
+
+@retry(
+    retry=retry_if_exception_type(_TransientAPIError),
+    wait=wait_exponential(multiplier=1, min=1, max=10),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _get_with_retry(
+    session: requests.Session,
+    url: str,
+    headers: dict[str, str],
+    params: dict[str, Any] | None,
+) -> requests.Response:
+    response = session.get(url, headers=headers, params=params)
+    # 404 is Judilibre's legitimate "not found" answer, not a transient
+    # failure, so it is deliberately excluded from the retry condition here
+    # (see the non-retry handling of HTTP_NOT_FOUND in JudilibreClient.get).
+    if _is_retryable_status(response.status_code):
+        raise _TransientAPIError(response.status_code, response.text)
+    return response
 
 
 class JudilibreClient:
@@ -71,7 +94,10 @@ class JudilibreClient:
         }
 
         url = f"{self.api_url}/{route}"
-        response = self._session.get(url, headers=headers, params=params)
+        try:
+            response = _get_with_retry(self._session, url, headers, params)
+        except _TransientAPIError as exc:
+            raise Exception(f"API client error {exc.status_code} - {exc.body}") from exc
 
         # 404 is a legitimate "no such decision" answer on Judilibre's
         # /decision endpoint, not a transport/auth failure, so it is
