@@ -45,4 +45,4 @@ def configure_session_timeouts(session: requests.Session, config: ApiConfig) -> 
         return original_request(*args, **kwargs)
 
     # Replace the request method with our wrapper
-    session.request = request_with_timeout  # ty: ignore[invalid-assignment]
+    session.request = request_with_timeout  # type: ignore[method-assign]

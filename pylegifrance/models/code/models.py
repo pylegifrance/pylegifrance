@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Any, Self
+from typing import Any, Self, cast
 
 from pydantic import Field, field_validator
 
@@ -40,7 +40,7 @@ def _to_dict(data: Any) -> dict:
     if isinstance(data, dict):
         return data
     if hasattr(data, "model_dump"):
-        return data.model_dump()
+        return cast(dict, data.model_dump())
     return vars(data) if hasattr(data, "__dict__") else {}
 
 
@@ -66,7 +66,7 @@ def _extract_code_name(
         for title in text_titles:
             titre = title.get("titre") if isinstance(title, dict) else None
             if titre is not None:
-                return titre
+                return cast(str, titre)
 
     # 2-4. consult: context block inside article_data
     context = article_data.get("context")
@@ -75,24 +75,24 @@ def _extract_code_name(
         if isinstance(titre_txt_list, list) and titre_txt_list:
             first = titre_txt_list[0]
             if isinstance(first, dict) and first.get("titre") is not None:
-                return first["titre"]
+                return cast(str, first["titre"])
         if context.get("titreCode") is not None:
-            return context["titreCode"]
+            return cast(str, context["titreCode"])
         if context.get("titre") is not None:
-            return context["titre"]
+            return cast(str, context["titre"])
 
     # 5. top-level contexte fallback
     contexte = raw_data.get("contexte")
     if isinstance(contexte, dict):
         if contexte.get("titreCode") is not None:
-            return contexte["titreCode"]
+            return cast(str, contexte["titreCode"])
         if contexte.get("titre") is not None:
-            return contexte["titre"]
+            return cast(str, contexte["titre"])
 
     # 6. direct top-level keys
     for key in ("titreCode", "codeTitle", "nomCode"):
         if raw_data.get(key) is not None:
-            return raw_data[key]
+            return cast(str, raw_data[key])
 
     # 7. top-level context.titreTxt
     top_context = raw_data.get("context")
@@ -101,7 +101,7 @@ def _extract_code_name(
         if isinstance(titre_txt_list, list) and titre_txt_list:
             first = titre_txt_list[0]
             if isinstance(first, dict) and first.get("titre") is not None:
-                return first["titre"]
+                return cast(str, first["titre"])
 
     # 8. search: titles list with nature == "CODE"
     titles = raw_data.get("titles")
@@ -112,7 +112,7 @@ def _extract_code_name(
                 and t.get("nature") == "CODE"
                 and t.get("title") is not None
             ):
-                return t["title"]
+                return cast(str, t["title"])
 
     return None
 
@@ -209,16 +209,17 @@ class Code(PyLegifranceBaseModel):
                 )
 
         code_data = {
-            "id": getattr(data_dict, "id", None),
-            "cid": getattr(data_dict, "cid", None),
-            "title": getattr(data_dict, "title", None),
-            "etat": getattr(data_dict, "etat", None),
-            "sections": getattr(data_dict, "sections", None),
-            "articles": getattr(data_dict, "articles", None),
+            "id": data_dict.get("id"),
+            "cid": data_dict.get("cid"),
+            "title": data_dict.get("title"),
+            "etat": data_dict.get("etat"),
+            "sections": data_dict.get("sections"),
+            "articles": data_dict.get("articles"),
         }
 
-        if "titles" in data_dict and getattr(data_dict, "titles", None):
-            for title in data_dict.titles:
+        titles = data_dict.get("titles")
+        if titles:
+            for title in titles:
                 title_cid = (
                     getattr(title, "cid", None)
                     if hasattr(title, "cid")
@@ -384,9 +385,11 @@ class Article(PyLegifranceBaseModel):
             parts.append(self.code_name)
         if self.number:
             parts.append(f"art. {self.number}")
+        citation = ", ".join(parts)
         if self.version_date:
-            parts.append(f"(version du {self.version_date.strftime('%d/%m/%Y')})")
-        return ", ".join(parts)
+            suffix = f"(version du {self.version_date.strftime('%d/%m/%Y')})"
+            citation = f"{citation} {suffix}" if citation else suffix
+        return citation
 
     def to_markdown(self) -> str:
         """Retourne une représentation Markdown de l'article, optimisée pour les LLM.

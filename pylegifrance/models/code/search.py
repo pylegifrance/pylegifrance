@@ -327,12 +327,17 @@ class CodeDateSearchRequest(SearchRequestDTO):
         ... )
     """
 
-    fond: Literal[Fond.CODE_DATE] = Field(
+    # Deliberately narrower than the base class's Fond/RechercheSpecifiqueDTO
+    # fields (a discriminated-union-style subtype pydantic validates at
+    # runtime); mypy's structural field-override check doesn't model this.
+    fond: Literal[Fond.CODE_DATE] = Field(  # type: ignore[assignment]  # ty: ignore[incompatible-attribute-override]
         default=Fond.CODE_DATE,
         frozen=True,
         description="Recherche par date dans les codes",
     )
-    recherche: CodeSearchCriteria = Field(..., description="Critères de recherche")
+    recherche: CodeSearchCriteria = Field(  # type: ignore[assignment]  # ty: ignore[incompatible-attribute-override]
+        ..., description="Critères de recherche"
+    )
 
     @model_validator(mode="after")
     def validate_date_filter(self) -> "CodeDateSearchRequest":
@@ -373,12 +378,15 @@ class CodeEtatSearchRequest(SearchRequestDTO):
         ... )
     """
 
-    fond: Literal[Fond.CODE_ETAT] = Field(
+    # See CodeDateSearchRequest above for why these are ignored.
+    fond: Literal[Fond.CODE_ETAT] = Field(  # type: ignore[assignment]  # ty: ignore[incompatible-attribute-override]
         default=Fond.CODE_ETAT,
         frozen=True,
         description="Recherche par état juridique dans les codes",
     )
-    recherche: CodeSearchCriteria = Field(..., description="Critères de recherche")
+    recherche: CodeSearchCriteria = Field(  # type: ignore[assignment]  # ty: ignore[incompatible-attribute-override]
+        ..., description="Critères de recherche"
+    )
 
 
 class CodeSearchResponse(PyLegifranceBaseModel):

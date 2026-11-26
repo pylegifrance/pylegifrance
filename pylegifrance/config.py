@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
-
 SANDBOX_TOKEN_URL = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token"
 SANDBOX_API_URL = "https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app/"
 PROD_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token"

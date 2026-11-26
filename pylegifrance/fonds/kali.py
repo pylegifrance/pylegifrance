@@ -262,9 +262,9 @@ class KaliAPI:
         """
         if not kali_id or not kali_id.strip():
             raise ValueError("kali_id ne peut pas être vide")
-        payload = KaliContConsultRequest(id=kali_id.strip()).model_dump(
-            by_alias=True, exclude_none=True
-        )
+        payload = KaliContConsultRequest(
+            id=kali_id.strip(), searchedString=None
+        ).model_dump(by_alias=True, exclude_none=True)
         response = self._client.call_api("consult/kaliCont", payload)
         return self._wrap_container(response.json())
 
@@ -290,9 +290,9 @@ class KaliAPI:
         """
         if not kali_id or not kali_id.strip():
             raise ValueError("kali_id ne peut pas être vide")
-        payload = KaliTextConsultRequest(id=kali_id.strip()).model_dump(
-            by_alias=True, exclude_none=True
-        )
+        payload = KaliTextConsultRequest(
+            id=kali_id.strip(), searchedString=None
+        ).model_dump(by_alias=True, exclude_none=True)
         response = self._client.call_api("consult/kaliText", payload)
         return self._wrap_text(response.json())
 

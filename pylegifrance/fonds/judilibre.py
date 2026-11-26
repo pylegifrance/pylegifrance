@@ -8,10 +8,15 @@ bearer token (see docs/superpowers/specs and the Judilibre OpenAPI spec).
 from typing import Any
 
 import requests
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from pylegifrance.auth import AuthenticationManager
-from pylegifrance.client import _TransientAPIError, _is_retryable_status
+from pylegifrance.client import _is_retryable_status, _TransientAPIError
 from pylegifrance.config import ApiConfig
 from pylegifrance.models.judilibre.models import DecisionFull, DecisionShort
 from pylegifrance.utils import configure_session_timeouts
@@ -91,7 +96,9 @@ class JudilibreClient:
 
         configure_session_timeouts(self._session, config)
 
-    def get(self, route: str, params: dict[str, Any] | None = None) -> requests.Response:
+    def get(
+        self, route: str, params: dict[str, Any] | None = None
+    ) -> requests.Response:
         """Call the Judilibre API with token management and error logging.
 
         Args:
@@ -187,7 +194,7 @@ class JudilibreDecision:
         """
         files = self._decision.files
         if files:
-            url = files[0].get("url")
+            url: str | None = files[0].get("url")
             if url:
                 return url
         if self.id:

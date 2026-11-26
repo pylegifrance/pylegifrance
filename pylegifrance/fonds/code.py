@@ -105,8 +105,10 @@ class CodeSearchBuilder:
         self.api = api_client
         self.fond = fond
         self.criteria = CodeSearchCriteria()
-        self._champs = []
-        self._filtres = []
+        self._champs: list[ChampCode] = []
+        self._filtres: list[
+            NomCodeFiltre | DateVersionFiltre | TextLegalStatusFiltre
+        ] = []
         self._formatter = False
         self._requested_statuses: list[EtatJuridique] | None = None
 
@@ -327,8 +329,15 @@ class CodeSearchBuilder:
                 )
                 current_timestamp = datetime.now()
                 self._filtres.append(DateVersionFiltre(single_date=current_timestamp))
+                # self.criteria.filtres was already assigned above; because
+                # CodeSearchCriteria has validate_assignment=True, that
+                # assignment copied the list, so appending to self._filtres
+                # alone would not be reflected in self.criteria. Re-sync it.
+                self.criteria.filtres = self._filtres
 
-            request = CodeDateSearchRequest(recherche=self.criteria)
+            request: CodeDateSearchRequest | CodeEtatSearchRequest = (
+                CodeDateSearchRequest(recherche=self.criteria)
+            )
         elif self.fond == "CODE_ETAT":
             request = CodeEtatSearchRequest(recherche=self.criteria)
         else:
@@ -400,10 +409,10 @@ class CodeConsultFetcher:
     def __init__(self, api_client: LegifranceClient, text_id: str):
         self.api = api_client
         self.text_id = text_id
-        self.date = None
+        self.date: str | None = None
         self.abrogated = False
-        self.searched_string = None
-        self.section_id = None
+        self.searched_string: str | None = None
+        self.section_id: str | None = None
 
     def at(self, date: str) -> models.Code:
         """Consulte le code à une date spécifique.
@@ -472,13 +481,14 @@ class CodeConsultFetcher:
             ValueError: Si les paramètres de consultation sont invalides.
         """
         logger.debug(f"CodeConsultFetcher._execute called with self.date: {self.date}")
+        date = self.date or datetime.now().strftime("%Y-%m-%d")
         if not self.date:
-            self.date = datetime.now().strftime("%Y-%m-%d")
-            logger.debug(f"Date was None, set to current date: {self.date}")
+            logger.debug(f"Date was None, set to current date: {date}")
+        self.date = date
 
         request = CodeConsultRequest(
             textId=self.text_id,
-            date=self.date,
+            date=date,
             abrogated=self.abrogated,
             searchedString=self.searched_string,
             sctCid=self.section_id,

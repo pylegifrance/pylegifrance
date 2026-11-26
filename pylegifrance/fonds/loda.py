@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from pylegifrance.client import LegifranceClient
 from pylegifrance.models.code.models import Article
@@ -255,7 +255,7 @@ class TexteLoda:
         from pylegifrance.fonds.code import Code
 
         logger.debug(f"Recherche des articles modifiés par la loi {self.id}")
-        modified_articles = []
+        modified_articles: list[Article] = []
 
         if not self.articles:
             return modified_articles
@@ -312,7 +312,7 @@ class TexteLoda:
         from pylegifrance.fonds.code import Code
 
         logger.debug(f"Recherche des articles créés par la loi {self.id}")
-        created_articles = []
+        created_articles: list[Article] = []
 
         if not self.articles:
             return created_articles
@@ -367,7 +367,7 @@ class TexteLoda:
         Returns:
             True si c'est une modification sortante valide.
         """
-        return (
+        return bool(
             lien.link_type == MODIFICATION_LINK_TYPE
             and lien.article_id
             and lien.date_debut_cible
@@ -437,10 +437,8 @@ class TexteLoda:
         Returns:
             L'article récupéré.
         """
-        if target_date:
-            return code_api.fetch_article(lien.article_id).at(target_date)
-        else:
-            return code_api.fetch_article(lien.article_id)
+        date_str = target_date or datetime.now().strftime("%Y-%m-%d")
+        return cast(Article, code_api.fetch_article(lien.article_id).at(date_str))
 
     def format_modifications_report(self) -> str:
         """Formate un rapport complet de l'impact de cette loi (modifications, créations, abrogations).
@@ -638,11 +636,13 @@ class TexteLoda:
 
         code_api = Code(self._client)
 
-        # Pour les modifications, utiliser la date cible si disponible
+        # Pour les modifications, utiliser la date cible si disponible ;
+        # sinon (p.ex. création sans date), récupérer la version courante.
         if hasattr(lien, "date_debut_cible") and lien.date_debut_cible:
-            return code_api.fetch_article(lien.article_id).at(lien.date_debut_cible)
+            target_date = lien.date_debut_cible
         else:
-            return code_api.fetch_article(lien.article_id)
+            target_date = datetime.now().strftime("%Y-%m-%d")
+        return code_api.fetch_article(lien.article_id).at(target_date)
 
     def _format_article_citation(self, article, lien: Any) -> str:
         """Formate la citation d'un article."""
@@ -1041,14 +1041,14 @@ class Loda:
                 logger.debug(
                     "Utilisation de 'hits' au lieu de 'results' pour les résultats de recherche"
                 )
-                return response_data["hits"]
+                return cast(list[dict[str, Any]], response_data["hits"])
             else:
                 logger.warning(
                     "Aucun résultat valide trouvé dans la réponse de recherche"
                 )
                 return []
 
-        return response_data["results"]
+        return cast(list[dict[str, Any]], response_data["results"])
 
     def _extract_title_info(self, result: dict[str, Any]) -> tuple[str, str] | None:
         """Extrait l'ID et le titre d'un résultat de recherche.
