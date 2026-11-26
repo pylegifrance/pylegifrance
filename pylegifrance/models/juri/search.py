@@ -76,6 +76,22 @@ class SearchRequest(PyLegifranceBaseModel):
         description="Court of appeal location filter (only for 'Juridictions d'appel')",
     )
 
+    fond: str = Field(
+        default="JURI",
+        description="Legifrance case-law corpus to search. 'JURI' (default) "
+        "is judicial case law (Cour de cassation, cours d'appel, tribunaux "
+        "judiciaires); 'CETAT' is administrative case law (Conseil d'État, "
+        "cours administratives d'appel, tribunaux administratifs).",
+    )
+
+    @field_validator("fond")
+    @classmethod
+    def validate_fond(cls, v: str) -> str:
+        """Validate fond is one of the two case-law corpora this model supports."""
+        if v not in ("JURI", "CETAT"):
+            raise ValueError(f"fond doit être 'JURI' ou 'CETAT', reçu: {v!r}")
+        return v
+
     @field_validator("date_start", "date_end")
     @classmethod
     def validate_date_format(cls, v: str | None) -> str | None:
@@ -111,7 +127,10 @@ class SearchRequest(PyLegifranceBaseModel):
         filters = self._create_filters()
         search_spec = self._create_search_specification(field, filters)
 
-        return SearchRequestDTO(recherche=search_spec, fond=Fond.juri)
+        return SearchRequestDTO(
+            recherche=search_spec,
+            fond=Fond.cetat if self.fond == "CETAT" else Fond.juri,
+        )
 
     def _create_criteria(self) -> CritereDTO:
         """Create search criteria from the search text."""

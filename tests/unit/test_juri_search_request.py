@@ -260,6 +260,21 @@ class TestSearchRequestToApiModel:
         assert criteres is not None
         assert criteres[0].proximite is None
 
+    def test_fond_defaults_to_juri(self):
+        req = _make_search_request(search="licenciement")
+        assert req.fond == "JURI"
+        assert req.to_api_model().fond.value == "JURI"
+
+    def test_fond_cetat_forwarded_to_api_model(self):
+        """CETAT is the administrative case-law corpus (Conseil d'État,
+        cours administratives d'appel, tribunaux administratifs)."""
+        req = _make_search_request(search="contentieux fiscal", fond="CETAT")
+        assert req.to_api_model().fond.value == "CETAT"
+
+    def test_invalid_fond_raises(self):
+        with pytest.raises(ValueError, match="JURI.*CETAT|CETAT.*JURI"):
+            _make_search_request(search="x", fond="BOGUS")
+
 
 class TestSearchResponse:
     def test_parses_aliased_fields(self):
