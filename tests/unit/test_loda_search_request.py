@@ -87,6 +87,31 @@ class TestToGeneratedModelFields:
         title_field = next(c for c in champs if c["typeChamp"] == TypeChamp.title)
         assert title_field["operateur"].value == "OU"
 
+    def test_explicit_champ_restricts_search_to_that_field(self):
+        """Légifrance's "Zone de recherche" selector (e.g. search only
+        article content) must be honored, not silently replaced by the
+        broad ALL+TEXTE+TITLE OR-search used when champ isn't specified."""
+        req = SearchRequest(search="licenciement", champ=TypeChamp.article)
+        dto = req.to_generated_model()
+
+        champs = dto["recherche"]["champs"]
+        assert len(champs) == 1
+        assert champs[0]["typeChamp"] == TypeChamp.article
+        assert champs[0]["criteres"][0]["valeur"] == "licenciement"
+
+    def test_explicit_type_recherche_is_honored_for_exact_phrase(self):
+        """Légifrance's "Rechercher l'expression exacte" toggle (EXACTE)
+        must be honored, not silently replaced by the broad OR-search."""
+        req = SearchRequest(
+            search="dommages et intérêts", type_recherche=TypeRecherche.exacte
+        )
+        dto = req.to_generated_model()
+
+        champs = dto["recherche"]["champs"]
+        assert len(champs) == 1
+        assert champs[0]["criteres"][0]["typeRecherche"] == TypeRecherche.exacte
+        assert champs[0]["criteres"][0]["valeur"] == "dommages et intérêts"
+
     def test_text_id_and_search_both_produce_four_fields(self):
         req = SearchRequest(text_id="LEGITEXT000006070721", search="travail")
         dto = req.to_generated_model()
