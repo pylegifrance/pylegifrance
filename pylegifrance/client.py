@@ -4,12 +4,46 @@ from contextlib import contextmanager
 from typing import Any, Self
 
 import requests
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from pylegifrance.auth import AuthenticationManager
 from pylegifrance.config import ApiConfig
 from pylegifrance.utils import configure_session_timeouts
 
 logger = logging.getLogger(__name__)
+
+
+class _TransientAPIError(Exception):
+    """Internal signal for a retryable (429/5xx) API response.
+
+    Caught by callers and converted back into the standard
+    ``Exception(f"API client error {status} - {body}")`` once retries are
+    exhausted, so the public error contract is unchanged.
+    """
+
+    def __init__(self, status_code: int, body: str):
+        self.status_code = status_code
+        self.body = body
+        super().__init__(f"transient API error {status_code}")
+
+
+def _is_retryable_status(status_code: int) -> bool:
+    return status_code == 429 or 500 <= status_code < 600
+
+
+@retry(
+    retry=retry_if_exception_type(_TransientAPIError),
+    wait=wait_exponential(multiplier=1, min=1, max=10),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _post_with_retry(
+    session: requests.Session, url: str, headers: dict[str, str], data: Any
+) -> requests.Response:
+    response = session.post(url, headers=headers, json=data)
+    if _is_retryable_status(response.status_code):
+        raise _TransientAPIError(response.status_code, response.text)
+    return response
 
 
 class LegifranceClient:
@@ -112,7 +146,14 @@ class LegifranceClient:
         logger.debug(
             f"Payload for request {url}: {json.dumps(data, indent=2, ensure_ascii=False)}"
         )
-        response = self.session.post(url, headers=headers, json=data)
+        try:
+            response = _post_with_retry(self.session, url, headers, data)
+        except _TransientAPIError as exc:
+            logger.error(
+                f"Client error {exc.status_code} - {exc.body} when calling the API "
+                "(retries exhausted)."
+            )
+            raise Exception(f"API client error {exc.status_code} - {exc.body}") from exc
 
         if 400 <= response.status_code < 600:
             logger.error(
