@@ -42,6 +42,31 @@ markers = [
     "timeout: mark test to timeout after a specified number of seconds"
 ]
 
+[tool.coverage.run]
+source = ["pylegifrance"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_optional = true
+
+[tool.basedpyright]
+include = ["pylegifrance", "tests"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+reportMissingImports = true
+
 [tool.setuptools.packages.find]
 include = ["pylegifrance", "pylegifrance.*"]
 
@@ -57,6 +82,10 @@ dev = [
     "pre-commit>=3.4.0",
     "twine>=4.0.2",
     "pytest-bdd>=8.1.0",
+    "mypy>=2.4.1",
+    "basedpyright>=1.40.2",
+    "pytest-cov>=7.1.0",
+    "types-requests>=2.33.0.20261030",
 ]
 
 [tool.datamodel-codegen]
