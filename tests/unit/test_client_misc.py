@@ -31,6 +31,23 @@ def test_call_api_raises_value_error_when_data_is_none():
         client.call_api("search", None)
 
 
+def test_call_api_logs_4xx_at_warning_not_error(caplog):
+    """A 4xx is routine for callers that probe for existence (e.g.
+    JuriAPI.fetch_by_id's documented "unknown textId" 400) and handle it
+    themselves. Logging it at ERROR makes every successful probe look like
+    a real failure in the logs; WARNING reflects that call_api itself
+    doesn't know whether the caller will treat this as fatal."""
+    client = _client()
+    mock_response = MagicMock(status_code=400, text="L'expression à valider est fausse")
+    with patch("pylegifrance.client._post_with_retry", return_value=mock_response):
+        with caplog.at_level("WARNING"):
+            with pytest.raises(Exception, match="API client error 400"):
+                client.call_api("consult/juri", {"textId": "JURITEXT999999999999"})
+
+    assert any(record.levelname == "WARNING" for record in caplog.records)
+    assert not any(record.levelname == "ERROR" for record in caplog.records)
+
+
 def test_call_api_raises_plain_exception_when_retries_exhausted():
     # Patch the module-level retry helper directly rather than driving the
     # real tenacity retry loop (which would introduce real sleeps); this

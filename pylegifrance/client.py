@@ -154,6 +154,9 @@ class LegifranceClient:
         try:
             response = _post_with_retry(self.session, url, headers, data)
         except _TransientAPIError as exc:
+            # _is_retryable_status() only retries 429 and 5xx, so a
+            # _TransientAPIError always carries one of those — ERROR is
+            # correct here, unlike the 4xx branch below.
             logger.error(
                 f"Client error {exc.status_code} - {exc.body} when calling the API "
                 "(retries exhausted)."
@@ -161,7 +164,13 @@ class LegifranceClient:
             raise Exception(f"API client error {exc.status_code} - {exc.body}") from exc
 
         if 400 <= response.status_code < 600:
-            logger.error(
+            # 4xx is routine for callers that probe for existence (e.g.
+            # JuriAPI.fetch_by_id's documented "unknown textId" 400) and
+            # handle it themselves — call_api doesn't know whether the
+            # caller treats this as fatal, so it isn't logged as an error.
+            # 5xx is never expected, so it stays at ERROR.
+            log = logger.warning if response.status_code < 500 else logger.error
+            log(
                 f"Client error {response.status_code} - {response.text} when calling the API."
             )
             raise Exception(
