@@ -6,7 +6,9 @@ from pylegifrance.fonds.judilibre import JUDILIBRE_SANDBOX_URL, JudilibreClient
 
 def test_get_sends_bearer_and_keyid_headers():
     config = ApiConfig(client_id="id", client_secret="secret")
-    client = JudilibreClient(config=config, key_id="my-key-id")
+    client = JudilibreClient(
+        config=config, key_id="my-key-id", api_url=JUDILIBRE_SANDBOX_URL
+    )
     client._auth_manager.ensure_valid_token = MagicMock(return_value="tok123")
 
     with patch.object(client._session, "get") as mock_get:

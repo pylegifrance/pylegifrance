@@ -70,14 +70,20 @@ class TexteLoda:
         """Récupère le CID du texte avec validation."""
         if not self._texte.cid:
             return None
-        return Cid(self._texte.cid)
+        try:
+            return Cid(self._texte.cid)
+        except ValueError:
+            return None
 
     @property
     def nor(self) -> Nor | None:
         """Récupère le NOR du texte avec validation."""
         if not self._texte.nor:
             return None
-        return Nor(self._texte.nor)
+        try:
+            return Nor(self._texte.nor)
+        except ValueError:
+            return None
 
     @property
     def titre(self) -> str | None:
@@ -932,8 +938,9 @@ class Loda:
         except ValueError:
             raise ValueError(f"Format de date invalide: {date}") from None
 
+        base_id, _ = self._extract_date_from_id(text_id)
         api_model = {
-            "textId": text_id,
+            "textId": base_id,
             "year": date_obj.year,
             "month": date_obj.month,
             "dayOfMonth": date_obj.day,

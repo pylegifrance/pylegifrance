@@ -197,21 +197,30 @@ class JuriDecision:
         """Récupère le CID de la décision avec validation."""
         if not hasattr(self._decision, "cid") or not self._decision.cid:
             return None
-        return Cid(self._decision.cid)
+        try:
+            return Cid(self._decision.cid)
+        except ValueError:
+            return None
 
     @property
     def eli(self) -> Eli | None:
         """Récupère l'ELI de la décision avec validation."""
         if not self._decision.id_eli:
             return None
-        return Eli(self._decision.id_eli)
+        try:
+            return Eli(self._decision.id_eli)
+        except ValueError:
+            return None
 
     @property
     def nor(self) -> Nor | None:
         """Récupère le NOR de la décision avec validation."""
         if not self._decision.nor:
             return None
-        return Nor(self._decision.nor)
+        try:
+            return Nor(self._decision.nor)
+        except ValueError:
+            return None
 
     @property
     def ecli(self) -> str | None:

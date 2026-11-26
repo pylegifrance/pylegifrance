@@ -42,7 +42,9 @@ class ApiConfig:
         Create an ApiConfig instance from environment variables.
 
         Reads ``PISTE_ENV`` (``"sandbox"`` or ``"production"``, case-insensitive,
-        defaults to ``"sandbox"``) to select the matching token/API base URLs.
+        defaults to ``"production"`` to match this class's own field defaults
+        and the behavior of callers who upgrade without setting it) to select
+        the matching token/API base URLs.
 
         Returns:
             ApiConfig: A new ApiConfig instance with values from environment variables.
@@ -62,7 +64,7 @@ class ApiConfig:
                 "LEGIFRANCE_CLIENT_SECRET are not set."
             )
 
-        piste_env = os.getenv("PISTE_ENV", "sandbox").strip().lower()
+        piste_env = os.getenv("PISTE_ENV", "production").strip().lower()
         try:
             token_url, api_url = _PISTE_ENV_URLS[piste_env]
         except KeyError:

@@ -84,6 +84,21 @@ class TestJuriDecisionIdentifiers:
         assert nor is not None
         assert str(nor) == "JUST2012345A"
 
+    def test_cid_returns_none_instead_of_raising_on_malformed_value(self):
+        """A truthy but malformed cid from a real API response must degrade
+        to None (the property's own documented contract), not crash a
+        caller like to_markdown() that reads it unconditionally."""
+        decision = _make_decision_with(cid="not-a-real-cid")
+        assert decision.cid is None
+
+    def test_eli_returns_none_instead_of_raising_on_malformed_value(self):
+        decision = _make_decision_with(idEli="not-a-real-eli")
+        assert decision.eli is None
+
+    def test_nor_returns_none_instead_of_raising_on_malformed_value(self):
+        decision = _make_decision_with(nor="not-a-real-nor")
+        assert decision.nor is None
+
 
 class TestJuriDecisionDate:
     """``date`` property: str/datetime handling and invalid-format fallback."""

@@ -164,13 +164,15 @@ class LegifranceClient:
             raise Exception(f"API client error {exc.status_code} - {exc.body}") from exc
 
         if 400 <= response.status_code < 600:
-            # 4xx is routine for callers that probe for existence (e.g.
-            # JuriAPI.fetch_by_id's documented "unknown textId" 400) and
-            # handle it themselves — call_api doesn't know whether the
-            # caller treats this as fatal, so it isn't logged as an error.
-            # 5xx is never expected, so it stays at ERROR.
-            log = logger.warning if response.status_code < 500 else logger.error
-            log(
+            # _is_retryable_status() means any 5xx here already went through
+            # _post_with_retry and would have raised _TransientAPIError
+            # (handled above) once retries were exhausted -- so in practice
+            # this is always a non-retryable 4xx, which is routine for
+            # callers that probe for existence (e.g. JuriAPI.fetch_by_id's
+            # documented "unknown textId" 400) and handle it themselves.
+            # call_api doesn't know whether the caller treats this as
+            # fatal, so it isn't logged as an error.
+            logger.warning(
                 f"Client error {response.status_code} - {response.text} when calling the API."
             )
             raise Exception(

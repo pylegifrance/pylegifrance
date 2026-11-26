@@ -17,7 +17,7 @@ from tenacity import (
 
 from pylegifrance.auth import AuthenticationManager
 from pylegifrance.client import _is_retryable_status, _TransientAPIError
-from pylegifrance.config import ApiConfig
+from pylegifrance.config import SANDBOX_API_URL, ApiConfig
 from pylegifrance.models.judilibre.models import DecisionFull, DecisionShort
 from pylegifrance.utils import configure_session_timeouts
 
@@ -87,9 +87,16 @@ class JudilibreClient:
             key_id: The Judilibre-specific ``KeyId`` header value for the
                 subscribed PISTE application.
             api_url: The base URL for the Judilibre API. Defaults to the
-                sandbox host.
+                Judilibre host matching ``config``'s own sandbox/production
+                Légifrance API URL, so PISTE_ENV switches both clients the
+                same way.
         """
-        self.api_url = api_url or JUDILIBRE_SANDBOX_URL
+        if api_url is not None:
+            self.api_url = api_url
+        elif config.api_url == SANDBOX_API_URL:
+            self.api_url = JUDILIBRE_SANDBOX_URL
+        else:
+            self.api_url = JUDILIBRE_PROD_URL
         self._key_id = key_id
         self._auth_manager = AuthenticationManager(config)
         self._session = requests.Session()

@@ -42,3 +42,18 @@ def test_is_expired_false_well_within_lifetime():
     token = TokenInfo(access_token="tok", issued_at=time.time(), expires_in=3600)
 
     assert token.is_expired is False
+
+
+def test_short_lived_token_is_not_immediately_expired():
+    """A token whose expires_in is below the 60s refresh margin must still
+    be usable for part of its life, not treated as expired the instant
+    it's issued (margin clamping to 0 made elapsed_time >= 0 always true)."""
+    token = TokenInfo(access_token="tok", issued_at=time.time(), expires_in=30)
+
+    assert token.is_expired is False
+
+
+def test_short_lived_token_expires_partway_through_its_life():
+    token = TokenInfo(access_token="tok", issued_at=time.time() - 20, expires_in=30)
+
+    assert token.is_expired is True

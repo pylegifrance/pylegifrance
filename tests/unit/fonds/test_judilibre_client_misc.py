@@ -8,8 +8,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pylegifrance.client import _TransientAPIError
-from pylegifrance.config import ApiConfig
-from pylegifrance.fonds.judilibre import JudilibreAPIError, JudilibreClient
+from pylegifrance.config import PROD_API_URL, SANDBOX_API_URL, ApiConfig
+from pylegifrance.fonds.judilibre import (
+    JUDILIBRE_PROD_URL,
+    JUDILIBRE_SANDBOX_URL,
+    JudilibreAPIError,
+    JudilibreClient,
+)
 
 
 def _client() -> JudilibreClient:
@@ -18,6 +23,32 @@ def _client() -> JudilibreClient:
     )
     client._auth_manager.ensure_valid_token = MagicMock(return_value="tok")
     return client
+
+
+def test_default_api_url_follows_config_production():
+    """A production-configured ApiConfig (its own default) must not leave
+    Judilibre pointed at the sandbox host -- that defeats PISTE_ENV
+    switching the same way for both clients."""
+    config = ApiConfig(client_id="id", client_secret="secret")
+    assert config.api_url == PROD_API_URL
+
+    client = JudilibreClient(config=config, key_id="k")
+
+    assert client.api_url == JUDILIBRE_PROD_URL
+
+
+def test_default_api_url_follows_config_sandbox():
+    config = ApiConfig(client_id="id", client_secret="secret", api_url=SANDBOX_API_URL)
+    client = JudilibreClient(config=config, key_id="k")
+
+    assert client.api_url == JUDILIBRE_SANDBOX_URL
+
+
+def test_explicit_api_url_overrides_config_inference():
+    config = ApiConfig(client_id="id", client_secret="secret")
+    client = JudilibreClient(config=config, key_id="k", api_url=JUDILIBRE_SANDBOX_URL)
+
+    assert client.api_url == JUDILIBRE_SANDBOX_URL
 
 
 def test_get_raises_judilibre_api_error_when_retries_exhausted():

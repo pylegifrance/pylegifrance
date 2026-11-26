@@ -44,8 +44,12 @@ class TokenInfo:
         if not self.access_token:
             return True
         elapsed_time = time.time() - self.issued_at
-        margin = max(self.expires_in - TOKEN_EXPIRY_MARGIN_SECONDS, 0)
-        return elapsed_time >= margin
+        # Cap the margin at half the token's own lifetime so a short-lived
+        # token (expires_in below the margin) isn't treated as expired the
+        # instant it's issued -- it still gets refreshed proactively, just
+        # partway through its life instead of at t=0.
+        margin = min(TOKEN_EXPIRY_MARGIN_SECONDS, self.expires_in / 2)
+        return elapsed_time >= self.expires_in - margin
 
     @property
     def is_valid(self) -> bool:

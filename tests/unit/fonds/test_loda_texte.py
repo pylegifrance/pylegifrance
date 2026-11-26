@@ -63,6 +63,15 @@ class TestProperties:
     def test_nor_none_when_falsy(self):
         assert _make_texte_loda(nor=None).nor is None
 
+    def test_cid_returns_none_instead_of_raising_on_malformed_value(self):
+        """A truthy but malformed cid from a real API response must degrade
+        to None (the property's own documented contract), not crash a
+        caller like to_markdown() that reads it unconditionally."""
+        assert _make_texte_loda(cid="not-a-real-cid").cid is None
+
+    def test_nor_returns_none_instead_of_raising_on_malformed_value(self):
+        assert _make_texte_loda(nor="not-a-real-nor").nor is None
+
     def test_titre(self):
         assert _make_texte_loda().titre == "Loi n° 2020-734"
 
