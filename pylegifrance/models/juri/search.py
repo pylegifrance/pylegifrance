@@ -35,6 +35,13 @@ class SearchRequest(PyLegifranceBaseModel):
     sort: SortOptions = Field(default=SortOptions.RELEVANCE)
     field: TypeChamp = Field(default=TypeChamp.all)
     search_type: TypeRecherche = Field(default=TypeRecherche.un_des_mots)
+    proximity: int | None = Field(
+        default=None,
+        ge=1,
+        le=100,
+        description="Maximum word distance between search terms (Légifrance's "
+        '"proximité" search option)',
+    )
     page_size: int = Field(default=5, ge=1, le=100)
     page_number: int = Field(default=1, ge=1)
 
@@ -112,7 +119,7 @@ class SearchRequest(PyLegifranceBaseModel):
             valeur=self.search,
             operateur=Operateur.et,
             typeRecherche=self.search_type,
-            proximite=None,
+            proximite=self.proximity,
             criteres=None,
         )
 

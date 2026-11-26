@@ -112,6 +112,22 @@ class TestToGeneratedModelFields:
         assert champs[0]["criteres"][0]["typeRecherche"] == TypeRecherche.exacte
         assert champs[0]["criteres"][0]["valeur"] == "dommages et intérêts"
 
+    def test_explicit_proximity_restricts_to_single_field_and_is_forwarded(self):
+        """Légifrance's "proximité N mots" search option."""
+        req = SearchRequest(search="dommages intérêts", proximity=3)
+        dto = req.to_generated_model()
+
+        champs = dto["recherche"]["champs"]
+        assert len(champs) == 1
+        assert champs[0]["criteres"][0]["proximite"] == 3
+
+    def test_no_proximity_means_broad_search_is_unaffected(self):
+        req = SearchRequest(search="travail")
+        dto = req.to_generated_model()
+        champs = dto["recherche"]["champs"]
+        assert len(champs) == 3
+        assert all(c["criteres"][0]["proximite"] is None for c in champs)
+
     def test_text_id_and_search_both_produce_four_fields(self):
         req = SearchRequest(text_id="LEGITEXT000006070721", search="travail")
         dto = req.to_generated_model()

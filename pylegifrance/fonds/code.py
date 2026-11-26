@@ -182,13 +182,18 @@ class CodeSearchBuilder:
         return self
 
     def text(
-        self, search_text: str, in_field: TypeChampCode = TypeChampCode.ALL
+        self,
+        search_text: str,
+        in_field: TypeChampCode = TypeChampCode.ALL,
+        proximity: int | None = None,
     ) -> Self:
         """Recherche un texte dans les articles.
 
         Args:
             search_text: Texte à rechercher.
             in_field: Champ dans lequel rechercher (par défaut: ALL).
+            proximity: Distance maximale en mots entre les termes recherchés
+                (option "proximité" de Légifrance).
 
         Returns:
             Self: Le builder pour chaînage.
@@ -200,7 +205,7 @@ class CodeSearchBuilder:
                     CritereCode(
                         type_recherche=TypeRecherche.TOUS_LES_MOTS_DANS_UN_CHAMP,
                         valeur=search_text,
-                        proximite=None,
+                        proximite=proximity,
                     )
                 ],
             )

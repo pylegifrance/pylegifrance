@@ -27,6 +27,21 @@ from pylegifrance.models.constants import EtatJuridique
 # ---------------------------------------------------------------------------
 
 
+class TestTextProximity:
+    def test_text_forwards_proximity_to_criteria(self):
+        """Légifrance's "proximité N mots" search option."""
+        builder = CodeSearchBuilder(MagicMock(), "CODE_DATE")
+        builder.text("bail commercial", proximity=3)
+
+        assert builder._champs[-1].criteres[0].proximite == 3
+
+    def test_text_without_proximity_leaves_it_unset(self):
+        builder = CodeSearchBuilder(MagicMock(), "CODE_DATE")
+        builder.text("bail commercial")
+
+        assert builder._champs[-1].criteres[0].proximite is None
+
+
 class TestExecuteValidation:
     def test_execute_raises_when_no_filtres_and_no_champs(self):
         client = MagicMock()

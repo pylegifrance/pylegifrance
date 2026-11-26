@@ -33,6 +33,7 @@ class SearchRequest(PyLegifranceBaseModel):
     text_id: str | None = None
     champ: TypeChamp | None = TypeChamp.all
     type_recherche: TypeRecherche | None = TypeRecherche.tous_les_mots_dans_un_champ
+    proximity: int | None = None
     fond: Fond = Fond.loda_date
     natures: list[Nature] | list[str] = []
     date_signature: DatePeriod | str | None = None
@@ -103,6 +104,7 @@ class SearchRequest(PyLegifranceBaseModel):
             if (
                 "champ" in self.model_fields_set
                 or "type_recherche" in self.model_fields_set
+                or "proximity" in self.model_fields_set
             ):
                 fields.append(
                     ChampDTO(
@@ -113,7 +115,7 @@ class SearchRequest(PyLegifranceBaseModel):
                                 typeRecherche=self.type_recherche
                                 or TypeRecherche.tous_les_mots_dans_un_champ,
                                 operateur=Operateur.et,
-                                proximite=None,
+                                proximite=self.proximity,
                                 criteres=None,
                             )
                         ],

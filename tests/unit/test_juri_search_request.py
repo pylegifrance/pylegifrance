@@ -245,6 +245,21 @@ class TestSearchRequestToApiModel:
         dto = req.to_api_model()
         assert dto.recherche.champs[0].type_champ == TypeChamp.title
 
+    def test_proximity_forwarded_to_criteria(self):
+        """Légifrance's "proximité N mots" search option."""
+        req = _make_search_request(search="dommages intérêts", proximity=3)
+        dto = req.to_api_model()
+        criteres = dto.recherche.champs[0].criteres
+        assert criteres is not None
+        assert criteres[0].proximite == 3
+
+    def test_proximity_defaults_to_none(self):
+        req = _make_search_request(search="licenciement")
+        dto = req.to_api_model()
+        criteres = dto.recherche.champs[0].criteres
+        assert criteres is not None
+        assert criteres[0].proximite is None
+
 
 class TestSearchResponse:
     def test_parses_aliased_fields(self):
