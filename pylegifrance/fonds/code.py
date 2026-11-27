@@ -19,7 +19,7 @@ from pylegifrance.models.code.search import (
     TextLegalStatusFiltre,
 )
 from pylegifrance.models.constants import EtatJuridique, TypeRecherche
-from pylegifrance.models.generated.model import CodeConsultRequest
+from pylegifrance.models.generated.model import CodeConsultRequest, TypePagination
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +111,7 @@ class CodeSearchBuilder:
         ] = []
         self._formatter = False
         self._requested_statuses: list[EtatJuridique] | None = None
+        self._paginate_called = False
 
     def in_code(self, code_name: NomCode) -> Self:
         """Filtre la recherche à un code juridique spécifique.
@@ -260,6 +261,15 @@ class CodeSearchBuilder:
             status = [EtatJuridique.VIGUEUR]
         self._requested_statuses = status
         self._filtres.append(TextLegalStatusFiltre(valeurs=status))
+
+        # Under the default (DEFAUT) pagination, the API only returns a
+        # handful of per-version "extracts" per matched text (see
+        # "moreArticlesCount" on the raw response) -- far fewer than an
+        # old article's real version count. A legal-status filter is
+        # meaningless unless it can actually see the true current version
+        # among them, so switch to pagination over extracts instead of
+        # over matched texts.
+        self.criteria.type_pagination = TypePagination.article
         return self
 
     def paginate(self, page_number: int = 1, page_size: int = 10) -> Self:
@@ -279,6 +289,7 @@ class CodeSearchBuilder:
 
         self.criteria.page_number = page_number
         self.criteria.page_size = page_size
+        self._paginate_called = True
         return self
 
     def with_formatter(self) -> Self:
@@ -316,6 +327,13 @@ class CodeSearchBuilder:
         self.criteria.filtres = self._filtres
         logger.debug(f"Criteria champs: {self.criteria.champs}")
         logger.debug(f"Criteria filtres: {self.criteria.filtres}")
+
+        if self._requested_statuses is not None and not self._paginate_called:
+            # No explicit .paginate() call to respect: widen to the API's max
+            # so the legal-status post-filter below has a real chance of
+            # seeing the true current version among an old article's many
+            # historical ones, instead of silently filtering everything out.
+            self.criteria.page_size = 100
 
         if self.fond == "CODE_DATE":
             has_date_filter = any(
