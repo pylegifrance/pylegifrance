@@ -34,3 +34,21 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run mypy pylegifrance
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run basedpyright pylegifrance tests
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: pytest-cov
+        name: pytest (with 90% coverage floor)
+        entry: uv run pytest tests/unit tests/test_config.py tests/test_client.py --cov=pylegifrance --cov-report=term-missing
+        language: system
+        types: [python]
+        pass_filenames: false

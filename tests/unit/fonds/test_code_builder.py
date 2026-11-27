@@ -8,6 +8,7 @@ import pytest
 from pylegifrance.fonds.code import CodeSearchBuilder, _normalize_article_number
 from pylegifrance.models.code.enum import NomCode
 from pylegifrance.models.constants import EtatJuridique
+from pylegifrance.models.generated.model import TypePagination
 
 # ---------------------------------------------------------------------------
 # _normalize_article_number
@@ -164,3 +165,113 @@ class TestPostFilter:
         builder = CodeSearchBuilder(client, "CODE_ETAT")
 
         assert builder._requested_statuses is None
+
+
+# ---------------------------------------------------------------------------
+# CodeSearchBuilder pagination: the search API only returns a handful of
+# per-article version "extracts" per matched text under DEFAUT pagination
+# (surfaced via a "moreArticlesCount" counter on the item), capped well below
+# an article's real version count. A legal-status filter needs the *true*
+# current version to actually be among the fetched extracts, or the filter
+# silently finds nothing to keep. typePagination=ARTICLE makes the API
+# paginate over extracts instead of over matched texts.
+# ---------------------------------------------------------------------------
+
+
+class TestArticlePagination:
+    def test_with_legal_status_switches_to_article_pagination(self):
+        client = MagicMock()
+        builder = CodeSearchBuilder(client, "CODE_ETAT")
+        builder.in_code(NomCode.CDT)
+
+        builder.with_legal_status([EtatJuridique.VIGUEUR])
+
+        assert builder.criteria.type_pagination == TypePagination.article
+
+    def test_default_pagination_unaffected_without_legal_status_filter(self):
+        client = MagicMock()
+        builder = CodeSearchBuilder(client, "CODE_ETAT")
+        builder.in_code(NomCode.CDT)
+
+        assert builder.criteria.type_pagination == TypePagination.defaut
+
+    def test_execute_maximizes_page_size_when_status_filter_requested(self):
+        """No explicit .paginate() call: the default page_size (5) is far too
+        small to reach an old article's current version among many historical
+        ones, so a legal-status filter must widen it to the API's max."""
+        client = MagicMock()
+        client.call_api.return_value = _mock_search_response([])
+        builder = CodeSearchBuilder(client, "CODE_ETAT")
+        builder.in_code(NomCode.CDT)
+        builder.with_legal_status([EtatJuridique.VIGUEUR])
+
+        builder.execute()
+
+        sent_request = client.call_api.call_args.args[1]
+        assert sent_request["recherche"]["pageSize"] == 100
+
+    def test_execute_respects_explicit_page_size_when_status_filter_requested(self):
+        """An explicit .paginate() call is a deliberate choice and must not
+        be silently overridden, even though it risks missing the current
+        version among many historical ones."""
+        client = MagicMock()
+        client.call_api.return_value = _mock_search_response([])
+        builder = CodeSearchBuilder(client, "CODE_ETAT")
+        builder.in_code(NomCode.CDT)
+        builder.with_legal_status([EtatJuridique.VIGUEUR])
+        builder.paginate(page_number=1, page_size=10)
+
+        builder.execute()
+
+        sent_request = client.call_api.call_args.args[1]
+        assert sent_request["recherche"]["pageSize"] == 10
+
+    def test_resolves_current_version_from_merged_item_and_extracts(self):
+        """Reproduces the real CODE_ETAT search response shape: a single
+        text-level item (global "etat", same across all its historical
+        extracts) merged with a sampled list of per-version "extracts"
+        (each carrying its own "legalStatus"). Only the one true current
+        extract should survive the VIGUEUR filter."""
+        client = MagicMock()
+        client.call_api.return_value = _mock_search_response(
+            [
+                {
+                    "etat": "VIGUEUR",
+                    "moreArticlesCount": 17,
+                    "sections": [
+                        {
+                            "id": "LEGISCTA000006199106",
+                            "extracts": [
+                                {
+                                    "id": "LEGIARTI000037988243",
+                                    "num": "787 B",
+                                    "legalStatus": "MODIFIE",
+                                    "type": "articles",
+                                },
+                                {
+                                    "id": "LEGIARTI000006305436",
+                                    "num": "787 B",
+                                    "legalStatus": "MODIFIE",
+                                    "type": "articles",
+                                },
+                                {
+                                    "id": "LEGIARTI000053542700",
+                                    "num": "787 B",
+                                    "legalStatus": "VIGUEUR",
+                                    "type": "articles",
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ]
+        )
+        builder = CodeSearchBuilder(client, "CODE_ETAT")
+        builder.in_code(NomCode.CDT)
+        builder.with_legal_status([EtatJuridique.VIGUEUR])
+
+        results = builder.execute()
+
+        assert len(results) == 1
+        assert results[0].id == "LEGIARTI000053542700"
+        assert results[0].legal_status == "VIGUEUR"

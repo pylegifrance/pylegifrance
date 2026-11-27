@@ -4,6 +4,16 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
+SANDBOX_TOKEN_URL = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token"
+SANDBOX_API_URL = "https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app/"
+PROD_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token"
+PROD_API_URL = "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/"
+
+_PISTE_ENV_URLS = {
+    "sandbox": (SANDBOX_TOKEN_URL, SANDBOX_API_URL),
+    "production": (PROD_TOKEN_URL, PROD_API_URL),
+}
+
 
 @dataclass
 class ApiConfig:
@@ -21,8 +31,8 @@ class ApiConfig:
 
     client_id: str
     client_secret: str
-    token_url: str = "https://oauth.piste.gouv.fr/api/oauth/token"
-    api_url: str = "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/"
+    token_url: str = PROD_TOKEN_URL
+    api_url: str = PROD_API_URL
     connect_timeout: float = 3.05  # seconds
     read_timeout: float = 27.0  # seconds
 
@@ -31,11 +41,17 @@ class ApiConfig:
         """
         Create an ApiConfig instance from environment variables.
 
+        Reads ``PISTE_ENV`` (``"sandbox"`` or ``"production"``, case-insensitive,
+        defaults to ``"production"`` to match this class's own field defaults
+        and the behavior of callers who upgrade without setting it) to select
+        the matching token/API base URLs.
+
         Returns:
             ApiConfig: A new ApiConfig instance with values from environment variables.
 
         Raises:
-            ValueError: If required environment variables are not set.
+            ValueError: If required environment variables are not set, or if
+                PISTE_ENV is set to anything other than "sandbox"/"production".
         """
         load_dotenv()
 
@@ -48,9 +64,19 @@ class ApiConfig:
                 "LEGIFRANCE_CLIENT_SECRET are not set."
             )
 
+        piste_env = os.getenv("PISTE_ENV", "production").strip().lower()
+        try:
+            token_url, api_url = _PISTE_ENV_URLS[piste_env]
+        except KeyError:
+            raise ValueError(
+                f"Invalid PISTE_ENV: {piste_env!r}. Expected 'sandbox' or 'production'."
+            ) from None
+
         return cls(
             client_id=client_id,
             client_secret=client_secret,
+            token_url=token_url,
+            api_url=api_url,
         )
 
 

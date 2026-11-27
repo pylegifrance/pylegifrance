@@ -33,6 +33,7 @@ class SearchRequest(PyLegifranceBaseModel):
     text_id: str | None = None
     champ: TypeChamp | None = TypeChamp.all
     type_recherche: TypeRecherche | None = TypeRecherche.tous_les_mots_dans_un_champ
+    proximity: int | None = None
     fond: Fond = Fond.loda_date
     natures: list[Nature] | list[str] = []
     date_signature: DatePeriod | str | None = None
@@ -96,59 +97,86 @@ class SearchRequest(PyLegifranceBaseModel):
 
         # Add search field if provided
         if self.search:
-            # For search terms, try different search types for better results
-            # Create multiple search fields to increase chances of finding matches
-
-            # Search in ALL fields with TOUS_LES_MOTS_DANS_UN_CHAMP
-            fields.append(
-                ChampDTO(
-                    typeChamp=TypeChamp.all,
-                    criteres=[
-                        CritereDTO(
-                            valeur=self.search,
-                            typeRecherche=TypeRecherche.tous_les_mots_dans_un_champ,
-                            operateur=Operateur.et,
-                            proximite=None,
-                            criteres=None,
-                        )
-                    ],
-                    operateur=Operateur.et,
+            # An explicit champ/type_recherche (Légifrance's "Zone de
+            # recherche" field selector and "Rechercher l'expression
+            # exacte" toggle) must be honored as a single targeted field,
+            # not silently overridden by the broad best-effort search below.
+            if (
+                "champ" in self.model_fields_set
+                or "type_recherche" in self.model_fields_set
+                or "proximity" in self.model_fields_set
+            ):
+                fields.append(
+                    ChampDTO(
+                        typeChamp=self.champ or TypeChamp.all,
+                        criteres=[
+                            CritereDTO(
+                                valeur=self.search,
+                                typeRecherche=self.type_recherche
+                                or TypeRecherche.tous_les_mots_dans_un_champ,
+                                operateur=Operateur.et,
+                                proximite=self.proximity,
+                                criteres=None,
+                            )
+                        ],
+                        operateur=Operateur.et,
+                    )
                 )
-            )
+            else:
+                # No field/search-type specified: try different search
+                # types for better results by searching ALL, TEXTE and
+                # TITLE fields at once to increase chances of a match.
 
-            # Also search in TEXTE field with UN_DES_MOTS
-            fields.append(
-                ChampDTO(
-                    typeChamp=TypeChamp.texte,
-                    criteres=[
-                        CritereDTO(
-                            valeur=self.search,
-                            typeRecherche=TypeRecherche.un_des_mots,
-                            operateur=Operateur.et,
-                            proximite=None,
-                            criteres=None,
-                        )
-                    ],
-                    operateur=Operateur.ou,  # Use OR between this field and others
+                # Search in ALL fields with TOUS_LES_MOTS_DANS_UN_CHAMP
+                fields.append(
+                    ChampDTO(
+                        typeChamp=TypeChamp.all,
+                        criteres=[
+                            CritereDTO(
+                                valeur=self.search,
+                                typeRecherche=TypeRecherche.tous_les_mots_dans_un_champ,
+                                operateur=Operateur.et,
+                                proximite=None,
+                                criteres=None,
+                            )
+                        ],
+                        operateur=Operateur.et,
+                    )
                 )
-            )
 
-            # Also search in TITLE field with UN_DES_MOTS
-            fields.append(
-                ChampDTO(
-                    typeChamp=TypeChamp.title,
-                    criteres=[
-                        CritereDTO(
-                            valeur=self.search,
-                            typeRecherche=TypeRecherche.un_des_mots,
-                            operateur=Operateur.et,
-                            proximite=None,
-                            criteres=None,
-                        )
-                    ],
-                    operateur=Operateur.ou,  # Use OR between this field and others
+                # Also search in TEXTE field with UN_DES_MOTS
+                fields.append(
+                    ChampDTO(
+                        typeChamp=TypeChamp.texte,
+                        criteres=[
+                            CritereDTO(
+                                valeur=self.search,
+                                typeRecherche=TypeRecherche.un_des_mots,
+                                operateur=Operateur.et,
+                                proximite=None,
+                                criteres=None,
+                            )
+                        ],
+                        operateur=Operateur.ou,  # Use OR between this field and others
+                    )
                 )
-            )
+
+                # Also search in TITLE field with UN_DES_MOTS
+                fields.append(
+                    ChampDTO(
+                        typeChamp=TypeChamp.title,
+                        criteres=[
+                            CritereDTO(
+                                valeur=self.search,
+                                typeRecherche=TypeRecherche.un_des_mots,
+                                operateur=Operateur.et,
+                                proximite=None,
+                                criteres=None,
+                            )
+                        ],
+                        operateur=Operateur.ou,  # Use OR between this field and others
+                    )
+                )
 
         # If no fields, create a default field that will match all
         if not fields:

@@ -17,6 +17,11 @@ from pylegifrance.utils import configure_session_timeouts
 
 logger = logging.getLogger(__name__)
 
+# Refresh this many seconds before the token's stated lifetime actually
+# ends, so a long-running server doesn't risk a request landing just past
+# expiry (clock skew, time spent building the request, etc.).
+TOKEN_EXPIRY_MARGIN_SECONDS = 60
+
 
 @dataclass
 class TokenInfo:
@@ -35,11 +40,16 @@ class TokenInfo:
 
     @property
     def is_expired(self) -> bool:
-        """Check if the token has expired."""
+        """Check if the token has expired (or is within the refresh margin)."""
         if not self.access_token:
             return True
         elapsed_time = time.time() - self.issued_at
-        return elapsed_time >= self.expires_in
+        # Cap the margin at half the token's own lifetime so a short-lived
+        # token (expires_in below the margin) isn't treated as expired the
+        # instant it's issued -- it still gets refreshed proactively, just
+        # partway through its life instead of at t=0.
+        margin = min(TOKEN_EXPIRY_MARGIN_SECONDS, self.expires_in / 2)
+        return elapsed_time >= self.expires_in - margin
 
     @property
     def is_valid(self) -> bool:

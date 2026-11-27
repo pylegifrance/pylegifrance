@@ -14,4 +14,7 @@ class Decision(TexteSimple):
 
     siege_appel: str | None = Field(alias="siegeAppel", default=None)
     avocat_general: str | None = Field(alias="avocatGl", default=None)
-    liens: list[TexteLien] = Field(default=[])
+    # Narrower than TexteSimple.liens (list[TexteLien] | None) — a
+    # discriminated-subtype pattern pydantic validates fine at runtime;
+    # basedpyright's mutable-attribute variance check doesn't model this.
+    liens: list[TexteLien] = Field(default=[])  # pyright: ignore[reportIncompatibleVariableOverride]  # ty: ignore[incompatible-mutable-override]

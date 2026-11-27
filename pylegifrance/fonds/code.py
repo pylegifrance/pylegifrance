@@ -19,7 +19,7 @@ from pylegifrance.models.code.search import (
     TextLegalStatusFiltre,
 )
 from pylegifrance.models.constants import EtatJuridique, TypeRecherche
-from pylegifrance.models.generated.model import CodeConsultRequest
+from pylegifrance.models.generated.model import CodeConsultRequest, TypePagination
 
 logger = logging.getLogger(__name__)
 
@@ -105,10 +105,13 @@ class CodeSearchBuilder:
         self.api = api_client
         self.fond = fond
         self.criteria = CodeSearchCriteria()
-        self._champs = []
-        self._filtres = []
+        self._champs: list[ChampCode] = []
+        self._filtres: list[
+            NomCodeFiltre | DateVersionFiltre | TextLegalStatusFiltre
+        ] = []
         self._formatter = False
         self._requested_statuses: list[EtatJuridique] | None = None
+        self._paginate_called = False
 
     def in_code(self, code_name: NomCode) -> Self:
         """Filtre la recherche à un code juridique spécifique.
@@ -180,13 +183,18 @@ class CodeSearchBuilder:
         return self
 
     def text(
-        self, search_text: str, in_field: TypeChampCode = TypeChampCode.ALL
+        self,
+        search_text: str,
+        in_field: TypeChampCode = TypeChampCode.ALL,
+        proximity: int | None = None,
     ) -> Self:
         """Recherche un texte dans les articles.
 
         Args:
             search_text: Texte à rechercher.
             in_field: Champ dans lequel rechercher (par défaut: ALL).
+            proximity: Distance maximale en mots entre les termes recherchés
+                (option "proximité" de Légifrance).
 
         Returns:
             Self: Le builder pour chaînage.
@@ -198,7 +206,7 @@ class CodeSearchBuilder:
                     CritereCode(
                         type_recherche=TypeRecherche.TOUS_LES_MOTS_DANS_UN_CHAMP,
                         valeur=search_text,
-                        proximite=None,
+                        proximite=proximity,
                     )
                 ],
             )
@@ -253,6 +261,15 @@ class CodeSearchBuilder:
             status = [EtatJuridique.VIGUEUR]
         self._requested_statuses = status
         self._filtres.append(TextLegalStatusFiltre(valeurs=status))
+
+        # Under the default (DEFAUT) pagination, the API only returns a
+        # handful of per-version "extracts" per matched text (see
+        # "moreArticlesCount" on the raw response) -- far fewer than an
+        # old article's real version count. A legal-status filter is
+        # meaningless unless it can actually see the true current version
+        # among them, so switch to pagination over extracts instead of
+        # over matched texts.
+        self.criteria.type_pagination = TypePagination.article
         return self
 
     def paginate(self, page_number: int = 1, page_size: int = 10) -> Self:
@@ -272,6 +289,7 @@ class CodeSearchBuilder:
 
         self.criteria.page_number = page_number
         self.criteria.page_size = page_size
+        self._paginate_called = True
         return self
 
     def with_formatter(self) -> Self:
@@ -310,6 +328,13 @@ class CodeSearchBuilder:
         logger.debug(f"Criteria champs: {self.criteria.champs}")
         logger.debug(f"Criteria filtres: {self.criteria.filtres}")
 
+        if self._requested_statuses is not None and not self._paginate_called:
+            # No explicit .paginate() call to respect: widen to the API's max
+            # so the legal-status post-filter below has a real chance of
+            # seeing the true current version among an old article's many
+            # historical ones, instead of silently filtering everything out.
+            self.criteria.page_size = 100
+
         if self.fond == "CODE_DATE":
             has_date_filter = any(
                 isinstance(f, DateVersionFiltre) for f in self._filtres
@@ -327,8 +352,15 @@ class CodeSearchBuilder:
                 )
                 current_timestamp = datetime.now()
                 self._filtres.append(DateVersionFiltre(single_date=current_timestamp))
+                # self.criteria.filtres was already assigned above; because
+                # CodeSearchCriteria has validate_assignment=True, that
+                # assignment copied the list, so appending to self._filtres
+                # alone would not be reflected in self.criteria. Re-sync it.
+                self.criteria.filtres = self._filtres
 
-            request = CodeDateSearchRequest(recherche=self.criteria)
+            request: CodeDateSearchRequest | CodeEtatSearchRequest = (
+                CodeDateSearchRequest(recherche=self.criteria)
+            )
         elif self.fond == "CODE_ETAT":
             request = CodeEtatSearchRequest(recherche=self.criteria)
         else:
@@ -400,10 +432,10 @@ class CodeConsultFetcher:
     def __init__(self, api_client: LegifranceClient, text_id: str):
         self.api = api_client
         self.text_id = text_id
-        self.date = None
+        self.date: str | None = None
         self.abrogated = False
-        self.searched_string = None
-        self.section_id = None
+        self.searched_string: str | None = None
+        self.section_id: str | None = None
 
     def at(self, date: str) -> models.Code:
         """Consulte le code à une date spécifique.
@@ -472,13 +504,14 @@ class CodeConsultFetcher:
             ValueError: Si les paramètres de consultation sont invalides.
         """
         logger.debug(f"CodeConsultFetcher._execute called with self.date: {self.date}")
+        date = self.date or datetime.now().strftime("%Y-%m-%d")
         if not self.date:
-            self.date = datetime.now().strftime("%Y-%m-%d")
-            logger.debug(f"Date was None, set to current date: {self.date}")
+            logger.debug(f"Date was None, set to current date: {date}")
+        self.date = date
 
         request = CodeConsultRequest(
             textId=self.text_id,
-            date=self.date,
+            date=date,
             abrogated=self.abrogated,
             searchedString=self.searched_string,
             sctCid=self.section_id,
@@ -633,3 +666,70 @@ class Code:
         if not article_id or not article_id.startswith("LEGIARTI"):
             raise ValueError(f"Identifiant d'article invalide: {article_id}")
         return ArticleFetcher(self.api, article_id)
+
+    def get_article(self, code_name: str | NomCode, num: str) -> models.Article:
+        """Récupère la version actuellement en vigueur d'un article, sans ambiguïté.
+
+        Utilise /consult/getArticleWithIdAndNum : un appel direct qui ne
+        renvoie que la version en vigueur au moment de l'appel, contrairement
+        à une recherche plein texte (CodeSearchBuilder) où il faut échantillonner
+        puis filtrer les versions historiques par état juridique.
+
+        Limitation (documentée par l'API) : ne trouve pas un article dont la
+        version actuelle a une entrée en vigueur différée (future).
+
+        Args:
+            code_name: Nom du code (ex: "Code civil", NomCode.CC).
+            num: Numéro de l'article (ex: "1234", "787 B", "L. 1121-1").
+
+        Returns:
+            models.Article: L'article actuellement en vigueur.
+
+        Raises:
+            ValueError: Si le code ou l'article est introuvable.
+
+        Examples:
+            >>> article = code.get_article("Code civil", "1134")
+            >>> print(article.legal_status)
+            VIGUEUR
+        """
+        code_name_str = str(code_name)
+        cid = self._resolve_code_cid(code_name_str)
+
+        request_data = {"id": cid, "num": _normalize_article_number(num)}
+        response = self.api.call_api("consult/getArticleWithIdAndNum", request_data)
+        # A nonexistent article is a 200 with {"article": null}, not a falsy
+        # response -- both shapes mean "not found" here.
+        response_data = response.json() if response else None
+        if not response_data or not response_data.get("article"):
+            raise ValueError(
+                f"Article {num} non trouvé dans {code_name_str} "
+                "(peut-être une version en vigueur différée, non couverte par "
+                "cette méthode)"
+            )
+
+        return models.Article.from_orm(response_data)
+
+    def _resolve_code_cid(self, code_name: str) -> str:
+        """Résout le nom d'un code vers son identifiant LEGITEXT (cid) via /list/code.
+
+        Args:
+            code_name: Titre exact du code (ex: "Code civil").
+
+        Returns:
+            str: Le cid (identifiant LEGITEXT) du code.
+
+        Raises:
+            ValueError: Si aucun code ne correspond exactement à ce titre.
+        """
+        request_data = {"codeName": code_name, "pageNumber": 1, "pageSize": 10}
+        response = self.api.call_api("list/code", request_data)
+        if response:
+            # /list/code matches substrings (it would also return a code's
+            # annexes for a base title), so only an exact title match is
+            # trustworthy here.
+            for entry in response.json().get("results", []):
+                if entry.get("titre") == code_name:
+                    return str(entry["cid"])
+
+        raise ValueError(f"Code juridique introuvable: {code_name}")
