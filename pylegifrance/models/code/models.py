@@ -462,13 +462,20 @@ class Article(PyLegifranceBaseModel):
         texte_html = article_data.get("texteHtml")
         cid = article_data.get("cid") or raw_data.get("cid")
 
+        # "legalStatus" must win over "etat" when both are present: search
+        # responses flatten {**item, **extract}, where item-level "etat" is
+        # the article's overall/global status (identical across every
+        # historical version) and extract-level "legalStatus" is the true
+        # per-version status. "etat" only needs to be checked as a fallback
+        # for shapes (e.g. consult/getArticle) that don't carry "legalStatus"
+        # at all.
         etat = _first_of(
             article_data,
             "etatJuridique",
             "etatText",
-            "etat",
             "legalStatus",
-        ) or _first_of(raw_data, "etatJuridique", "etatText", "etat", "legalStatus")
+            "etat",
+        ) or _first_of(raw_data, "etatJuridique", "etatText", "legalStatus", "etat")
 
         date_version = _first_of(
             article_data, "dateVersion", "dateDebut", "date"
